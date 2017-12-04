@@ -1,9 +1,9 @@
 {
-  "name": "vue-admin-template",
-  "version": "3.0.0",
+  "name": "IoTKS-admin",
+  "version": "0.12.0",
   "license": "MIT",
-  "description": "A vue admin template with Element UI & axios & iconfont & permission control & lint",
-  "author": "Pan <panfree23@gmail.com>",
+  "description": "IoTKS admininstator platform",
+  "author": "KunTeng dev Team <liudengfeng@kunteng.org>",
   "scripts": {
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
