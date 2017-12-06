@@ -1,0 +1,118 @@
+<template>
+    <div>
+        <div class="crumbs">
+            <el-breadcrumb separator="/">
+                <el-breadcrumb-item><i class="el-icon-upload"></i> 批量执行任务</el-breadcrumb-item>
+                <el-breadcrumb-item>发起推送</el-breadcrumb-item>
+            </el-breadcrumb>
+        </div>
+        <div class="form-box">
+            <el-form ref="form" :model="form" label-width="120px">
+                <el-form-item label="输入指定MAC">
+                    <el-input type="textarea" v-model="form.desc"></el-input>
+                </el-form-item>
+                <el-form-item label="选择设备型号">
+                    <el-select v-model="form.devnum" placeholder="请选择">
+                        <el-option key="bbk" label="R7800" value="bbk"></el-option>
+                        <el-option key="xtc" label="小天才" value="xtc"></el-option>
+                        <el-option key="imoo" label="imoo" value="imoo"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="选择分支">
+                    <el-select v-model="form.branch" placeholder="请选择">
+                        <el-option key="bbk" label="普通分支(1.0只有这一个版本)" value="bbk"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="选择ROM版本">
+                    <el-select v-model="form.romversion" placeholder="请选择">
+                        <el-option key="bbk" label="2.05.38061 R7800" value="bbk"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="所选文件">
+                    <el-text>http://cloud.kunteng.org/super/firmware/52123b95</el-text>
+                </el-form-item>
+                <el-form-item label="升级方式">
+                    <el-radio-group v-model="form.uptype">
+                        <el-radio label="实时自动升级"></el-radio>
+                        <el-radio label="用户自动升级"></el-radio>
+                        <el-radio label="定时自动升级(整点时刻)"></el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="配置更新">
+                    <el-radio-group v-model="form.update">
+                        <el-radio label="保留用户原有配置"></el-radio>
+                        <el-radio label="更改用户原有配置(填选)"></el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="操作人">
+                    <el-input v-model="form.name"></el-input>
+                </el-form-item>
+                <!--<el-form-item label="日期时间">
+                    <el-col :span="11">
+                        <el-date-picker type="date" placeholder="选择日期" v-model="form.date1" style="width: 100%;"></el-date-picker>
+                    </el-col>
+                    <el-col class="line" :span="2">-</el-col>
+                    <el-col :span="11">
+                        <el-time-picker type="fixed-time" placeholder="选择时间" v-model="form.date2" style="width: 100%;"></el-time-picker>
+                    </el-col>
+                </el-form-item>
+                <el-form-item label="选择开关">
+                    <el-switch on-text="" off-text="" v-model="form.delivery"></el-switch>
+                </el-form-item>
+                <el-form-item label="多选框">
+                    <el-checkbox-group v-model="form.type">
+                        <el-checkbox label="步步高" name="type"></el-checkbox>
+                        <el-checkbox label="小天才" name="type"></el-checkbox>
+                        <el-checkbox label="imoo" name="type"></el-checkbox>
+                    </el-checkbox-group>
+                </el-form-item>
+                <el-form-item label="单选框">
+                    <el-radio-group v-model="form.resource">
+                        <el-radio label="步步高"></el-radio>
+                        <el-radio label="小天才"></el-radio>
+                        <el-radio label="imoo"></el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="文本框">
+                    <el-input type="textarea" v-model="form.desc"></el-input>
+                </el-form-item>-->
+                <el-form-item>
+                    <el-button type="primary" @click="onSubmit">执行</el-button>
+                    <!--<el-button>取消</el-button>-->
+                </el-form-item>
+            </el-form>
+        </div>
+
+    </div>
+</template>
+
+<script>
+    export default {
+        data: function(){
+            return {
+                form: {
+                    name: '',
+                    region: '',
+                    date1: '',
+                    date2: '',
+                    delivery: true,
+                    type: ['步步高'],
+                    resource: '小天才',
+                    desc: '',
+
+                    devnum:'',
+                    branch:'',
+                    romversion:'',
+                    uptype:'实时自动升级',
+                    update:'保留用户原有配置'
+
+                }
+            }
+        },
+        methods: {
+            onSubmit() {
+                this.$message.success('提交成功！');
+            }
+        }
+    }
+</script>
