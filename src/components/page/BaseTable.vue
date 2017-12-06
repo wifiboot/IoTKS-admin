@@ -94,6 +94,12 @@
         </el-dialog>
 
         <el-dialog title="导入路由" :visible.sync="showDialog" class="digcont">
+            <div class='rad-group'>
+                <el-radio-group v-model="radiotoRout" @change="changeTab2">
+                    <el-radio-button label="文件上传"></el-radio-button>
+                    <el-radio-button label="手动导入"></el-radio-button>
+                </el-radio-group>
+            </div>
             <el-form :model="form">
                 <el-form-item label="账号" :label-width="formLabelWidth">
                     <el-input v-model="form.user" class="diainp" auto-complete="off"></el-input>
@@ -179,7 +185,8 @@
                 selectProv: '',
                 selectCity: '',
 
-                showDialog:false
+                showDialog:false,
+                radiotoRout:'文件上传'
             }
         },
         created: function(){
@@ -228,6 +235,10 @@
             changeTab: function(){
                 console.log(this.radio3);
                 this.$message('选择'+ this.radio3);
+            },
+            changeTab2: function(){
+                console.log(this.radiotoRout);
+//                this.$message('选择'+ this.radiotoRout);
             },
             toRouter: function(data){
                 var self = this;
