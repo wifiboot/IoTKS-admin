@@ -2,18 +2,14 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-menu"></i> 用户管理</el-breadcrumb-item>
-                <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-menu"></i> 渠道管理</el-breadcrumb-item>
+                <el-breadcrumb-item>渠道列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="handle-box">
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">新建用户</el-button>
-            <!--<el-select v-model="select_cate" placeholder="筛选省份" class="handle-select mr10">-->
-                <!--<el-option key="1" label="广东省" value="广东省"></el-option>-->
-                <!--<el-option key="2" label="湖南省" value="湖南省"></el-option>-->
-            <!--</el-select>-->
             <el-input v-model="select_word" placeholder="请输入渠道名称或账号查找" class="handle-input mr10"></el-input>
-            <el-button type="primary" icon="search" @click="search">搜索</el-button>
+            <el-button type="primary" icon="search" @click="search">查询</el-button>
         </div>
         <div class='rad-group'>
             <el-radio-group v-model="radio3" @change="changeTab">
@@ -23,20 +19,22 @@
             </el-radio-group>
         </div>
         <el-table :data="tableData2" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
-            <!--<el-table-column type="selection" width="55"></el-table-column>-->
-            <el-table-column prop="zh" label="账 号" width="150"></el-table-column>
-            <el-table-column prop="qdmc" label="渠道名称" width="150"></el-table-column>
-            <el-table-column prop="lxdh" label="联系电话" width="150"></el-table-column>
+            <el-table-column prop="zh" label="账 号" width="130"></el-table-column>
+            <el-table-column prop="qdmc" label="渠道名称" width="130"></el-table-column>
+            <el-table-column prop="lxdh" label="联系电话" width="130"></el-table-column>
+            <el-table-column label="冻结状态" width="120" :filters="[{ text: 'frozen', value: '已冻结' }, { text: 'Not frozen', value: '未冻结' }]" :filter-method="filterTag">
+                <template slot-scope="scope">
+                    <el-tag :type="scope.row.djzt == 'frozen' ? 'warning' : 'success'" close-transition>{{scope.row.djzt=='frozen'?'已冻结':'未冻结'}}</el-tag>
+                </template>
+            </el-table-column>
             <el-table-column prop="ly" label="路由" width="80"></el-table-column>
             <el-table-column prop="zxsb" label="在线设备" width="100"></el-table-column>
             <el-table-column prop="cjsj" label="创建时间" width="150"></el-table-column>
             <el-table-column label="操作">
-                <template scope="scope">
-                    <el-button class="btn1" size="small" @click="handleEdit(scope.$index, scope.row)">分配设备</el-button>
-                    <el-button class="btn1" size="small" type="info" @click="handleDelete(scope.$index, scope.row)">修改权限</el-button>
-                    <el-button class="btn1" size="small" type="danger" @click="resetPwd(scope.$index, scope.row)">重置密码</el-button>
-                    <el-button class="btn1" size="small" type="warning" @click="frozen(scope.$index, scope.row)">冻结账户</el-button>
-                    <el-button class="btn1" size="small" type="success" @click="toRouter(scope.$index, scope.row)">导入路由</el-button>
+                <template slot-scope="scope">
+                    <el-button class="btn1" size="small" type="text" @click="resetPwd(scope.$index, scope.row)">重置密码</el-button>
+                    <el-button class="btn1" size="small" :type="scope.row.djzt == 'frozen' ? 'warning' : 'danger'" @click="frozen(scope.$index, scope.row)">{{scope.row.djzt=='frozen'?'解除冻结':'冻结账户'}}</el-button>
+                    <el-button class="btn1" size="small" type="success" @click="toRouter(scope.row)">导入路由</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -48,21 +46,65 @@
             </el-pagination>
         </div>
 
-        <el-dialog title="收货地址" :visible.sync="dialogFormVisible">
+        <el-dialog title="新建子渠道" :visible.sync="dialogFormVisible" class="digcont">
             <el-form :model="form">
-                <el-form-item label="活动名称" :label-width="formLabelWidth">
-                    <el-input v-model="form.name" auto-complete="off"></el-input>
+                <el-form-item label="账号" :label-width="formLabelWidth">
+                    <el-input v-model="form.user" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="活动区域" :label-width="formLabelWidth">
-                    <el-select v-model="form.region" placeholder="请选择活动区域">
-                        <el-option label="区域一" value="shanghai"></el-option>
-                        <el-option label="区域二" value="beijing"></el-option>
+                <el-form-item label="密码" :label-width="formLabelWidth">
+                    <el-input v-model="form.password" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="渠道名称" :label-width="formLabelWidth">
+                    <el-input v-model="form.name" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="联系电话" :label-width="formLabelWidth">
+                    <el-input v-model="form.tel" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="地址" :label-width="formLabelWidth">
+                    <el-select size="small" style="width: 110px"
+                               v-model="selectProv"
+                               placeholder="请选择省份"
+                               v-on:change="getProv($event)">
+                        <el-option
+                            v-for="item in provs"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
                     </el-select>
+                    <el-select size="small" style="width: 104px"
+                               v-if="selectProv!=''"
+                               v-model="selectCity"
+                               placeholder="请选择城市"
+                               v-on:change="getCity($event)">
+                        <el-option
+                            v-for="item in citys"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="" :label-width="formLabelWidth">
+                    <el-input v-model="form.addr" class="diainp2" auto-complete="off" placeholder="请输入详细地址"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+                <el-button type="primary" @click="dialogFormVisible = false">创 建</el-button>
+            </div>
+        </el-dialog>
+
+        <el-dialog title="导入路由" :visible.sync="showDialog" class="digcont">
+            <el-form :model="form">
+                <el-form-item label="账号" :label-width="formLabelWidth">
+                    <el-input v-model="form.user" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="密码" :label-width="formLabelWidth">
+                    <el-input v-model="form.password" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="showDialog = false">取 消</el-button>
+                <el-button type="primary" @click="showDialog = false">保 存</el-button>
             </div>
         </el-dialog>
 
@@ -70,6 +112,7 @@
 </template>
 
 <script>
+    import global_ from 'components/common/Global';
     export default {
         data: function() {
             return {
@@ -88,6 +131,7 @@
                         "zh":"test@163.com",
                         "qdmc": "D4EE073B9180",
                         "lxdh":"13547895762",
+                        "djzt":'frozen',
                         "ly":"1/1",
                         "zxsb":7,
                         "cjsj":"2017/11/13 11:41"
@@ -95,6 +139,7 @@
                         "zh":"reytg@163.com",
                         "qdmc": "D4EE073B9180",
                         "lxdh":"13547895654",
+                        "djzt":'Not frozen',
                         "ly":"6/1",
                         "zxsb":8,
                         "cjsj":"2017/11/13 11:41"
@@ -102,6 +147,7 @@
                         "zh":"test@163.com",
                         "qdmc": "D4EE073B9180",
                         "lxdh":"13547895762",
+                        "djzt":'frozen',
                         "ly":"1/1",
                         "zxsb":7,
                         "cjsj":"2017/11/13 11:41"
@@ -109,6 +155,7 @@
                         "zh":"gdgd@163.com",
                         "qdmc": "D4EE073B5432",
                         "lxdh":"13547895762",
+                        "djzt":'Not frozen',
                         "ly":"1/1",
                         "zxsb":0,
                         "cjsj":"2017/11/13 11:41"
@@ -125,7 +172,14 @@
                     resource: '',
                     desc: ''
                 },
-                formLabelWidth: '120px'
+                formLabelWidth: '120px',
+
+                provs:global_.provs,
+                citys: [],
+                selectProv: '',
+                selectCity: '',
+
+                showDialog:false
             }
         },
         created: function(){
@@ -154,9 +208,31 @@
 //            }
         },
         methods: {
+            getProv: function(prov){
+                let tempCity=[];
+                this.citys=[];
+                this.selectCity='';
+                let allCity=global_.allCity;
+                for (var val of allCity){
+                    if (prov == val.prov){
+                        console.log(val);
+                        tempCity.push({label: val.label, value: val.label})
+                    }
+                }
+                this.citys = tempCity;
+            },
+            getCity: function (city) {
+                console.log(city);
+                console.log(this.selectCity)
+            },
             changeTab: function(){
                 console.log(this.radio3);
                 this.$message('选择'+ this.radio3);
+            },
+            toRouter: function(data){
+                var self = this;
+                self.showDialog = true;
+                console.log(data);
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;
@@ -167,26 +243,26 @@
                 if(process.env.NODE_ENV === 'development'){
                     self.url = '/ms/table/list';
                 };
-                self.$axios.post(self.url, {page:self.cur_page}).then((res) => {
+                self.$axios.post(self.url, {page:self.cur_page}).then(function(res){
                     self.tableData = res.data.list;
                 })
             },
-            search(){
+            search:function(){
                 this.is_search = true;
             },
-            formatter(row, column) {
+            formatter:function(row, column) {
                 return row.address;
             },
-            filterTag(value, row) {
+            filterTag:function(value, row) {
                 return row.tag === value;
             },
-            handleEdit(index, row) {
+            handleEdit:function(index, row) {
                 this.$message('编辑第'+(index+1)+'行');
             },
-            handleDelete(index, row) {
+            handleDelete:function(index, row) {
                 this.$message.error('删除第'+(index+1)+'行');
             },
-            addUsr(){
+            addUsr:function(){
                 const self = this,
                     length = self.multipleSelection.length;
                 let str = '';
@@ -197,7 +273,7 @@
                 self.$message.error('删除了'+str);
                 self.multipleSelection = [];
             },
-            handleSelectionChange(val) {
+            handleSelectionChange:function(val) {
                 this.multipleSelection = val;
             }
         }
@@ -218,5 +294,8 @@
 
     .rad-group{margin-bottom:20px;}
     .btn1{margin-bottom:5px;margin-top:5px;margin-left:0;}
+    /*.digcont{width:600px;}*/
+    .diainp{width:217px;}
+    .diainp2{width:400px;}
 
 </style>
