@@ -62,7 +62,7 @@
                 </el-form-item>
                 <el-form-item label="地址" :label-width="formLabelWidth">
                     <el-select size="small" style="width: 110px"
-                               v-model="selectProv"
+                               v-model="form.selectProv"
                                placeholder="请选择省份"
                                v-on:change="getProv($event)">
                         <el-option
@@ -72,8 +72,8 @@
                         </el-option>
                     </el-select>
                     <el-select size="small" style="width: 104px"
-                               v-if="selectProv!=''"
-                               v-model="selectCity"
+                               v-if="form.selectProv!=''"
+                               v-model="form.selectCity"
                                placeholder="请选择城市"
                                v-on:change="getCity($event)">
                         <el-option
@@ -100,14 +100,22 @@
                     <el-radio-button label="手动导入"></el-radio-button>
                 </el-radio-group>
             </div>
-            <el-form :model="form">
-                <el-form-item label="账号" :label-width="formLabelWidth">
-                    <el-input v-model="form.user" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="密码" :label-width="formLabelWidth">
-                    <el-input v-model="form.password" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-            </el-form>
+
+            <el-upload
+                class="upload-demo"
+                ref="upload"
+                action="https://jsonplaceholder.typicode.com/posts/"
+                :on-preview="handlePreview"
+                :on-remove="handleRemove"
+                :file-list="fileList"
+                :auto-upload="false">
+                <div>
+                    <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                    <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+                </div>
+                <div slot="tip" style="margin-top:20px;" class="el-upload__tip">只能上传XXX文件，且不超过500kb</div>
+            </el-upload>
+
             <div slot="footer" class="dialog-footer">
                 <el-button @click="showDialog = false">取 消</el-button>
                 <el-button type="primary" @click="showDialog = false">保 存</el-button>
@@ -169,7 +177,13 @@
                 ],
                 dialogFormVisible: false,
                 form: {
+                    user:'',
+                    password:'',
                     name: '',
+                    tel:'',
+                    selectProv: '',
+                    selectCity: '',
+                    addr:'',
                     region: '',
                     date1: '',
                     date2: '',
@@ -182,11 +196,10 @@
 
                 provs:global_.provs,
                 citys: [],
-                selectProv: '',
-                selectCity: '',
 
                 showDialog:false,
-                radiotoRout:'文件上传'
+                radiotoRout:'文件上传',
+                fileList:[{name: '路由器导入模板.xls', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}]
             }
         },
         created: function(){
@@ -239,6 +252,16 @@
             changeTab2: function(){
                 console.log(this.radiotoRout);
 //                this.$message('选择'+ this.radiotoRout);
+            },
+            submitUpload:function() {
+                console.log('上传到服务器');
+                this.$refs.upload.submit();
+            },
+            handleRemove:function(file, fileList) {
+                console.log(file, fileList);
+            },
+            handlePreview:function(file) {
+                console.log(file);
             },
             toRouter: function(data){
                 var self = this;
@@ -308,5 +331,5 @@
     /*.digcont{width:600px;}*/
     .diainp{width:217px;}
     .diainp2{width:400px;}
-
+    .upload-demo{}
 </style>
