@@ -32,11 +32,11 @@
                     {
                         icon: 'el-icon-menu',
                         index: '2',
-                        title: '用户管理',
+                        title: '渠道管理',
                         subs: [
                             {
                                 index: 'basetable',
-                                title: '用户列表'
+                                title: '渠道列表'
                             },
 //                            {
 //                                index: 'vuetable',
@@ -60,7 +60,7 @@
                         ]
                     },
                     {
-                        icon: 'el-icon-menu',
+                        icon: 'el-icon-setting',
                         index: '4',
                         title: '设备管理',
                         subs: [
@@ -84,6 +84,17 @@
                     {
                         icon: 'el-icon-date',
                         index: '6',
+                        title: '插件管理',
+                        subs: [
+                            {
+                                index: 'pluginmanage',
+                                title: '插件列表'
+                            }
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-date',
+                        index: '7',
                         title: '表单',
                         subs: [
                             {

@@ -9,7 +9,7 @@
         <div class="handle-box rad-group">
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建版本</el-button>
         </div>
-        <el-table :data="tableData2" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
+        <el-table :data="tableData2" border style="width: 100%" ref="multipleTable">
             <!--<el-table-column label="状态" width="100":filters="[{ text: '离线', value: '离线' }, { text: '未激活', value: '未激活' }]" :filter-method="filterTag">-->
                 <!--<template slot-scope="scope">-->
                     <!--<el-tag :type="scope.row.zt == '离线' ? 'warning' : 'success'" close-transition>{{scope.row.zt}}</el-tag>-->
@@ -17,6 +17,7 @@
             <!--</el-table-column>-->
             <el-table-column prop="cjsj" label="创建时间" width="170"></el-table-column>
             <el-table-column prop="bbh" label="版本号" width="100"></el-table-column>
+            <el-table-column prop="oem" label="OEM" width="70"></el-table-column>
             <el-table-column label="版本类型" width="110" :filters="[{ text: 'test', value: '测试版本' }, { text: 'official', value: '正式版本' }]" :filter-method="filterTag">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.bblx == 'test' ? 'warning' : 'success'"  size="small" close-transition>{{scope.row.bblx=='test'?'测试版本':'正式版本'}}</el-tag>
@@ -31,11 +32,10 @@
             <el-table-column prop="xpxh" label="芯片型号" width="150"></el-table-column>
             <el-table-column prop="gxsm" label="更新说明" width="160"></el-table-column>
             <el-table-column label="操作">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-button class="btn1" type="text" size="small" @click="handleEdit(scope.$index, scope.row)">下载</el-button>
-                    <el-button class="btn1" type="text" size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-                    <el-button class="btn1" type="text" size="small" @click="handleEdit(scope.$index, scope.row)">查看详情</el-button>
                     <el-button class="btn1" type="text" size="small" @click="handleEdit(scope.$index, scope.row)">删除</el-button>
+                    <el-button class="btn1" type="text" size="small" @click="handleEdit(scope.$index, scope.row)">{{scope.row.bblx=='test'?'上架':'下架'}}</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -46,6 +46,37 @@
                 :total="1000">
             </el-pagination>
         </div>
+
+        <el-dialog title="添加ROM版本" :visible.sync="dialogFormVisible" class="digcont">
+            <el-form :model="form">
+                <!--<el-form-item label="上传" :label-width="formLabelWidth">-->
+                    <el-upload
+                        class="upload-demo"
+                        action="https://jsonplaceholder.typicode.com/posts/"
+                        :on-change="handleChange"
+                        :file-list="fileList3">
+                        <el-button size="small" type="primary">选择文件</el-button>
+                        <!--<div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>-->
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="密码" :label-width="formLabelWidth">
+                    <el-input v-model="form.password" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="渠道名称" :label-width="formLabelWidth">
+                    <el-input v-model="form.name" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="联系电话" :label-width="formLabelWidth">
+                    <el-input v-model="form.tel" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="" :label-width="formLabelWidth">
+                    <el-input v-model="form.addr" class="diainp2" auto-complete="off" placeholder="请输入详细地址"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="dialogFormVisible = false">创 建</el-button>
+            </div>
+        </el-dialog>
 
     </div>
 </template>
@@ -97,6 +128,7 @@
                     {
                         "cjsj":"2017-11-17 14:05:58",
                         "bbh":"2.11.2514",
+                        "oem":"LD",
                         "bblx":"test",
                         "sbxh":"zc9525a",
                         "xpxh":"MT7628AN",
@@ -105,6 +137,7 @@
                     {
                         "cjsj":"2017-11-17 14:05:58",
                         "bbh":"2.11.2514",
+                        "oem":"LD",
                         "bblx":"official",
                         "sbxh":"zc9525a",
                         "xpxh":"MT7628AN+MT7610E",
@@ -113,6 +146,7 @@
                     {
                         "cjsj":"2017-11-17 14:05:58",
                         "bbh":"2.11.2514",
+                        "oem":"ZC",
                         "bblx":"official",
                         "sbxh":"zc9525a",
                         "xpxh":"MT7628AN",
@@ -121,6 +155,7 @@
                     {
                         "cjsj":"2017-11-17 14:05:58",
                         "bbh":"2.11.2514",
+                        "oem":"LD",
                         "bblx":"test",
                         "sbxh":"zc9525a",
                         "xpxh":"MT7628AN",
@@ -128,7 +163,30 @@
                     }
 
 
-                ]
+                ],
+
+                form: {
+                    user:'',
+                        password:'',
+                        name: '',
+                        tel:'',
+                        selectProv: '',
+                        selectCity: '',
+                        addr:'',
+                        region: '',
+                        date1: '',
+                        date2: '',
+                        delivery: false,
+                        type: [],
+                        resource: '',
+                        desc: ''
+                },
+                formLabelWidth: '120px',
+                fileList3: [{
+//                    name: 'food.jpeg',
+//                    url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100',
+//                    status: 'finished'
+                }]
 
             }
         },
@@ -136,8 +194,11 @@
             Datasource
         },
         methods: {
-            filterTag(value, row) {
+            filterTag:function(value, row) {
                 return row.zt === value;
+            },
+            handleChange:function(file, fileList) {
+                this.fileList3 = fileList.slice(-3);
             },
             test: function(event){
                 console.log(event);
@@ -195,6 +256,7 @@
     .handle-box2{display:inline-block;float:right;}
     /*.el-table_1_column_5{color:#eb9e05;}*/
     .orange{color:#eb9e05;background-color:none;}
-    .rad-group{margin-bottom:20px;}
     .btn2{margin-bottom:5px;margin-left:0;}
+    .diainp{width:217px;}
+    .diainp2{width:400px;}
 </style>

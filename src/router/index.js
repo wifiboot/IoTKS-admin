@@ -38,6 +38,10 @@ export default new Router({
                         component: resolve => require(['../components/page/RomManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
+                    path: '/pluginmanage',
+                        component: resolve => require(['../components/page/PluginManage.vue'], resolve)     // vue-datasource组件
+                },
+                {
                     path: '/vuetable',
                     component: resolve => require(['../components/page/VueTable.vue'], resolve)     // vue-datasource组件
                 },

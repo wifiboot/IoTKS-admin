@@ -13,7 +13,7 @@
                 <el-radio-button label="脚本推送"></el-radio-button>
             </el-radio-group>
             <div class="handle-box2">
-                <el-input v-model="select_word" placeholder="请输入指定MAC或升级方式" class="handle-input mr10"></el-input>
+                <el-input v-model="select_word" placeholder="请输入任务ID" class="handle-input mr10"></el-input>
                 <el-button type="primary" icon="search" @click="search">搜索</el-button>
             </div>
         </div>
@@ -30,7 +30,8 @@
             <!--<el-table-column type="selection" width="55"></el-table-column>-->
             <el-table-column prop="cz" label="操作" width="100"></el-table-column>
             <el-table-column prop="sj" label="时间" width="180"></el-table-column>
-            <el-table-column prop="zdmac" label="指定MAC" width="150"></el-table-column>
+            <el-table-column prop="rwid" label="任务ID" width="90"></el-table-column>
+            <el-table-column prop="zdmac" label="指定MAC" width="140"></el-table-column>
             <el-table-column prop="sjfs" label="升级方式" width="100"></el-table-column>
             <el-table-column label="结果" width="240">
                 <el-table-column prop="jg.cg" label="成功"></el-table-column>
@@ -39,7 +40,7 @@
             </el-table-column>
             <el-table-column prop="czr" label="操作人" width="80"></el-table-column>
             <el-table-column label="详情">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-button class="btn1" type="info" size="small" @click="handleEdit(scope.$index, scope.row)">详情</el-button>
                 </template>
             </el-table-column>
@@ -96,6 +97,7 @@
                     {
                         "cz":"ROM升级",
                         "sj":"2017-11-28 18:18:29",
+                        "rwid":"01029",
                         "zdmac":"D4EE71263AA",
                         "sjfs":"实时自动",
                         "jg":{
@@ -108,6 +110,7 @@
                     {
                         "cz":"ROM升级",
                         "sj":"2017-11-28 18:18:29",
+                        "rwid":"01029",
                         "zdmac":"D4EE71263AA",
                         "sjfs":"实时自动",
                         "jg":{
@@ -120,6 +123,7 @@
                     {
                         "cz":"ROM升级",
                         "sj":"2017-11-28 18:18:29",
+                        "rwid":"01029",
                         "zdmac":"D4EE71263AA",
                         "sjfs":"实时自动",
                         "jg":{
@@ -132,6 +136,7 @@
                     {
                         "cz":"ROM升级",
                         "sj":"2017-11-28 18:18:29",
+                        "rwid":"01029",
                         "zdmac":"D4EE71263AA",
                         "sjfs":"实时自动",
                         "jg":{

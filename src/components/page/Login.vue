@@ -1,6 +1,6 @@
 <template>
     <div class="login-wrap">
-        <div class="ms-title">后台管理系统</div>
+        <div class="ms-title">IoTKS管理系统</div>
         <div class="ms-login">
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" class="demo-ruleForm">
                 <el-form-item prop="username">
@@ -33,7 +33,16 @@
                         { required: true, message: '请输入用户名', trigger: 'blur' }
                     ],
                     password: [
-                        { required: true, message: '请输入密码', trigger: 'blur' }
+                        { required: true, message: '请输入密码', trigger: 'blur' },
+                        {validator:function(rule,value,callback){
+                            if(value.indexOf(' ') != -1){
+                                callback(new Error('密码不能包含空格'));
+                            }else if(value.length > 32 || value.length < 3){
+                                callback(new Error('密码长度应为3~32位'));
+                            }else{
+                                callback();
+                            }
+                        }}
                     ]
                 }
             }
@@ -47,8 +56,9 @@
                 console.log(global_.timeStamp('417865'));
 //                self.$axios({
 //                    method:'get',
-//                    header: { "content-type": "application/json" },
-//                    url:'https://wifi.kunteng.org/cgi-bin/luci/admin/system/getDeviceInfo' ,
+////                    header: { "content-type": "application/json" },
+//                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+//                    url:'https://wifi.kunteng.org/cgi-bin/luci/admin/system/getDeviceInfo?wx=wlife' ,
 //                    data:{wx:'wlife'}
 //                }).then(function(response) {
 ////                        response.data.pipe(fs.createWriteStream('ada_lovelace.jpg'))
@@ -56,7 +66,10 @@
 //                    },function(err){
 ////                        console.log(err);
 //                });
-                self.$axios.get('https://wifi.kunteng.org/cgi-bin/luci/admin/system/getDeviceInfo?wx=wlife').then(function(res){
+                var params = {
+                    wx:'wlife'
+                };
+                self.$axios.get('https://wifi.kunteng.org/cgi-bin/luci/admin/system/getDeviceInfo',{params}).then(function(res){
                     console.log(res);
                 })
 
@@ -64,8 +77,20 @@
             },
             submitForm:function(formName) {
                 const self = this;
-                self.$refs[formName].validate((valid) => {
+                self.$refs[formName].validate(function(valid){
                     if (valid) {
+                        self.$axios({
+                            method:'get',
+                            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                            url:global_.baseUrl + '/user/login'+self.ruleForm.password ,
+//                            data:{wx:'wlife'}
+                        }).then(function(response) {
+                            console.log(response);
+                        },function(err){
+                            console.log(err);
+                        });
+
+
                         localStorage.setItem('ms_username',self.ruleForm.username);
                         localStorage.setItem('storgePwd',self.ruleForm.password);
 //                        self.$router.push('/readme');

@@ -2,7 +2,7 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-menu"></i> 设备管理</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-setting"></i> 设备管理</el-breadcrumb-item>
                 <el-breadcrumb-item>设备状态</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
@@ -25,19 +25,24 @@
                 </template>
             </el-table-column>
             <el-table-column prop="lymac" label="路由Mac" width="180"></el-table-column>
-            <el-table-column prop="sbxh" label="设备" width="150"></el-table-column>
+            <el-table-column prop="sbxh" label="设备型号" width="150"></el-table-column>
             <el-table-column prop="gjbb" label="固件版本" width="150"></el-table-column>
             <el-table-column label="51盒子状态" width="150">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-tag type="warning" class="orange">{{scope.row.hzzt}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column prop="dyjzt" label="打印机状态" width="150"></el-table-column>
-            <el-table-column label="详情">
-                <template scope="scope">
-                    <el-button class="btn1" type="info" size="small" @click="handleEdit(scope.$index, scope.row)">详情</el-button>
+            <el-table-column prop="dyjzt" label="打印机状态" width="120">
+                <template slot-scope="scope">
+                    <el-tag>{{scope.row.dyjzt == 'online'?'在线': (scope.row.dyjzt == 'offline'?'离线':'未知')}}</el-tag>
                 </template>
             </el-table-column>
+            <el-table-column prop="gl" label="管理"></el-table-column>
+            <!--<el-table-column label="详情">-->
+                <!--<template slot-scope="scope">-->
+                    <!--<el-button class="btn1" type="info" size="small" @click="handleEdit(scope.$index, scope.row)">详情</el-button>-->
+                <!--</template>-->
+            <!--</el-table-column>-->
         </el-table>
         <div class="pagination">
             <el-pagination
@@ -99,7 +104,8 @@
                         "sbxh":"zc9525a",
                         "gjbb":"1.08.1659",
                         "hzzt":0,
-                        "dyjzt":"无",
+                        "dyjzt":"online",
+                        "gl":"无线信息"
                     },
                     {
                         "zt":"未激活",
@@ -107,7 +113,8 @@
                         "sbxh":"9525a",
                         "gjbb":"1.03.599",
                         "hzzt":0,
-                        "dyjzt":"无",
+                        "dyjzt":"offline",
+                        "gl":"无线信息"
                     },
                     {
                         "zt":"离线",
@@ -115,7 +122,8 @@
                         "sbxh":"zc9525a",
                         "gjbb":"1.08.1659",
                         "hzzt":0,
-                        "dyjzt":"无",
+                        "dyjzt":"offline",
+                        "gl":"无线信息"
                     }
 
                 ]
