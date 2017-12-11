@@ -49,7 +49,7 @@
 
         <el-dialog title="添加ROM版本" :visible.sync="dialogFormVisible" class="digcont">
             <el-form :model="form">
-                <!--<el-form-item label="上传" :label-width="formLabelWidth">-->
+                <el-form-item label="上传" :label-width="formLabelWidth">
                     <el-upload
                         class="upload-demo"
                         action="https://jsonplaceholder.typicode.com/posts/"
@@ -59,22 +59,34 @@
                         <!--<div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>-->
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="密码" :label-width="formLabelWidth">
+                <el-form-item label="ROM版本号" :label-width="formLabelWidth">
                     <el-input v-model="form.password" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="渠道名称" :label-width="formLabelWidth">
+                <el-form-item label="对应设备型号" :label-width="formLabelWidth">
+                    <el-select v-model="form.region" placeholder="请选择对应设备型号">
+                        <el-option label="zc9525a" value="zc9525a"></el-option>
+                        <el-option label="r7800" value="r7800"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="OEM版本" :label-width="formLabelWidth">
+                    <el-select v-model="form.region" placeholder="请选择OEM版本">
+                        <el-option label="hang" value="航信版本"></el-option>
+                        <el-option label="rom7" value="rom7"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="MD5串码" :label-width="formLabelWidth">
                     <el-input v-model="form.name" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="联系电话" :label-width="formLabelWidth">
-                    <el-input v-model="form.tel" class="diainp" auto-complete="off"></el-input>
+                <el-form-item label="更新说明" :label-width="formLabelWidth">
+                    <el-input v-model="form.tel" class="diainp2" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="" :label-width="formLabelWidth">
-                    <el-input v-model="form.addr" class="diainp2" auto-complete="off" placeholder="请输入详细地址"></el-input>
-                </el-form-item>
+                <!--<el-form-item label="" :label-width="formLabelWidth">-->
+                    <!--<el-input v-model="form.addr" class="diainp2" auto-complete="off" placeholder="请输入详细地址"></el-input>-->
+                <!--</el-form-item>-->
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialogFormVisible = false">创 建</el-button>
+                <el-button type="primary" @click="dialogFormVisible = false">添 加</el-button>
             </div>
         </el-dialog>
 
@@ -259,4 +271,12 @@
     .btn2{margin-bottom:5px;margin-left:0;}
     .diainp{width:217px;}
     .diainp2{width:400px;}
+    .upload-demo .el-upload {
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .upload-demo .el-upload:hover {
+        border-color: #409EFF;
+    }
 </style>

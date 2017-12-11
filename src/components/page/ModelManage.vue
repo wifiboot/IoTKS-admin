@@ -2,23 +2,18 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-date"></i> 插件管理</el-breadcrumb-item>
-                <el-breadcrumb-item>插件列表</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-share"></i> 设备型号管理</el-breadcrumb-item>
+                <el-breadcrumb-item>设备型号列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="handle-box">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">上传插件</el-button>
+            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">上传脚本</el-button>
         </div>
         <el-table :data="tableData2" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
             <el-table-column prop="cjmc" label="插件名称" width="130"></el-table-column>
             <el-table-column prop="bbh" label="版本号" width="130"></el-table-column>
             <el-table-column prop="kfz" label="开发者" width="130"></el-table-column>
             <el-table-column prop="scsj" label="上传时间" width="180"></el-table-column>
-            <!--<el-table-column label="冻结状态" width="120" :filters="[{ text: 'frozen', value: '已冻结' }, { text: 'Not frozen', value: '未冻结' }]" :filter-method="filterTag">-->
-                <!--<template slot-scope="scope">-->
-                    <!--<el-tag :type="scope.row.djzt == 'frozen' ? 'warning' : 'success'" close-transition>{{scope.row.djzt=='frozen'?'已冻结':'未冻结'}}</el-tag>-->
-                <!--</template>-->
-            <!--</el-table-column>-->
             <el-table-column label="操作">
                 <template slot-scope="scope">
                     <el-button class="btn1" size="small" type="success" @click="resetPwd(scope.$index, scope.row)">下载</el-button>
@@ -28,25 +23,24 @@
         </el-table>
         <div class="pagination">
             <el-pagination
-                    @current-change ="handleCurrentChange"
-                    layout="prev, pager, next"
-                    :total="1000">
+                @current-change ="handleCurrentChange"
+                layout="prev, pager, next"
+                :total="1000">
             </el-pagination>
         </div>
 
-        <el-dialog title="添加插件版本" :visible.sync="dialogFormVisible" class="digcont">
+        <el-dialog title="添加脚本文件" :visible.sync="dialogFormVisible" class="digcont">
             <el-form :model="form">
-                <el-form-item label="上传ipk文件" :label-width="formLabelWidth">
+                <el-form-item label="上传脚本" :label-width="formLabelWidth">
                     <el-upload
                         class="upload-demo"
                         action="https://jsonplaceholder.typicode.com/posts/"
                         :on-preview="handlePreview"
                         :file-list="fileList">
                         <el-button size="small" type="primary">选择文件</el-button>
-                         <!--<div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>-->
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="插件名称" :label-width="formLabelWidth">
+                <el-form-item label="脚本名称" :label-width="formLabelWidth">
                     <el-input v-model="form.password" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="版本号" :label-width="formLabelWidth">
@@ -55,7 +49,7 @@
                 <el-form-item label="开发者" :label-width="formLabelWidth">
                     <el-input v-model="form.tel" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="插件说明" :label-width="formLabelWidth">
+                <el-form-item label="脚本说明" :label-width="formLabelWidth">
                     <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
             </el-form>
@@ -254,16 +248,16 @@
 </script>
 
 <style scoped>
-.handle-box{
-    margin-bottom: 20px;
-}
-.handle-select{
-    width: 120px;
-}
-.handle-input{
-    width: 300px;
-    display: inline-block;
-}
+    .handle-box{
+        margin-bottom: 20px;
+    }
+    .handle-select{
+        width: 120px;
+    }
+    .handle-input{
+        width: 300px;
+        display: inline-block;
+    }
 
     .rad-group{margin-bottom:20px;}
     .btn1{margin-bottom:5px;margin-top:5px;margin-left:0;}
@@ -272,3 +266,4 @@
     .diainp2{width:400px;}
     .upload-demo{}
 </style>
+

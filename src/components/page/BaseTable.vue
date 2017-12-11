@@ -67,6 +67,7 @@
                                v-on:change="getProv($event)">
                         <el-option
                             v-for="item in provs"
+                            :key="item.label"
                             :label="item.label"
                             :value="item.value">
                         </el-option>
@@ -78,6 +79,7 @@
                                v-on:change="getCity($event)">
                         <el-option
                             v-for="item in citys"
+                            :key="item.label"
                             :label="item.label"
                             :value="item.value">
                         </el-option>

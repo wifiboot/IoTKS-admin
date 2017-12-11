@@ -18,7 +18,7 @@
             </div>
         </div>
 
-        <el-table :data="tableData2" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
+        <el-table :data="tableData2" border style="width: 100%" ref="multipleTable">
             <el-table-column label="状态" width="100":filters="[{ text: '离线', value: '离线' }, { text: '未激活', value: '未激活' }]" :filter-method="filterTag">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.zt == '离线' ? 'warning' : 'success'" close-transition>{{scope.row.zt}}</el-tag>
@@ -126,7 +126,8 @@
                         "gl":"无线信息"
                     }
 
-                ]
+                ],
+                select_word:''
 
             }
         },
@@ -134,7 +135,10 @@
             Datasource
         },
         methods: {
-            filterTag(value, row) {
+            search: function(){
+
+            },
+            filterTag:function(value, row) {
                 return row.zt === value;
             },
             test: function(event){
@@ -157,16 +161,16 @@
                 this.cur_page = val;
                 this.getData();
             },
-            changePage(values) {
+            changePage:function(values) {
                 this.information.pagination.per_page = values.perpage;
                 this.information.data = this.information.data;
             },
-            onSearch(searchQuery) {
+            onSearch:function(searchQuery) {
                 this.query = searchQuery;
             }
         },
         computed:{
-            getData(){
+            getData:function(){
                 const self = this;
                 return self.information.data.filter(function (d) {
                     if(d.name.indexOf(self.query) > -1){
@@ -175,11 +179,11 @@
                 })
             }
         },
-        beforeMount(){
+        beforeMount:function(){
             if(process.env.NODE_ENV === 'development'){
                 this.url = '/ms/table/source';
             };
-            axios.get(this.url).then( (res) => {
+            axios.get(this.url).then( function(res) {
                 this.information = res.data;
             })
         }

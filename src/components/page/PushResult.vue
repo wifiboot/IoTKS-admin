@@ -26,7 +26,7 @@
                 v-on:change="changePage"
                 v-on:searching="onSearch"></datasource>-->
 
-        <el-table :data="tableData2" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
+        <el-table :data="tableData2" border style="width: 100%" ref="multipleTable">
             <!--<el-table-column type="selection" width="55"></el-table-column>-->
             <el-table-column prop="cz" label="操作" width="100"></el-table-column>
             <el-table-column prop="sj" label="时间" width="180"></el-table-column>

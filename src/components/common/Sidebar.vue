@@ -84,13 +84,24 @@
                         ]
                     },
                     {
-                        icon: 'el-icon-date',
+                        icon: 'el-icon-document',
                         index: '7',
                         title: '脚本管理',
                         subs: [
                             {
                                 index: 'scriptmanage',
                                 title: '脚本列表'
+                            }
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-share',
+                        index: '8',
+                        title: '设备型号管理',
+                        subs: [
+                            {
+                                index: 'modelmanage',
+                                title: '设备型号列表'
                             }
                         ]
                     },
