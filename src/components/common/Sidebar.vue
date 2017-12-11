@@ -24,11 +24,6 @@
         data() {
             return {
                 items: [
-//                    {
-//                        icon: 'el-icon-setting',
-//                        index: 'readme',
-//                        title: '自述'
-//                    },
                     {
                         icon: 'el-icon-menu',
                         index: '2',
@@ -38,10 +33,6 @@
                                 index: 'basetable',
                                 title: '渠道列表'
                             },
-//                            {
-//                                index: 'vuetable',
-//                                title: 'Vue表格组件'
-//                            }
                         ]
                     },
                     {
@@ -95,6 +86,17 @@
                     {
                         icon: 'el-icon-date',
                         index: '7',
+                        title: '脚本管理',
+                        subs: [
+                            {
+                                index: 'scriptmanage',
+                                title: '脚本列表'
+                            }
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-date',
+                        index: '8',
                         title: '表单',
                         subs: [
                             {
