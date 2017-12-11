@@ -42,6 +42,10 @@ export default new Router({
                         component: resolve => require(['../components/page/PluginManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
+                    path: '/scriptmanage',
+                        component: resolve => require(['../components/page/ScriptManage.vue'], resolve)     // vue-datasource组件
+                },
+                {
                     path: '/vuetable',
                     component: resolve => require(['../components/page/VueTable.vue'], resolve)     // vue-datasource组件
                 },
