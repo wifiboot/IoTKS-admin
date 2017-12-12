@@ -7,16 +7,18 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">上传脚本</el-button>
+            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">添加型号</el-button>
         </div>
         <el-table :data="tableData2" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
-            <el-table-column prop="cjmc" label="插件名称" width="130"></el-table-column>
-            <el-table-column prop="bbh" label="版本号" width="130"></el-table-column>
-            <el-table-column prop="kfz" label="开发者" width="130"></el-table-column>
-            <el-table-column prop="scsj" label="上传时间" width="180"></el-table-column>
+            <el-table-column prop="tjsj" label="添加时间" width="170"></el-table-column>
+            <el-table-column prop="sbxh" label="设备型号" width="120"></el-table-column>
+            <el-table-column prop="sblx" label="设备类型" width="130"></el-table-column>
+            <el-table-column prop="xpxh" label="芯片型号" width="120"></el-table-column>
+            <el-table-column prop="xpcs" label="芯片厂商" width="180"></el-table-column>
+            <el-table-column prop="sbcs" label="设备厂商" width="100"></el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
-                    <el-button class="btn1" size="small" type="success" @click="resetPwd(scope.$index, scope.row)">下载</el-button>
+                    <!--<el-button class="btn1" size="small" type="success" @click="resetPwd(scope.$index, scope.row)">下载</el-button>-->
                     <el-button class="btn1" size="small" type="danger" @click="toRouter(scope.row)">删除</el-button>
                 </template>
             </el-table-column>
@@ -29,27 +31,45 @@
             </el-pagination>
         </div>
 
-        <el-dialog title="添加脚本文件" :visible.sync="dialogFormVisible" class="digcont">
+        <el-dialog title="添加型号" :visible.sync="dialogFormVisible" class="digcont">
             <el-form :model="form">
-                <el-form-item label="上传脚本" :label-width="formLabelWidth">
-                    <el-upload
-                        class="upload-demo"
-                        action="https://jsonplaceholder.typicode.com/posts/"
-                        :on-preview="handlePreview"
-                        :file-list="fileList">
-                        <el-button size="small" type="primary">选择文件</el-button>
-                    </el-upload>
-                </el-form-item>
-                <el-form-item label="脚本名称" :label-width="formLabelWidth">
+                <el-form-item label="设备型号" :label-width="formLabelWidth">
                     <el-input v-model="form.password" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="版本号" :label-width="formLabelWidth">
+                <el-form-item label="芯片型号" :label-width="formLabelWidth">
+                    <el-select v-model="form.region" placeholder="请选择芯片型号">
+                        <el-option label="区域一" value="shanghai"></el-option>
+                        <el-option label="区域二" value="beijing"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="设备厂商" :label-width="formLabelWidth">
                     <el-input v-model="form.name" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="开发者" :label-width="formLabelWidth">
+                <el-form-item label="设备类型" :label-width="formLabelWidth">
                     <el-input v-model="form.tel" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="脚本说明" :label-width="formLabelWidth">
+                <el-form-item label="CPU主频" :label-width="formLabelWidth">
+                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="内存" :label-width="formLabelWidth">
+                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="闪存" :label-width="formLabelWidth">
+                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="无线并发量" :label-width="formLabelWidth">
+                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="天线" :label-width="formLabelWidth">
+                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="接口" :label-width="formLabelWidth">
+                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="网络标准" :label-width="formLabelWidth">
+                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="备注" :label-width="formLabelWidth">
                     <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
             </el-form>
@@ -79,30 +99,40 @@
                 radio3:'全部',
                 tableData2:[
                     {
-                        "cjmc":"apbridge",
-                        "bbh": "0.7.2.2",
-                        "kfz":"王爱明",
-                        "scsj":'2017/11/13 11:41'
+                        "tjsj":'2017/11/13 11:41',
+                        "sbxh": "kt9761ld",
+                        "sblx":"企业智能中枢",
+                        "xpxh":'MT7628AN',
+                        "xpcs":"北京坤腾畅联科技有限公司",
+                        "sbcs":"坤腾"
                     },{
-                        "cjmc":"apfree_wifidog",
-                        "bbh": "2.3.0.7.2.2",
-                        "kfz":"张华",
-                        "scsj":'2017/11/13 18:20'
+                        "tjsj":'2017/11/13 16:41',
+                        "sbxh": "r7800",
+                        "sblx":"R7800",
+                        "xpxh":'IPQ8064',
+                        "xpcs":"ARM",
+                        "sbcs":"ARM"
                     },{
-                        "cjmc":"apbridge",
-                        "bbh": "0.7.2.2",
-                        "kfz":"傅山",
-                        "scsj":'2017/11/13 11:41'
+                        "tjsj":'2017/11/13 11:41',
+                        "sbxh": "kt9761ld",
+                        "sblx":"企业智能中枢",
+                        "xpxh":'MT7628AN',
+                        "xpcs":"高通",
+                        "sbcs":"坤腾"
                     },{
-                        "cjmc":"apbridge",
-                        "bbh": "0.7.2.2",
-                        "kfz":"我爱罗",
-                        "scsj":'2017/11/13 11:41'
+                        "tjsj":'2017/11/13 11:41',
+                        "sbxh": "kt9761ld",
+                        "sblx":"企业智能中枢",
+                        "xpxh":'MT7628AN',
+                        "xpcs":"kunteng",
+                        "sbcs":"test"
                     },{
-                        "cjmc":"apbridge",
-                        "bbh": "0.7.2.2",
-                        "kfz":"王爱明",
-                        "scsj":'2017/11/13 11:41'
+                        "tjsj":'2017/11/13 11:41',
+                        "sbxh": "kt9761ld",
+                        "sblx":"路由器",
+                        "xpxh":'MT7628AN',
+                        "xpcs":"北京坤腾畅联科技有限公司",
+                        "sbcs":"坤腾"
                     }
                 ],
                 dialogFormVisible: false,
