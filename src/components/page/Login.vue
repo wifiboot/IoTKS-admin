@@ -34,11 +34,10 @@
                     ],
                     password: [
                         { required: true, message: '请输入密码', trigger: 'blur' },
+                        {min:3,max:32,message:'长度在3到32个字符',trigger:'blur'},
                         {validator:function(rule,value,callback){
                             if(value.indexOf(' ') != -1){
                                 callback(new Error('密码不能包含空格'));
-                            }else if(value.length > 32 || value.length < 3){
-                                callback(new Error('密码长度应为3~32位'));
                             }else{
                                 callback();
                             }

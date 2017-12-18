@@ -55,35 +55,6 @@
                 <el-form-item label="操作人">
                     <el-input v-model="form0.name"></el-input>
                 </el-form-item>
-                <!--<el-form-item label="日期时间">
-                    <el-col :span="11">
-                        <el-date-picker type="date" placeholder="选择日期" v-model="form.date1" style="width: 100%;"></el-date-picker>
-                    </el-col>
-                    <el-col class="line" :span="2">-</el-col>
-                    <el-col :span="11">
-                        <el-time-picker type="fixed-time" placeholder="选择时间" v-model="form.date2" style="width: 100%;"></el-time-picker>
-                    </el-col>
-                </el-form-item>
-                <el-form-item label="选择开关">
-                    <el-switch on-text="" off-text="" v-model="form.delivery"></el-switch>
-                </el-form-item>
-                <el-form-item label="多选框">
-                    <el-checkbox-group v-model="form.type">
-                        <el-checkbox label="步步高" name="type"></el-checkbox>
-                        <el-checkbox label="小天才" name="type"></el-checkbox>
-                        <el-checkbox label="imoo" name="type"></el-checkbox>
-                    </el-checkbox-group>
-                </el-form-item>
-                <el-form-item label="单选框">
-                    <el-radio-group v-model="form.resource">
-                        <el-radio label="步步高"></el-radio>
-                        <el-radio label="小天才"></el-radio>
-                        <el-radio label="imoo"></el-radio>
-                    </el-radio-group>
-                </el-form-item>
-                <el-form-item label="文本框">
-                    <el-input type="textarea" v-model="form.desc"></el-input>
-                </el-form-item>-->
                 <el-form-item>
                     <el-button type="primary" @click="onSubmit">执行</el-button>
                     <!--<el-button>取消</el-button>-->
@@ -96,18 +67,26 @@
                     <el-input class="textarea-mac" type="textarea" v-model="form1.mac" placeholder="以换行符分割，最多输入100条mac"></el-input>
                 </el-form-item>
                 <el-form-item label="选择要安装的插件">
-                    <el-select v-model="form1.plug" placeholder="请选择">
-                        <el-option key="apbridge" label="apbridge" value="bbk"></el-option>
-                        <el-option key="apfree_wifidog" label="apfree_wifidog" value="xtc"></el-option>
-                        <el-option key="apmodectl" label="apmodectl" value="imoo"></el-option>
-                        <el-option key="apmodectl_wd" label="apmodectl_wd"" value="imoo"></el-option>
-                        <el-option key="cloudPlugin" label="cloudPlugin" value="imoo"></el-option>
-                        <el-option key="frpc" label="frpc" value="imoo"></el-option>
-                        <el-option key="jsInjector" label="jsInjector" value="imoo"></el-option>
-                        <el-option key="kt-base-files" label="kt-base-files" value="imoo"></el-option>
-                        <el-option key="luasocket" label="luasocket" value="imoo"></el-option>
-                        <el-option key="mosquitto" label="mosquitto" value="imoo"></el-option>
-                        <el-option key="jsInjector" label="jsInjector" value="imoo"></el-option>
+                    <!--<el-select v-model="form1.plug" placeholder="请选择">-->
+                        <!--<el-option key="apbridge" label="apbridge" value="bbk"></el-option>-->
+                        <!--<el-option key="apfree_wifidog" label="apfree_wifidog" value="xtc"></el-option>-->
+                        <!--<el-option key="apmodectl" label="apmodectl" value="imoo"></el-option>-->
+                        <!--<el-option key="apmodectl_wd" label="apmodectl_wd"" value="imoo"></el-option>-->
+                        <!--<el-option key="cloudPlugin" label="cloudPlugin" value="imoo"></el-option>-->
+                        <!--<el-option key="frpc" label="frpc" value="imoo"></el-option>-->
+                        <!--<el-option key="jsInjector" label="jsInjector" value="imoo"></el-option>-->
+                        <!--<el-option key="kt-base-files" label="kt-base-files" value="imoo"></el-option>-->
+                        <!--<el-option key="luasocket" label="luasocket" value="imoo"></el-option>-->
+                        <!--<el-option key="mosquitto" label="mosquitto" value="imoo"></el-option>-->
+                        <!--<el-option key="jsInjector" label="jsInjector" value="imoo"></el-option>-->
+                    <!--</el-select>-->
+                    <el-select v-model="value" placeholder="请选择">
+                        <el-option
+                            v-for="item in pluginList"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="选择插件的版本">
@@ -198,7 +177,40 @@
                 form2:{
                     mac:'',
                     plug:''
-                }
+                },
+                pluginList:[
+                    {
+                        value:'apbridge',
+                        label:'apbridge'
+                    },{
+                        value:'apfree_wifidog',
+                        label:'apfree_wifidog'
+                    },{
+                        value:'frpc',
+                        label:'frpc'
+                    },{
+                        value:'cloudPlugin',
+                        label:'cloudPlugin'
+                    },{
+                        value:'apbridge',
+                        label:'apbridge'
+                    },{
+                        value:'apmodectl',
+                        label:'apmodectl'
+                    },{
+                        value:'kt-base-files',
+                        label:'kt-base-files'
+                    },{
+                        value:'apbridge',
+                        label:'apbridge'
+                    },{
+                        value:'jsInjector',
+                        label:'jsInjector'
+                    },{
+                        value:'apbridge',
+                        label:'apbridge'
+                    }
+                ]
             }
         },
         methods: {

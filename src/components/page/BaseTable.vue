@@ -8,8 +8,8 @@
         </div>
         <div class="handle-box">
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">新建用户</el-button>
-            <el-input v-model="select_word" placeholder="请输入渠道名称或账号查找" class="handle-input mr10"></el-input>
-            <el-button type="primary" icon="search" @click="search">查询</el-button>
+            <el-input v-model="search_word" placeholder="请输入渠道名称或账号查找" class="handle-input mr10"></el-input>
+            <el-button type="primary" icon="search" @click="search('searchForm')">查询</el-button>
         </div>
         <div class='rad-group'>
             <el-radio-group v-model="radio3" @change="changeTab">
@@ -47,17 +47,17 @@
         </div>
 
         <el-dialog title="新建子渠道" :visible.sync="dialogFormVisible" class="digcont">
-            <el-form :model="form">
-                <el-form-item label="账号" :label-width="formLabelWidth">
+            <el-form :model="form" :rules="rules" ref="form">
+                <el-form-item label="账号" prop="user" :label-width="formLabelWidth">
                     <el-input v-model="form.user" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="密码" :label-width="formLabelWidth">
-                    <el-input v-model="form.password" class="diainp" auto-complete="off"></el-input>
+                <el-form-item label="密码" prop="password" :label-width="formLabelWidth">
+                    <el-input v-model="form.password" type="password" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="渠道名称" :label-width="formLabelWidth">
+                <el-form-item label="渠道名称" prop="name" :label-width="formLabelWidth">
                     <el-input v-model="form.name" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="联系电话" :label-width="formLabelWidth">
+                <el-form-item label="联系电话" prop="tel" :label-width="formLabelWidth">
                     <el-input v-model="form.tel" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="地址" :label-width="formLabelWidth">
@@ -91,7 +91,7 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialogFormVisible = false">创 建</el-button>
+                <el-button type="primary" @click="saveCreate('form')">创 建</el-button>
             </div>
         </el-dialog>
 
@@ -139,7 +139,7 @@
                 select_cate: '',
                 select_word: '',
                 del_list: [],
-                is_search: false,
+//                is_search: false,
 
                 radio3:'全部',
                 tableData2:[
@@ -194,6 +194,22 @@
                     resource: '',
                     desc: ''
                 },
+                rules: {
+                    user:[
+                        {required: true, message: '请输入账号', trigger: 'blur'}
+                    ],
+                    password:[
+                        {required: true, message: '请输入密码', trigger: 'blur'},
+                        {validator:this.validatePwd,trigger:'blur'}
+                    ],
+                    name:[
+                        {required: true, message: '请输入渠道名称', trigger: 'blur'}
+                    ],
+                    tel:[
+                        {required: true, message: '请输入联系电话', trigger: 'blur'},
+                        {validator:this.validateTel,trigger:'blur'}
+                    ]
+                },
                 formLabelWidth: '120px',
 
                 provs:global_.provs,
@@ -201,11 +217,13 @@
 
                 showDialog:false,
                 radiotoRout:'文件上传',
-                fileList:[{name: '路由器导入模板.xls', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}]
+                fileList:[{name: '路由器导入模板.xls', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}],
+                search_word:''
             }
         },
         created: function(){
             this.getData();
+//            this.requestDatalist();
         },
         computed: {
 //            data: function(){
@@ -230,6 +248,63 @@
 //            }
         },
         methods: {
+            requestDatalist: function(){//获取数据列表
+                var self = this;
+                var params = {
+                    wx:'wlife'
+                };
+                self.$axios.get('https://wifi.kunteng.org/cgi-bin/luci/admin/system/getDeviceInfo',{params}).then(function(res){
+                    console.log(res);
+                })
+            },
+            saveCreate: function(formName){
+                var self = this;
+                self.$refs[formName].validate(function(valid){
+                    if(valid){
+                        console.log('验证成功')
+                    }else{
+                        return false;
+                        console.log('验证失败');
+                    }
+                });
+                var params = {
+                    user:self.form.user,
+                    password:self.form.password,
+                    name:self.form.name,
+                    tel:self.form.tel,
+                    addr:self.form.selectProv+self.form.selectCity+self.form.addr
+                }
+                console.log(params);
+                return false;
+                self.$axios.get('urlstr',{params}).then(function(res){
+//                    console.log(res);
+                })
+            },
+            frozen: function(i,data){
+                
+            },
+            validateUser: function(rule,value,callback){
+                if(value === ''){
+                    callback(new Error('请输入账号'))
+                }else{
+                    callback();
+                }
+            },
+            validatePwd: function(rule,value,callback){
+                if(value === ''){
+                    callback(new Error('请输入密码'))
+                }else{
+                    callback();
+                }
+            },
+            validateTel:function(rule,value,callback){
+                var regTel3 = /(\(\d{3,4}\)|\d{3,4}-|\s)?\d{7,14}$/.test(value);
+                if(!regTel3){
+                    callback(new Error('电话号码输入有误！'))
+                }else{
+                    callback();
+                }
+            },
             getProv: function(prov){
                 let tempCity=[];
                 this.citys=[];
@@ -283,8 +358,19 @@
                     self.tableData = res.data.list;
                 })
             },
-            search:function(){
-                this.is_search = true;
+            search:function(formstr){
+                var self = this;
+                if(self.search_word == ''){
+                    self.$message({
+                        message: '输入不能为空',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                var params = {
+                    search_word:self.search_word
+                }
+
             },
             formatter:function(row, column) {
                 return row.address;
