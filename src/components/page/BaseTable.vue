@@ -19,8 +19,8 @@
             </el-radio-group>
         </div>
         <el-table :data="tableData2" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
-            <el-table-column prop="zh" label="账 号" width="130"></el-table-column>
-            <el-table-column prop="qdmc" label="渠道名称" width="130"></el-table-column>
+            <el-table-column prop="zh" label="账 号" width="150"></el-table-column>
+            <el-table-column prop="qdmc" label="渠道名称" width="150"></el-table-column>
             <el-table-column prop="lxdh" label="联系电话" width="130"></el-table-column>
             <el-table-column label="冻结状态" width="120" :filters="[{ text: 'frozen', value: '已冻结' }, { text: 'Not frozen', value: '未冻结' }]" :filter-method="filterTag">
                 <template slot-scope="scope">
@@ -32,8 +32,8 @@
             <el-table-column prop="cjsj" label="创建时间" width="150"></el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
-                    <el-button class="btn1" size="small" type="text" @click="resetPwd(scope.$index, scope.row)">重置密码</el-button>
-                    <el-button class="btn1" size="small" :type="scope.row.djzt == 'frozen' ? 'warning' : 'danger'" @click="frozen(scope.$index, scope.row)">{{scope.row.djzt=='frozen'?'解除冻结':'冻结账户'}}</el-button>
+                    <el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.zh)">重置密码</el-button>
+                    <el-button class="btn1" size="small" :type="scope.row.djzt == 'frozen' ? 'warning' : 'danger'" @click="frozen(scope.row.zh)">{{scope.row.djzt=='frozen'?'解除冻结':'冻结账户'}}</el-button>
                     <el-button class="btn1" size="small" type="success" @click="toRouter(scope.row)">导入路由</el-button>
                 </template>
             </el-table-column>
@@ -96,32 +96,47 @@
         </el-dialog>
 
         <el-dialog title="导入路由" :visible.sync="showDialog" class="digcont">
-            <div class='rad-group'>
-                <el-radio-group v-model="radiotoRout" @change="changeTab2">
-                    <el-radio-button label="文件上传"></el-radio-button>
-                    <el-radio-button label="手动导入"></el-radio-button>
-                </el-radio-group>
-            </div>
-
-            <el-upload
-                class="upload-demo"
-                ref="upload"
-                action="https://jsonplaceholder.typicode.com/posts/"
-                :on-preview="handlePreview"
-                :on-remove="handleRemove"
-                :file-list="fileList"
-                :auto-upload="false">
-                <div>
-                    <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                    <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-                </div>
-                <div slot="tip" style="margin-top:20px;" class="el-upload__tip">只能上传XXX文件，且不超过500kb</div>
-            </el-upload>
-
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="showDialog = false">取 消</el-button>
-                <el-button type="primary" @click="showDialog = false">保 存</el-button>
-            </div>
+            <el-tabs v-model="activeName2" type="card" @tab-click="handleClick">
+                <el-tab-pane label="文件上传" name="first">
+                    <div class="mb30">
+                        路由导入模板.xls
+                        <a href="http://cloud.kunteng.org/yunac/static/tmp/routers.xls" target="_blank">
+                            <el-button class="btn1" size="small" type="primary">下载</el-button>
+                        </a>
+                    </div>
+                    <el-upload
+                        class="upload-demo"
+                        ref="upload"
+                        action="https://jsonplaceholder.typicode.com/posts/"
+                        :on-preview="handlePreview"
+                        :on-remove="handleRemove"
+                        :file-list="fileList"
+                        :auto-upload="false">
+                        <div>
+                            <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+                        </div>
+                        <div slot="tip" style="margin-top:20px;" class="el-upload__tip">只能上传XXX文件，且不超过500kb</div>
+                    </el-upload>
+                    <div class="mt30">
+                        <el-button @click="showDialog = false">取 消</el-button>
+                        <el-button type="primary" @click="showDialog = false">保 存</el-button>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="手动导入" name="second">
+                    <div style="margin-bottom:16px;">*批量添加功能MAC之间以换行分割，每行一个MAC；MAC格式为12位字母或数字组合，不区分大小写:</div>
+                    <el-input
+                        type="textarea"
+                        :rows="5"
+                        placeholder="请输入内容"
+                        v-model="textarea_macs">
+                    </el-input>
+                    <div class="mt30">
+                        <el-button @click="showDialog = false">取 消</el-button>
+                        <el-button type="primary" @click="showDialog = false">保 存</el-button>
+                    </div>
+                </el-tab-pane>
+            </el-tabs>
         </el-dialog>
 
     </div>
@@ -218,7 +233,9 @@
                 showDialog:false,
                 radiotoRout:'文件上传',
                 fileList:[{name: '路由器导入模板.xls', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}],
-                search_word:''
+                search_word:'',
+                activeName2:'first',
+                textarea_macs:''
             }
         },
         created: function(){
@@ -280,8 +297,21 @@
 //                    console.log(res);
                 })
             },
-            frozen: function(i,data){
-                
+            frozen: function(account){
+                var self = this;
+                self.$confirm('确认执行该操作？')
+                    .then(function(){
+                        console.log('确认');
+                    })
+                    .catch();
+            },
+            resetPwd: function(account){
+                var self = this;
+                self.$confirm('确认重置该账号？')
+                    .then(function(){
+                        console.log('确认重置');
+                    })
+                    .catch();
             },
             validateUser: function(rule,value,callback){
                 if(value === ''){
@@ -305,6 +335,9 @@
                     callback();
                 }
             },
+            handleClick:function(tab,event){
+
+            },
             getProv: function(prov){
                 let tempCity=[];
                 this.citys=[];
@@ -325,10 +358,6 @@
             changeTab: function(){
                 console.log(this.radio3);
                 this.$message('选择'+ this.radio3);
-            },
-            changeTab2: function(){
-                console.log(this.radiotoRout);
-//                this.$message('选择'+ this.radiotoRout);
             },
             submitUpload:function() {
                 console.log('上传到服务器');
@@ -384,17 +413,6 @@
             handleDelete:function(index, row) {
                 this.$message.error('删除第'+(index+1)+'行');
             },
-            addUsr:function(){
-                const self = this,
-                    length = self.multipleSelection.length;
-                let str = '';
-                self.del_list = self.del_list.concat(self.multipleSelection);
-                for (let i = 0; i < length; i++) {
-                    str += self.multipleSelection[i].name + ' ';
-                }
-                self.$message.error('删除了'+str);
-                self.multipleSelection = [];
-            },
             handleSelectionChange:function(val) {
                 this.multipleSelection = val;
             }
@@ -403,16 +421,9 @@
 </script>
 
 <style scoped>
-.handle-box{
-    margin-bottom: 20px;
-}
-.handle-select{
-    width: 120px;
-}
-.handle-input{
-    width: 300px;
-    display: inline-block;
-}
+    .handle-box{  margin-bottom: 20px;  }
+    .handle-select{  width: 120px;  }
+    .handle-input{  width: 300px;  display: inline-block;  }
 
     .rad-group{margin-bottom:20px;}
     .btn1{margin-bottom:5px;margin-top:5px;margin-left:0;}
@@ -420,4 +431,6 @@
     .diainp{width:217px;}
     .diainp2{width:400px;}
     .upload-demo{}
+    .mb30{margin-bottom:30px;}
+    .mt30{margin-top:30px;}
 </style>
