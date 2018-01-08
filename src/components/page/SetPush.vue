@@ -168,6 +168,7 @@
 </template>
 
 <script>
+    import global_ from 'components/common/Global';
     export default {
         data: function () {
             return {
@@ -414,7 +415,7 @@
                 self.$axios({
                     method: 'get',
                     headers: {'Content-Type': 'application/json'},
-                    url: 'http://api.rom.kunteng.org/device/sysinfo'
+                    url: global_.baseUrl + '/device/sysinfo'
 //                            data:{wx:'wlife'}
                 }).then(function (response) {
                     console.log(response);

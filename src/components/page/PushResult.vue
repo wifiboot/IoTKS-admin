@@ -75,7 +75,7 @@
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
                 :current-page="currentPage"
-                :page-sizes="[10, 20, 30, 40]"
+                :page-sizes="[10]"
                 :page-size="10"
                 layout="total, sizes, prev, pager, next, jumper"
                 :total="400">
@@ -185,7 +185,7 @@
                 ],
                 select_word:'',
                 listData:[],
-                currentPage:4
+                currentPage:1
 
             }
         },
@@ -196,11 +196,15 @@
         methods: {
             getList: function(){
                 var self = this;
+                var params = {
+//                    page_size:"10",
+                    current_page:"1"
+                }
                 self.$axios({
-                    method:'get',
+                    method:'post',
                     headers: {'Content-Type': 'application/json'},
-                    url: global_.baseUrl + '/task/list'
-//                            data:{wx:'wlife'}
+                    url: global_.baseUrl + '/task/list',
+                    data:params
                 }).then(function(response) {
                     console.log(response.data);
                     self.listData = response.data.message;

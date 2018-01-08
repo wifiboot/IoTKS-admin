@@ -239,7 +239,7 @@
             }
         },
         created: function(){
-            this.getData();
+//            this.getData();
 //            this.requestDatalist();
         },
         computed: {

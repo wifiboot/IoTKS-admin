@@ -9,17 +9,16 @@
         <div class="handle-box">
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">添加型号</el-button>
         </div>
-        <el-table :data="tableData2" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
-            <el-table-column prop="tjsj" label="添加时间" width="170"></el-table-column>
-            <el-table-column prop="sbxh" label="设备型号" width="120"></el-table-column>
-            <el-table-column prop="sblx" label="设备类型" width="130"></el-table-column>
-            <el-table-column prop="xpxh" label="芯片型号" width="120"></el-table-column>
-            <el-table-column prop="xpcs" label="芯片厂商" width="180"></el-table-column>
-            <el-table-column prop="sbcs" label="设备厂商" width="100"></el-table-column>
+        <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
+            <el-table-column prop="create_date" label="添加时间" width="170"></el-table-column>
+            <el-table-column prop="dev_name" label="设备型号" width="150"></el-table-column>
+            <el-table-column prop="dev_vendor" label="设备类型" width="130"></el-table-column>
+            <el-table-column prop="chip_type" label="芯片型号" width="170"></el-table-column>
+            <el-table-column prop="chip_vendor" label="芯片厂商" width="130"></el-table-column>
+            <el-table-column prop="comment" label="更新说明" width="130"></el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
-                    <!--<el-button class="btn1" size="small" type="success" @click="resetPwd(scope.$index, scope.row)">下载</el-button>-->
-                    <el-button class="btn1" size="small" type="danger" @click="toRouter(scope.row)">删除</el-button>
+                    <el-button class="btn1" size="small" type="danger" @click="delDev(scope.row._id)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -31,51 +30,33 @@
             </el-pagination>
         </div>
 
-        <el-dialog title="添加型号" :visible.sync="dialogFormVisible" class="digcont">
-            <el-form :model="form">
-                <el-form-item label="设备型号" :label-width="formLabelWidth">
-                    <el-input v-model="form.password" class="diainp" auto-complete="off"></el-input>
+        <el-dialog title="添加型号" :visible.sync="dialogFormVisible" class="digcont" v-loading="loading">
+            <el-form :model="form" :rules="rules" ref="form">
+                <el-form-item label="设备型号" prop="dev_name" :label-width="formLabelWidth">
+                    <el-input v-model="form.dev_name" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="芯片型号" :label-width="formLabelWidth">
-                    <el-select v-model="form.region" placeholder="请选择芯片型号">
-                        <el-option label="区域一" value="shanghai"></el-option>
-                        <el-option label="区域二" value="beijing"></el-option>
-                    </el-select>
+                <!--<el-form-item label="芯片型号" :label-width="formLabelWidth">-->
+                    <!--<el-select v-model="form.region" placeholder="请选择芯片型号">-->
+                        <!--<el-option label="区域一" value="shanghai"></el-option>-->
+                        <!--<el-option label="区域二" value="beijing"></el-option>-->
+                    <!--</el-select>-->
+                <!--</el-form-item>-->
+                <el-form-item label="设备厂商" prop="dev_vendor" :label-width="formLabelWidth">
+                    <el-input v-model="form.dev_vendor" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="设备厂商" :label-width="formLabelWidth">
-                    <el-input v-model="form.name" class="diainp" auto-complete="off"></el-input>
+                <el-form-item label="芯片类型" prop="chip_type" :label-width="formLabelWidth">
+                    <el-input v-model="form.chip_type" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="设备类型" :label-width="formLabelWidth">
-                    <el-input v-model="form.tel" class="diainp" auto-complete="off"></el-input>
+                <el-form-item label="芯片厂商" prop="chip_vendor" :label-width="formLabelWidth">
+                    <el-input v-model="form.chip_vendor" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="CPU主频" :label-width="formLabelWidth">
-                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="内存" :label-width="formLabelWidth">
-                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="闪存" :label-width="formLabelWidth">
-                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="无线并发量" :label-width="formLabelWidth">
-                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="天线" :label-width="formLabelWidth">
-                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="接口" :label-width="formLabelWidth">
-                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="网络标准" :label-width="formLabelWidth">
-                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="备注" :label-width="formLabelWidth">
-                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
+                <el-form-item label="备注" prop="comment" :label-width="formLabelWidth">
+                    <el-input v-model="form.comment" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialogFormVisible = false">添 加</el-button>
+                <el-button type="primary" @click="saveAdd('form')">添 加</el-button>
             </div>
         </el-dialog>
 
@@ -87,16 +68,7 @@
     export default {
         data: function() {
             return {
-                url: './static/vuetable.json',
-                tableData: [],
                 cur_page: 1,
-                multipleSelection: [],
-                select_cate: '',
-                select_word: '',
-                del_list: [],
-                is_search: false,
-
-                radio3:'全部',
                 tableData2:[
                     {
                         "tjsj":'2017/11/13 11:41',
@@ -137,29 +109,29 @@
                 ],
                 dialogFormVisible: false,
                 form: {
-                    user:'',
-                    password:'',
-                    name: '',
-                    tel:'',
-                    selectProv: '',
-                    selectCity: '',
-                    addr:'',
-                    region: '',
-                    date1: '',
-                    date2: '',
-                    delivery: false,
-                    type: [],
-                    resource: '',
-                    desc: ''
+                    dev_name:'',
+                    dev_vendor:'',
+                    chip_type:'',
+                    chip_vendor:'',
+                    comment:''
                 },
+                rules: {
+                    dev_name:[
+                        {required: true, message: '请输入设备型号', trigger: 'blur'}
+                    ],
+                    dev_vendor:[
+                        {required: true, message: '请输入设备厂商', trigger: 'blur'},
+                    ],
+                    chip_type:[
+                        {required: true, message: '请输入芯片类型', trigger: 'blur'}
+                    ],
+                    chip_vendor:[
+                        {required: true, message: '请输入芯片厂商', trigger: 'blur'}
+                    ]
+                },
+                listData:[],
                 formLabelWidth: '120px',
-
-                provs:global_.provs,
-                citys: [],
-
-                showDialog:false,
-                radiotoRout:'文件上传',
-                fileList:[{name: '路由器导入模板.xls', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}]
+                loading:false
             }
         },
         created: function(){
@@ -188,91 +160,79 @@
 //            }
         },
         methods: {
-            handlePreview:function(file) {
-                console.log(file);
-            },
-            getProv: function(prov){
-                let tempCity=[];
-                this.citys=[];
-                this.selectCity='';
-                let allCity=global_.allCity;
-                for (var val of allCity){
-                    if (prov == val.prov){
-                        console.log(val);
-                        tempCity.push({label: val.label, value: val.label})
-                    }
-                }
-                this.citys = tempCity;
-            },
-            getCity: function (city) {
-                console.log(city);
-                console.log(this.selectCity)
-            },
-            changeTab: function(){
-                console.log(this.radio3);
-                this.$message('选择'+ this.radio3);
-            },
-            changeTab2: function(){
-                console.log(this.radiotoRout);
-//                this.$message('选择'+ this.radiotoRout);
-            },
-            submitUpload:function() {
-                console.log('上传到服务器');
-                this.$refs.upload.submit();
-            },
-            handleRemove:function(file, fileList) {
-                console.log(file, fileList);
-            },
-            handlePreview:function(file) {
-                console.log(file);
-            },
-            toRouter: function(data){
+            getData:function(){
                 var self = this;
-                self.showDialog = true;
-                console.log(data);
+                self.loading = true;
+                var params = {
+//                    page_size:10,
+//                    current_page:1,
+//                    sort:'asc'
+                };
+                self.$axios.post(global_.baseUrl+'/devtype/list').then(function(res){
+//                    console.log(res);
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.listData = res.data.extra;
+//                        console.log(self.listData);
+                    }
+                })
+            },
+            saveAdd: function(formName){
+                var self = this;
+                self.$refs[formName].validate(function(valid){
+                    if(valid){
+                        console.log('验证成功')
+                    }else{
+                        return false;
+                        console.log('验证失败');
+                    }
+                });
+                var params = {
+                    dev_name:self.form.dev_name,
+                    dev_vendor:self.form.dev_vendor,
+                    chip_type:self.form.chip_type,
+                    chip_vendor:self.form.chip_vendor,
+                    comment:self.form.comment
+                };
+                self.loading = true;
+//                console.log(params);
+                self.$axios.post(global_.baseUrl+'/devtype/add',params).then(function(res){
+//                    console.log(res);
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message('添加成功');
+                        self.getData();
+                        self.dialogFormVisible = false;
+                    }
+
+                },function(err){
+                    self.loading = false;
+                    self.$message('添加失败');
+                    console.log(err);
+                })
+            },
+            delDev: function(id){
+                var self = this;
+                var params = {
+                    _id: id
+                };
+                self.loading = true;
+                self.$axios.post(global_.baseUrl+'/devtype/del',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message('删除成功');
+                        self.getData();
+                    }
+
+                },function(err){
+                    self.loading = false;
+                    console.log(err);
+                })
             },
             handleCurrentChange:function(val){
                 this.cur_page = val;
                 this.getData();
             },
-            getData:function(){
-                let self = this;
-                if(process.env.NODE_ENV === 'development'){
-                    self.url = '/ms/table/list';
-                };
-                self.$axios.post(self.url, {page:self.cur_page}).then(function(res){
-                    self.tableData = res.data.list;
-                })
-            },
-            search:function(){
-                this.is_search = true;
-            },
-            formatter:function(row, column) {
-                return row.address;
-            },
-            filterTag:function(value, row) {
-                return row.tag === value;
-            },
-            handleEdit:function(index, row) {
-                this.$message('编辑第'+(index+1)+'行');
-            },
-            handleDelete:function(index, row) {
-                this.$message.error('删除第'+(index+1)+'行');
-            },
-            addUsr:function(){
-                const self = this,
-                    length = self.multipleSelection.length;
-                let str = '';
-                self.del_list = self.del_list.concat(self.multipleSelection);
-                for (let i = 0; i < length; i++) {
-                    str += self.multipleSelection[i].name + ' ';
-                }
-                self.$message.error('删除了'+str);
-                self.multipleSelection = [];
-            },
-            handleSelectionChange:function(val) {
-                this.multipleSelection = val;
-            }
         }
     }
 </script>

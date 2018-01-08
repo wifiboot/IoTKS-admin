@@ -12,7 +12,10 @@
                 <div class="login-btn">
                     <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
                 </div>
-                <p style="font-size:12px;line-height:30px;color:#999;">Tips : 用户名和密码随便填。</p>
+                <div class="login-btn">
+                    <el-button type="text" @click="register">用户注册</el-button>
+                </div>
+                <!--<p style="font-size:12px;line-height:30px;color:#999;">Tips : 用户名和密码随便填。</p>-->
             </el-form>
         </div>
     </div>
@@ -68,9 +71,9 @@
                 var params = {
                     wx:'wlife'
                 };
-                self.$axios.get('https://wifi.kunteng.org/cgi-bin/luci/admin/system/getDeviceInfo',{params}).then(function(res){
-                    console.log(res);
-                })
+//                self.$axios.get('https://wifi.kunteng.org/cgi-bin/luci/admin/system/getDeviceInfo',{params}).then(function(res){
+//                    console.log(res);
+//                })
 
 
             },
@@ -78,27 +81,46 @@
                 const self = this;
                 self.$refs[formName].validate(function(valid){
                     if (valid) {
-                        self.$axios({
-                            method:'get',
-                            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                            url:global_.baseUrl + '/user/login'+self.ruleForm.password ,
-//                            data:{wx:'wlife'}
+                        var params = {
+                            user_account: self.ruleForm.username,
+                            user_password: self.ruleForm.password
+                        };
+
+                        /*self.$axios({
+                            method:'post',
+                            headers: {'Content-Type': 'application/json'},
+                            url:global_.baseUrl + '/admin/login',
+                            data:params
                         }).then(function(response) {
                             console.log(response);
                         },function(err){
                             console.log(err);
-                        });
+                        });*/
+                        self.$axios.post(global_.baseUrl + '/admin/login',params).then(function(res){
+                            console.log(res);
+                            if(res.data.ret_code == 0){
+                                self.$message('登录成功！');
+                                localStorage.setItem('ms_username',self.ruleForm.username);
+                                localStorage.setItem('storgePwd',self.ruleForm.password);
+                                self.$router.push('/basetable');
+                            }else{
+                                self.$message(res.data.ret_msg);
+                            }
+
+                        },function(err){
+                            console.log(err);
+                        })
 
 
-                        localStorage.setItem('ms_username',self.ruleForm.username);
-                        localStorage.setItem('storgePwd',self.ruleForm.password);
-//                        self.$router.push('/readme');
-                        self.$router.push('/basetable');
                     } else {
                         console.log('error submit!!');
                         return false;
                     }
                 });
+            },
+            register: function(){
+                var self = this;
+                self.$router.push('/register');
             }
         }
     }
