@@ -15,33 +15,29 @@
                             <el-form-item label="输入指定MAC" prop="router_mac">
                                 <el-input type="textarea" v-model="form0.router_mac"></el-input>
                             </el-form-item>
-                            <el-form-item label="选择设备型号" prop="devnum">
-                                <el-select v-model="form0.devnum" placeholder="请选择" @change="changeDev">
+                            <el-form-item label="选择设备型号" prop="dev_type">
+                                <el-select v-model="form0.dev_type" placeholder="请选择" @change="changeDev">
                                     <el-option
-                                        v-for="item in datatest[0].models"
-                                        :key="item.name"
-                                        :label="item.name"
-                                        :value="item.name">
+                                        v-for="item in typeListData"
+                                        :key="item"
+                                        :label="item"
+                                        :value="item">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item label="选择分支" prop="branch">
-                                <el-select v-model="form0.branch" placeholder="请选择">
-                                    <el-option key="bbk" label="普通分支(1.0只有这一个版本)" value="bbk"></el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item label="选择ROM版本" prop="romversion">
-                                <el-select v-model="form0.romversion" placeholder="请选择" @change="changeRom">
+                            <el-form-item label="选择ROM版本" prop="dest_version">
+                                <el-select v-model="form0.dest_version" placeholder="请选择" @change="changeRom">
                                     <el-option
-                                        v-for="item in romtest"
-                                        :key="item.name"
-                                        :label="item.name+' '+item.oem"
-                                        :value="item.name">
+                                        v-for="item in romListData"
+                                        :key="item.rom_version"
+                                        :label="item.rom_version"
+                                        :value="item.rom_version">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
                             <el-form-item label="所选文件">
-                                <a>{{filetest}}</a>
+                                <!--<a>{{filetest}}</a>-->
+                                <el-input v-model="filetest" class="diainp" :disabled="true"></el-input>
                             </el-form-item>
                             <el-form-item label="升级方式" prop="upgrade_type">
                                 <el-radio-group v-model="form0.upgrade_type">
@@ -169,32 +165,31 @@
 
 <script>
     import global_ from 'components/common/Global';
+    import md5 from 'js-md5';
     export default {
         data: function () {
             return {
                 form0: {
                     router_mac: '',
-                    devnum: '',
-                    branch: '',
-                    romversion: '',
+                    dev_type: '',
+                    dest_version: '',
                     upgrade_type: '1',
                     update:'1',
                     user_name: '',
                     expires_time:''
 
                 },
+                typeListData:[],
+                romListData:[],
                 rules0: {
                     router_mac: [
                         {required: true, message: '请输入指定MAC', trigger: 'blur'},
                         {validator: this.validateMac, trigger: 'blur'}
                     ],
-                    devnum: [
+                    dev_type: [
                         {required: true, message: '请选择设备型号', trigger: 'change'}
                     ],
-                    branch: [
-                        {required: true, message: '请选择分支', trigger: 'change'}
-                    ],
-                    romversion: [
+                    dest_version: [
                         {required: true, message: '请选择ROM版本', trigger: 'change'}
                     ],
                     upgrade_type: [
@@ -407,11 +402,68 @@
             }
         },
         created:function () {
+            this.getTypes();
+            this.getRomList();
 //            this.getSysinfo()
+//             console.log(md5(''));
         },
         methods: {
+            onRomSubmit:function (formName) {
+//                this.$message.success('提交成功！');
+                var self = this;
+                self.$refs[formName].validate(function (valid) {
+                    if (valid) {
+                        console.log('验证成功')
+                    } else {
+                        return false;
+                        console.log('验证失败');
+                    }
+                });
+                var params = {
+                    devnum: self.form0.devnum,
+                    romversion: self.form0.romversion,
+                    update: self.form0.update,
+                    router_mac: self.splitStr(self.form0.router_mac).join(','),
+                    user_name:localStorage.getItem('ms_username'),
+                    dev_type:self.dev_type,
+                    upgrade_type:self.form0.upgrade_type,
+                    expires_time:self.form0.expires_time,
+                    firmware_url: self.filetest
+                };
+                console.log(params);
+                return false;
+                self.$axios.post(global_.baseUrl + '/task/add/sysupgrade', {params}).then(function (res) {
+//                    console.log(res);
+                })
+
+            },
+            getTypes: function(){//获取设备型号
+                var self = this;
+                self.$axios.post(global_.baseUrl+'/devtype/types').then(function(res){
+                    if(res.data.ret_code == 0){
+                        self.typeListData = res.data.extra;
+                    }
+                })
+            },
+            getRomList: function(){//获取rom版本
+                var self = this;
+                self.$axios.post(global_.baseUrl+'/rom/list').then(function(res){
+                    if(res.data.ret_code == 0){
+                        self.romListData = res.data.extra;
+                    }
+                })
+            },
             getSysinfo: function () {
                 var self = this;
+                var params = {
+                    user_name:localStorage.getItem('ms_username'),
+                    router_mac: self.splitStr(self.form0.router_mac).join(','),
+                    task_type:self.task_type,
+                    upgrade_type:self.form0.upgrade_type,
+                    expires_time:self.form0.expires_time,
+                    firmware_url: self.filetest
+                };
+                console.log(params);
                 self.$axios({
                     method: 'get',
                     headers: {'Content-Type': 'application/json'},
@@ -470,36 +522,6 @@
                     }
                 }
                 return temp;
-            },
-            onRomSubmit:function (formName) {
-//                this.$message.success('提交成功！');
-                var self = this;
-                self.$refs[formName].validate(function (valid) {
-                    if (valid) {
-                        console.log('验证成功')
-                    } else {
-                        return false;
-                        console.log('验证失败');
-                    }
-                });
-                var params = {
-                    devnum: self.form0.devnum,
-                    branch: self.form0.branch,
-                    romversion: self.form0.romversion,
-                    update: self.form0.update,
-                    user_name:self.form0.user_name,
-                    router_mac: self.splitStr(self.form0.router_mac).join(','),
-                    task_type:self.task_type,
-                    upgrade_type:self.form0.upgrade_type,
-                    expires_time:self.form0.expires_time+'h',
-                    firmware_url: self.filetest
-                };
-                console.log(params);
-                return false;
-                self.$axios.get('urlstr', {params}).then(function (res) {
-//                    console.log(res);
-                })
-
             },
             onPluginSubmit: function (formName) {
 

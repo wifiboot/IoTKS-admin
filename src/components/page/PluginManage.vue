@@ -9,59 +9,63 @@
         <div class="handle-box">
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">上传插件</el-button>
         </div>
-        <el-table :data="tableData2" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
-            <el-table-column prop="cjmc" label="插件名称" width="130"></el-table-column>
-            <el-table-column prop="bbh" label="版本号" width="130"></el-table-column>
-            <el-table-column prop="kfz" label="开发者" width="130"></el-table-column>
-            <el-table-column prop="scsj" label="上传时间" width="180"></el-table-column>
-            <!--<el-table-column label="冻结状态" width="120" :filters="[{ text: 'frozen', value: '已冻结' }, { text: 'Not frozen', value: '未冻结' }]" :filter-method="filterTag">-->
-                <!--<template slot-scope="scope">-->
-                    <!--<el-tag :type="scope.row.djzt == 'frozen' ? 'warning' : 'success'" close-transition>{{scope.row.djzt=='frozen'?'已冻结':'未冻结'}}</el-tag>-->
-                <!--</template>-->
-            <!--</el-table-column>-->
+        <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
+            <el-table-column prop="pkg_name" label="插件名称" width="250"></el-table-column>
+            <el-table-column prop="pkg_version" label="版本号" width="150"></el-table-column>
+            <el-table-column prop="pkg_developer" label="开发者" width="110"></el-table-column>
+            <el-table-column prop="pkg_create_time" label="上传时间" width="150"></el-table-column>
+            <el-table-column prop="pkg_info" label="插件说明" width="110"></el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
-                    <el-button class="btn1" size="small" type="success" @click="resetPwd(scope.$index, scope.row)">下载</el-button>
-                    <el-button class="btn1" size="small" type="danger" @click="toRouter(scope.row)">删除</el-button>
+                    <el-button type="text" size="small" @click="downloadPlugin(scope.row.pkg_name,scope.row.pkg_status)">下载</el-button>
+                    <el-button type="text" size="small" @click="delPlugin(scope.row.pkg_name)">删除</el-button>
+                    <el-button type="danger" size="small" v-if="scope.row.pkg_status =='0'" @click="revokePlugin(scope.row.pkg_name)">下架</el-button>
+                    <el-button type="success" size="small" v-else @click="releasePlugin(scope.row.pkg_name)">上架</el-button>
                 </template>
             </el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination
-                    @current-change ="handleCurrentChange"
-                    layout="prev, pager, next"
-                    :total="1000">
+                @current-change ="handleCurrentChange"
+                :current-page="currentPage"
+                layout="prev, pager, next"
+                :total="pageTotal">
             </el-pagination>
         </div>
 
         <el-dialog title="添加插件版本" :visible.sync="dialogFormVisible" class="digcont">
-            <el-form :model="form">
+            <el-form :model="form" :rules="rules" ref="form">
                 <el-form-item label="上传ipk文件" :label-width="formLabelWidth">
                     <el-upload
                         class="upload-demo"
-                        action="https://jsonplaceholder.typicode.com/posts/"
-                        :on-preview="handlePreview"
-                        :file-list="fileList">
+                        ref="upload"
+                        name="file_name"
+                        action="http://api.rom.kunteng.org/pkg/upload"
+                        :data="form"
+                        :beforeUpload="beforeUpload"
+                        :on-change="handleChange"
+                        :on-success="handleSuccess"
+                        :file-list="fileList"
+                        :auto-upload="false">
                         <el-button size="small" type="primary">选择文件</el-button>
-                         <!--<div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>-->
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="插件名称" :label-width="formLabelWidth">
-                    <el-input v-model="form.password" class="diainp" auto-complete="off"></el-input>
+                <el-form-item label="插件名称" prop="pkg_name" :label-width="formLabelWidth">
+                    <el-input v-model="form.pkg_name" class="diainp" :disabled="true"></el-input>
                 </el-form-item>
-                <el-form-item label="版本号" :label-width="formLabelWidth">
-                    <el-input v-model="form.name" class="diainp" auto-complete="off"></el-input>
+                <el-form-item label="版本号" prop="pkg_version" :label-width="formLabelWidth">
+                    <el-input v-model="form.pkg_version" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="开发者" :label-width="formLabelWidth">
-                    <el-input v-model="form.tel" class="diainp" auto-complete="off"></el-input>
+                <el-form-item label="开发者" prop="pkg_developer" :label-width="formLabelWidth">
+                    <el-input v-model="form.pkg_developer" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="插件说明" :label-width="formLabelWidth">
-                    <el-input v-model="form.addr" class="diainp" auto-complete="off"></el-input>
+                <el-form-item label="插件说明" prop="pkg_info" :label-width="formLabelWidth">
+                    <el-input v-model="form.pkg_info" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialogFormVisible = false">添 加</el-button>
+                <el-button type="primary" @click="saveAdd('form')" v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
             </div>
         </el-dialog>
 
@@ -73,202 +77,210 @@
     export default {
         data: function() {
             return {
-                url: './static/vuetable.json',
-                tableData: [],
-                cur_page: 1,
-                multipleSelection: [],
-                select_cate: '',
-                select_word: '',
-                del_list: [],
-                is_search: false,
-
-                radio3:'全部',
-                tableData2:[
-                    {
-                        "cjmc":"apbridge",
-                        "bbh": "0.7.2.2",
-                        "kfz":"王爱明",
-                        "scsj":'2017/11/13 11:41'
-                    },{
-                        "cjmc":"apfree_wifidog",
-                        "bbh": "2.3.0.7.2.2",
-                        "kfz":"张华",
-                        "scsj":'2017/11/13 18:20'
-                    },{
-                        "cjmc":"apbridge",
-                        "bbh": "0.7.2.2",
-                        "kfz":"傅山",
-                        "scsj":'2017/11/13 11:41'
-                    },{
-                        "cjmc":"apbridge",
-                        "bbh": "0.7.2.2",
-                        "kfz":"我爱罗",
-                        "scsj":'2017/11/13 11:41'
-                    },{
-                        "cjmc":"apbridge",
-                        "bbh": "0.7.2.2",
-                        "kfz":"王爱明",
-                        "scsj":'2017/11/13 11:41'
-                    }
-                ],
+                currentPage: 1,
+                pageTotal:0,
                 dialogFormVisible: false,
                 form: {
-                    user:'',
-                    password:'',
-                    name: '',
-                    tel:'',
-                    selectProv: '',
-                    selectCity: '',
-                    addr:'',
-                    region: '',
-                    date1: '',
-                    date2: '',
-                    delivery: false,
-                    type: [],
-                    resource: '',
-                    desc: ''
+                    file_name:'',
+                    pkg_name:'',
+                    pkg_version:'',
+                    pkg_developer:'',
+                    pkg_info:''
+                },
+                rules: {
+                    pkg_name:[
+                        {required: true, message: '请选择插件', trigger: 'blur'}
+                    ],
+                    pkg_version:[
+                        {required: true, message: '请输入插件版本', trigger: 'blur'},
+                    ],
+                    pkg_info:[
+                        {required: true, message: '请输入插件相关信息', trigger: 'blur'},
+                    ]
                 },
                 formLabelWidth: '120px',
 
-                provs:global_.provs,
-                citys: [],
-
                 showDialog:false,
                 radiotoRout:'文件上传',
-                fileList:[{name: '路由器导入模板.xls', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}]
+                fileList:[],
+                fullscreenLoading:false,
+                listData:[],
+                loading:false
             }
         },
         created: function(){
-            this.getData();
-        },
-        computed: {
-//            data: function(){
-//                const self = this;
-//                return self.tableData.filter(function(d){
-//                    let is_del = false;
-//                    for (let i = 0; i < self.del_list.length; i++) {
-//                        if(d.name === self.del_list[i].name){
-//                            is_del = true;
-//                            break;
-//                        }
-//                    }
-//                    if(!is_del){
-//                        if(d.address.indexOf(self.select_cate) > -1 &&
-//                            (d.name.indexOf(self.select_word) > -1 ||
-//                            d.address.indexOf(self.select_word) > -1)
-//                        ){
-//                            return d;
-//                        }
-//                    }
-//                })
-//            }
+            this.getData({});
         },
         methods: {
-            handlePreview:function(file) {
-                console.log(file);
-            },
-            getProv: function(prov){
-                let tempCity=[];
-                this.citys=[];
-                this.selectCity='';
-                let allCity=global_.allCity;
-                for (var val of allCity){
-                    if (prov == val.prov){
-                        console.log(val);
-                        tempCity.push({label: val.label, value: val.label})
-                    }
-                }
-                this.citys = tempCity;
-            },
-            getCity: function (city) {
-                console.log(city);
-                console.log(this.selectCity)
-            },
-            changeTab: function(){
-                console.log(this.radio3);
-                this.$message('选择'+ this.radio3);
-            },
-            changeTab2: function(){
-                console.log(this.radiotoRout);
-//                this.$message('选择'+ this.radiotoRout);
-            },
-            submitUpload:function() {
-                console.log('上传到服务器');
-                this.$refs.upload.submit();
-            },
-            handleRemove:function(file, fileList) {
-                console.log(file, fileList);
-            },
-            handlePreview:function(file) {
-                console.log(file);
-            },
-            toRouter: function(data){
+            getData: function(params){//获取rom列表
                 var self = this;
-                self.showDialog = true;
-                console.log(data);
-            },
-            handleCurrentChange:function(val){
-                this.cur_page = val;
-                this.getData();
-            },
-            getData:function(){
-                let self = this;
-                if(process.env.NODE_ENV === 'development'){
-                    self.url = '/ms/table/list';
-                };
-                self.$axios.post(self.url, {page:self.cur_page}).then(function(res){
-                    self.tableData = res.data.list;
+                self.loading = true;
+                self.$axios.post(global_.baseUrl+'/pkg/list',params).then(function(res){
+                   // console.log(res);
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        if(JSON.stringify(params) == '{}'){
+                            self.pageTotal = res.data.data.length;
+                            self.listData = res.data.data.slice(0,10);
+                        }else{
+                            self.listData = res.data.data;
+                        }
+
+                    }
                 })
             },
-            search:function(){
-                this.is_search = true;
+            handlePreview:function(file) {
+                console.log(file);
             },
-            formatter:function(row, column) {
-                return row.address;
+            beforeUpload: function(file){
+                this.form.pkg_name = file.name;
+                this.form.file_name = file.name;
+                return true;
             },
-            filterTag:function(value, row) {
-                return row.tag === value;
-            },
-            handleEdit:function(index, row) {
-                this.$message('编辑第'+(index+1)+'行');
-            },
-            handleDelete:function(index, row) {
-                this.$message.error('删除第'+(index+1)+'行');
-            },
-            addUsr:function(){
-                const self = this,
-                    length = self.multipleSelection.length;
-                let str = '';
-                self.del_list = self.del_list.concat(self.multipleSelection);
-                for (let i = 0; i < length; i++) {
-                    str += self.multipleSelection[i].name + ' ';
+            handleSuccess: function(response,file,fileList){
+                // console.log(response);
+                this.fullscreenLoading  = false;
+                this.dialogFormVisible = false;
+                if(response.ret_code == 0){
+                    this.$message({message:'创建成功',type:'success'});
+                    this.getData({});
+                }else{
+                    this.$message.error('创建失败');
                 }
-                self.$message.error('删除了'+str);
-                self.multipleSelection = [];
+
             },
-            handleSelectionChange:function(val) {
-                this.multipleSelection = val;
+            handleError: function(response,file,fileList){
+                this.$message('操作失败');
+                this.fullscreenLoading  = false;
+            },
+            handleChange:function(file, fileList) {
+                this.form.pkg_name = file.name;
+            },
+            saveAdd: function(formName){
+                var self = this;
+                self.$refs[formName].validate(function(valid){
+                    if(valid){
+                        // console.log('验证成功')
+                    }else{
+                        return false;
+                        console.log('验证失败');
+                    }
+                });
+                self.fullscreenLoading  = true;
+                self.$refs.upload.submit();
+            },
+            downloadPlugin: function(fileName,status){//下载
+                var self = this;
+                if(status != '0'){
+                    self.$message({message:'插件已下架',type:'warning'});
+                    return false;
+                }
+                var params = {
+                    pkg_name:fileName
+                };
+                self.loading = true;
+                self.$axios.post(global_.baseUrl+'/pkg/download',params).then(function(res){
+                    self.loading = false;
+                    console.log(res);
+                    var blob = new Blob([res.data]);
+                    var reader = new FileReader();
+                    reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表情href
+                    reader.onload = function (e) {
+                        // 转换完成，创建一个a标签用于下载
+                        var a = document.createElement('a');
+                        a.download = fileName;
+                        a.href = e.target.result;
+//                        $("body").append(a);  // 修复firefox中无法触发click
+                        a.click();
+//                        $(a).remove();
+                    }
+
+                    if(res.data.ret_code == 0){
+                        self.$message({message:'下载成功',type:'success'});
+                        self.getData();
+                    }
+
+                },function(err){
+                    self.$message.error('下载失败');
+                    self.loading = false;
+                    console.log(err);
+                })
+            },
+            delPlugin: function(fileName){//删除
+                var self = this;
+                var params = {
+                    pkg_name:fileName
+                };
+                self.loading = true;
+                self.$axios.post(global_.baseUrl+'/pkg/del',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message({message:'删除成功',type:'success'});
+                        self.getData({});
+                    }else{
+                        self.$message.error('删除失败');
+                    }
+
+                },function(err){
+                    self.$message.error('删除失败');
+                    self.loading = false;
+                    // console.log(err);
+                })
+            },
+            releasePlugin: function(fileName){//上架操作
+                var self = this;
+                var params = {
+                    pkg_name:fileName
+                };
+                self.loading = true;
+                self.$axios.post(global_.baseUrl+'/pkg/release',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message({message:'操作成功',type:'success'});
+                        self.getData({});
+                    }
+
+                },function(err){
+                    self.$message.error('操作失败');
+                    self.loading = false;
+                    console.log(err);
+                })
+            },
+            revokePlugin: function(fileName){//下架操作
+                var self = this;
+                var params = {
+                    pkg_name:fileName
+                };
+                self.loading = true;
+                self.$axios.post(global_.baseUrl+'/pkg/revoke',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message({message:'操作成功',type:'success'});
+                        self.getData({});
+                    }else{
+                        self.$message.error('操作失败')
+                    }
+
+                },function(err){
+                    self.$message.error('操作失败');
+                    self.loading = false;
+                    console.log(err);
+                })
+            },
+            handleCurrentChange:function(val){
+                this.currentPage = val;
+                this.getData({page_size:10,current_page:this.currentPage});
             }
         }
     }
 </script>
 
 <style scoped>
-.handle-box{
-    margin-bottom: 20px;
-}
-.handle-select{
-    width: 120px;
-}
-.handle-input{
-    width: 300px;
-    display: inline-block;
-}
-
-    .rad-group{margin-bottom:20px;}
-    .btn1{margin-bottom:5px;margin-top:5px;margin-left:0;}
-    /*.digcont{width:600px;}*/
-    .diainp{width:217px;}
-    .diainp2{width:400px;}
-    .upload-demo{}
+.handle-box{margin-bottom: 20px;}
+.handle-select{width: 120px;}
+.handle-input{width: 300px;display: inline-block;}
+.rad-group{margin-bottom:20px;}
+.diainp{width:217px;}
+.diainp2{width:400px;}
+.upload-demo{}
 </style>

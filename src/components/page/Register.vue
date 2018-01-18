@@ -140,10 +140,10 @@
                             console.log(res);
                             if(res.data.ret_code == 0){
                                 self.$message('注册成功！');
-                                localStorage.setItem('ms_username',self.ruleForm.account);
-                                localStorage.setItem('storgePwd',self.ruleForm.password);
+                                // localStorage.setItem('ms_username',self.ruleForm.account);
+                                // localStorage.setItem('storgePwd',self.ruleForm.password);
 //                        self.$router.push('/readme');
-                                self.$router.push('/basetable');
+                                self.$router.push('/login');
                             }else{
                                 self.$message(res.data.extra);
                             }

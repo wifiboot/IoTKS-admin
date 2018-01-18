@@ -18,31 +18,42 @@
                 <el-radio-button label="已冻结"></el-radio-button>
             </el-radio-group>
         </div>
-        <el-table :data="tableData2" border style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
-            <el-table-column prop="zh" label="账 号" width="150"></el-table-column>
-            <el-table-column prop="qdmc" label="渠道名称" width="150"></el-table-column>
-            <el-table-column prop="lxdh" label="联系电话" width="130"></el-table-column>
-            <el-table-column label="冻结状态" width="120" :filters="[{ text: 'frozen', value: '已冻结' }, { text: 'Not frozen', value: '未冻结' }]" :filter-method="filterTag">
+        <el-table :data="userData" border style="width: 100%" ref="multipleTable" v-loading="loading">
+            <el-table-column prop="user_account" label="账 号" width="150"></el-table-column>
+            <el-table-column prop="user_name" label="渠道名称" width="110"></el-table-column>
+            <el-table-column prop="user_phone" label="联系电话" width="130"></el-table-column>
+            <el-table-column prop="user_status" label="冻结状态" width="120" :filters="[{ text: '已冻结', value: '1' }, { text: '未冻结', value: '0' }]" :filter-method="filterTag">
                 <template slot-scope="scope">
-                    <el-tag :type="scope.row.djzt == 'frozen' ? 'warning' : 'success'" close-transition>{{scope.row.djzt=='frozen'?'已冻结':'未冻结'}}</el-tag>
+                    <el-tag :type="scope.row.user_status == '1' ? 'warning' : 'success'" close-transition>{{scope.row.user_status=='1'?'已冻结':'未冻结'}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column prop="ly" label="路由" width="80"></el-table-column>
-            <el-table-column prop="zxsb" label="在线设备" width="100"></el-table-column>
-            <el-table-column prop="cjsj" label="创建时间" width="150"></el-table-column>
+            <!--<el-table-column prop="ly" label="路由" width="80"></el-table-column>-->
+            <el-table-column label="渠道类型" width="140">
+                <template slot-scope="scope">
+                    <el-tag :type="scope.row.user_type == '0' ? 'danger' : 'info'" close-transition>{{scope.row.user_type == '0'?'超级管理员':'管理员'}}</el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column prop="user_create_time" label="创建时间" width="150"></el-table-column>
+            <el-table-column label="在线设备" width="100">
+                <template slot-scope="scope">
+                    <el-tag type="warning">{{scope.row.user_online_count + '/ ' + scope.row.user_device_count}}</el-tag>
+                </template>
+            </el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
                     <el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.zh)">重置密码</el-button>
-                    <el-button class="btn1" size="small" :type="scope.row.djzt == 'frozen' ? 'warning' : 'danger'" @click="frozen(scope.row.zh)">{{scope.row.djzt=='frozen'?'解除冻结':'冻结账户'}}</el-button>
+                    <el-button class="btn1" size="small" v-if="scope.row.user_status =='0'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>
+                    <el-button class="btn1" size="small" v-else @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>
                     <el-button class="btn1" size="small" type="success" @click="toRouter(scope.row)">导入路由</el-button>
                 </template>
             </el-table-column>
         </el-table>
         <div class="pagination">
             <el-pagination
-                    @current-change ="handleCurrentChange"
-                    layout="prev, pager, next"
-                    :total="1000">
+                @current-change ="handleCurrentChange"
+                :current-page="currentPage"
+                layout="prev, pager, next"
+                :total="pageTotal">
             </el-pagination>
         </div>
 
@@ -235,47 +246,78 @@
                 fileList:[{name: '路由器导入模板.xls', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}],
                 search_word:'',
                 activeName2:'first',
-                textarea_macs:''
+                textarea_macs:'',
+
+                userData:[],
+                loading:false,
+                pageTotal:0,
+                currentPage:1
             }
         },
         created: function(){
-//            this.getData();
-//            this.requestDatalist();
+           this.getUsers({});
         },
         computed: {
-//            data: function(){
-//                const self = this;
-//                return self.tableData.filter(function(d){
-//                    let is_del = false;
-//                    for (let i = 0; i < self.del_list.length; i++) {
-//                        if(d.name === self.del_list[i].name){
-//                            is_del = true;
-//                            break;
-//                        }
-//                    }
-//                    if(!is_del){
-//                        if(d.address.indexOf(self.select_cate) > -1 &&
-//                            (d.name.indexOf(self.select_word) > -1 ||
-//                            d.address.indexOf(self.select_word) > -1)
-//                        ){
-//                            return d;
-//                        }
-//                    }
-//                })
-//            }
+
         },
         methods: {
-            requestDatalist: function(){//获取数据列表
+            getUsers: function(params){//获取渠道列表
                 var self = this;
-                var params = {
-                    wx:'wlife'
-                };
-                self.$axios.get('https://wifi.kunteng.org/cgi-bin/luci/admin/system/getDeviceInfo',{params}).then(function(res){
-                    console.log(res);
+                self.$axios.get(global_.baseUrl+'/admin/all',params).then(function(res){
+                    // console.log(res.data);
+                    if(res.data.ret_code == 0){
+                        if(JSON.stringify(params) == '{}'){
+                            self.pageTotal = res.data.data.length;
+                            self.userData = res.data.data.slice(0,10);
+                        }else{
+                            self.userData = res.data.data;
+                        }
+
+                    }
                 })
             },
-            saveCreate: function(formName){
+            revoke: function(account){//冻结操作
                 var self = this;
+                var params = {
+                    user_account:account
+                };
+                self.loading = true;
+                self.$axios.post(global_.baseUrl+'/admin/revoke',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message({message:'操作成功',type:'success'});
+                        self.getUsers();
+                    }
+
+                },function(err){
+                    self.$message.error('操作失败');
+                    self.loading = false;
+                    console.log(err);
+                })
+
+            },
+            restore: function(account){//解冻操作
+                var self = this;
+                var params = {
+                    user_account:account
+                };
+                self.loading = true;
+                self.$axios.post(global_.baseUrl+'/admin/restore',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.$message({message:'操作成功',type:'success'});
+                        self.getUsers();
+                    }
+
+                },function(err){
+                    self.$message.error('操作失败');
+                    self.loading = false;
+                    console.log(err);
+                })
+
+            },
+            saveCreate: function(formName){
+                let self = this;
                 self.$refs[formName].validate(function(valid){
                     if(valid){
                         console.log('验证成功')
@@ -283,19 +325,25 @@
                         return false;
                         console.log('验证失败');
                     }
+                    let params = {
+                        user_account:self.form.user,
+                        user_password:self.form.password,
+                        user_name:self.form.name,
+                        user_phone:self.form.tel,
+                        user_city:self.form.selectProv+self.form.selectCity+self.form.addr
+                    };
+                    self.$axios.post(global_.baseUrl + '/admin/register',params).then(function(res){
+                        if(res.data.ret_code == 0){
+                            self.$message('注册成功！');
+                            self.dialogFormVisible = false;
+                            self.getUsers({});
+                        }else{
+                            self.$message(res.data.extra);
+                        }
+                    })
+
                 });
-                var params = {
-                    user:self.form.user,
-                    password:self.form.password,
-                    name:self.form.name,
-                    tel:self.form.tel,
-                    addr:self.form.selectProv+self.form.selectCity+self.form.addr
-                }
-                console.log(params);
-                return false;
-                self.$axios.get('urlstr',{params}).then(function(res){
-//                    console.log(res);
-                })
+
             },
             frozen: function(account){
                 var self = this;
@@ -375,17 +423,8 @@
                 console.log(data);
             },
             handleCurrentChange:function(val){
-                this.cur_page = val;
-                this.getData();
-            },
-            getData:function(){
-                let self = this;
-                if(process.env.NODE_ENV === 'development'){
-                    self.url = '/ms/table/list';
-                };
-                self.$axios.post(self.url, {page:self.cur_page}).then(function(res){
-                    self.tableData = res.data.list;
-                })
+                this.currentPage = val;
+                this.getUsers({page_size:10,current_page:this.currentPage});
             },
             search:function(formstr){
                 var self = this;
@@ -401,20 +440,8 @@
                 }
 
             },
-            formatter:function(row, column) {
-                return row.address;
-            },
             filterTag:function(value, row) {
-                return row.tag === value;
-            },
-            handleEdit:function(index, row) {
-                this.$message('编辑第'+(index+1)+'行');
-            },
-            handleDelete:function(index, row) {
-                this.$message.error('删除第'+(index+1)+'行');
-            },
-            handleSelectionChange:function(val) {
-                this.multipleSelection = val;
+                return row.user_status == value;
             }
         }
     }

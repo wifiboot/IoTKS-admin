@@ -25,8 +25,9 @@
         <div class="pagination">
             <el-pagination
                 @current-change ="handleCurrentChange"
+                :current-page="currentPage"
                 layout="prev, pager, next"
-                :total="1000">
+                :total="pageTotal">
             </el-pagination>
         </div>
 
@@ -131,49 +132,34 @@
                 },
                 listData:[],
                 formLabelWidth: '120px',
-                loading:false
+                loading:false,
+                pageTotal:0,
+                currentPage:1
             }
         },
         created: function(){
-            this.getData();
-        },
-        computed: {
-//            data: function(){
-//                const self = this;
-//                return self.tableData.filter(function(d){
-//                    let is_del = false;
-//                    for (let i = 0; i < self.del_list.length; i++) {
-//                        if(d.name === self.del_list[i].name){
-//                            is_del = true;
-//                            break;
-//                        }
-//                    }
-//                    if(!is_del){
-//                        if(d.address.indexOf(self.select_cate) > -1 &&
-//                            (d.name.indexOf(self.select_word) > -1 ||
-//                            d.address.indexOf(self.select_word) > -1)
-//                        ){
-//                            return d;
-//                        }
-//                    }
-//                })
-//            }
+            this.getData({});
         },
         methods: {
-            getData:function(){
+            getData:function(params){
                 var self = this;
                 self.loading = true;
-                var params = {
+                // var params = {
 //                    page_size:10,
 //                    current_page:1,
 //                    sort:'asc'
-                };
-                self.$axios.post(global_.baseUrl+'/devtype/list').then(function(res){
+//                 };
+                self.$axios.post(global_.baseUrl+'/devtype/list',params).then(function(res){
 //                    console.log(res);
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.listData = res.data.extra;
-//                        console.log(self.listData);
+                        if(JSON.stringify(params) == '{}'){
+                            self.pageTotal = res.data.extra.length;
+                            self.listData = res.data.extra.slice(0,10);
+                        }else{
+                            self.listData = res.data.extra;
+                        }
+
                     }
                 })
             },
@@ -230,8 +216,8 @@
                 })
             },
             handleCurrentChange:function(val){
-                this.cur_page = val;
-                this.getData();
+                this.currentPage = val;
+                this.getData({page_size:10,current_page:this.currentPage});
             },
         }
     }

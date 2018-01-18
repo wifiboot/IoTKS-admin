@@ -42,8 +42,9 @@
         <div class="pagination">
             <el-pagination
                 @current-change ="handleCurrentChange"
+                :current-page="currentPage"
                 layout="prev, pager, next"
-                :total="1000">
+                :total="pageTotal">
             </el-pagination>
         </div>
 
@@ -57,6 +58,7 @@
                         action="http://api.rom.kunteng.org/rom/upload"
                         :data="form"
                         :beforeUpload="beforeUpload"
+                        :on-change="handleChange"
                         :on-success="handleSuccess"
                         :file-list="fileList3"
                         :auto-upload="false">
@@ -83,7 +85,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="MD5串码" prop="md5_value" :label-width="formLabelWidth">
-                    <el-input v-model="form.md5_value" class="diainp" auto-complete="off"></el-input>
+                    <el-input v-model="form.md5_value" class="diainp" :disabled="true" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="备注说明" prop="comment" :label-width="formLabelWidth">
                     <el-input v-model="form.comment" class="diainp" auto-complete="off"></el-input>
@@ -91,7 +93,7 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveAdd('form')"v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
+                <el-button type="primary" @click="saveAdd('form')" v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
             </div>
         </el-dialog>
 
@@ -100,6 +102,7 @@
 
 <script>
     import global_ from 'components/common/Global';
+    import md5 from 'js-md5';
     export default {
         data: function(){
             return {
@@ -169,9 +172,6 @@
                     ],
                     ver_type:[
                         {required: true, message: '请输入版本类型', trigger: 'blur'}
-                    ],
-                    md5_value:[
-                        {required: true, message: '请输入MD5串码', trigger: 'blur'}
                     ]
                 },
                 formLabelWidth: '120px',
@@ -179,12 +179,14 @@
                 loading:false,
                 fullscreenLoading: false,
                 listData:[],
-                typeListData:[]
+                typeListData:[],
+                pageTotal:0,
+                currentPage:1
 
             }
         },
         created: function(){
-            this.getData();
+            this.getData({});
             this.getTypes();
         },
         methods: {
@@ -196,43 +198,59 @@
                     }
                 })
             },
-            getData: function(){//获取rom列表
+            getData: function(params){//获取rom列表
                 var self = this;
                 self.loading = true;
-                var params = {
+                // var params = {
 //                    page_size:10,
 //                    current_page:1,
 //                    sort:'asc'
-                };
-                self.$axios.post(global_.baseUrl+'/rom/list').then(function(res){
+//                 };
+                self.$axios.post(global_.baseUrl+'/rom/list',params).then(function(res){
 //                    console.log(res);
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.listData = res.data.extra;
+                        if(JSON.stringify(params) == '{}'){
+                            self.pageTotal = res.data.extra.length;
+                            self.listData = res.data.extra.slice(0,10);
+                        }else{
+                            self.listData = res.data.extra;
+                        }
+
                     }
                 })
             },
+            handleCurrentChange:function(val){
+                this.currentPage = val;
+                this.getData({page_size:10,current_page:this.currentPage});
+            },
             beforeUpload: function(file){
-                console.log(file);
+                // console.log(file);
                 this.form.file_name = file.name;
+                this.form.md5_value = md5(file.name);
                 return true;
             },
             handleSuccess: function(response,file,fileList){
                 console.log(response);
+                if(response.ret_code == 0){
+                    this.$message({message:'创建成功',type:'success'});
+                }else{
+                    this.$message.error('创建失败');
+                }
                 this.fullscreenLoading  = false;
-                this.$message('创建成功');
+
                 this.dialogFormVisible = false;
                 this.getData();
             },
             handleError: function(response,file,fileList){
-                this.$message('操作失败');
-                self.fullscreenLoading  = false;
+                this.$message.error('操作失败');
+                this.fullscreenLoading  = false;
             },
             saveAdd: function(formName){
                 var self = this;
                 self.$refs[formName].validate(function(valid){
                     if(valid){
-                        console.log('验证成功')
+                        // console.log('验证成功')
                     }else{
                         return false;
                         console.log('验证失败');
@@ -244,7 +262,7 @@
             downloadRom: function(id,fileName,status){//下载
                 var self = this;
                 if(status == 'revoke'){
-                    self.$message('固件已下架');
+                    self.$message({message:'固件已下架',type:'warning'});
                     return false;
                 }
                 var params = {
@@ -269,12 +287,12 @@
                     }
 
                     if(res.data.ret_code == 0){
-                        self.$message('删除成功');
+                        self.$message({message:'删除成功',type:'success'});
                         self.getData();
                     }
 
                 },function(err){
-                    self.$message('删除失败');
+                    self.$message.error('删除失败');
                     self.loading = false;
                     console.log(err);
                 })
@@ -289,12 +307,12 @@
                 self.$axios.post(global_.baseUrl+'/rom/del',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.$message('删除成功');
+                        self.$message({message:'删除成功',type:'success'});
                         self.getData();
                     }
 
                 },function(err){
-                    self.$message('删除失败');
+                    self.$message.error('删除失败');
                     self.loading = false;
                     console.log(err);
                 })
@@ -309,12 +327,12 @@
                 self.$axios.post(global_.baseUrl+'/rom/release',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.$message('操作成功');
+                        self.$message({message:'操作成功',type:'success'});
                         self.getData();
                     }
 
                 },function(err){
-                    self.$message('操作失败');
+                    self.$message.error('操作失败');
                     self.loading = false;
                     console.log(err);
                 })
@@ -329,12 +347,12 @@
                 self.$axios.post(global_.baseUrl+'/rom/revoke',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.$message('操作成功');
+                        self.$message({message:'操作成功',type:'success'});
                         self.getData();
                     }
 
                 },function(err){
-                    self.$message('操作失败');
+                    self.$message.error('操作失败');
                     self.loading = false;
                     console.log(err);
                 })
@@ -342,13 +360,10 @@
             handleChange:function(file, fileList) {
 //                console.log(file,fileList);
                 this.form.file_name = file.name;
-            },
-            handleCurrentChange:function(val){
-                this.cur_page = val;
-                this.getData();
+                this.form.md5_value = md5(file.name);
             },
             filterTag:function(value, row) {
-                return row.tag === value;
+                return row.ver_type === value;
             },
             changePage:function(values) {
                 this.information.pagination.per_page = values.perpage;
@@ -361,7 +376,7 @@
     }
 </script>
 
-<style src="../../../static/css/datasource.css"></style>
+<!--<style src="../../../static/css/datasource.css"></style>-->
 <style>
     .rad-group{margin-bottom:20px;}
     .handle-input{  width: 300px;  display: inline-block;  }

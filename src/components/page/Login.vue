@@ -12,9 +12,9 @@
                 <div class="login-btn">
                     <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
                 </div>
-                <div class="login-btn">
-                    <el-button type="text" @click="register">用户注册</el-button>
-                </div>
+                <!--<div class="login-btn">-->
+                    <!--<el-button type="text" @click="register">用户注册</el-button>-->
+                <!--</div>-->
                 <!--<p style="font-size:12px;line-height:30px;color:#999;">Tips : 用户名和密码随便填。</p>-->
             </el-form>
         </div>
@@ -54,57 +54,25 @@
         },
         methods: {
             getData: function(){
-                var self = this;
-                console.log(global_.timeStamp('417865'));
-//                self.$axios({
-//                    method:'get',
-////                    header: { "content-type": "application/json" },
-//                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-//                    url:'https://wifi.kunteng.org/cgi-bin/luci/admin/system/getDeviceInfo?wx=wlife' ,
-//                    data:{wx:'wlife'}
-//                }).then(function(response) {
-////                        response.data.pipe(fs.createWriteStream('ada_lovelace.jpg'))
-//                        console.log(response);
-//                    },function(err){
-////                        console.log(err);
-//                });
-                var params = {
-                    wx:'wlife'
-                };
-//                self.$axios.get('https://wifi.kunteng.org/cgi-bin/luci/admin/system/getDeviceInfo',{params}).then(function(res){
-//                    console.log(res);
-//                })
-
-
+                let self = this;
             },
             submitForm:function(formName) {
                 const self = this;
                 self.$refs[formName].validate(function(valid){
                     if (valid) {
-                        var params = {
+                        let params = {
                             user_account: self.ruleForm.username,
                             user_password: self.ruleForm.password
                         };
-
-                        /*self.$axios({
-                            method:'post',
-                            headers: {'Content-Type': 'application/json'},
-                            url:global_.baseUrl + '/admin/login',
-                            data:params
-                        }).then(function(response) {
-                            console.log(response);
-                        },function(err){
-                            console.log(err);
-                        });*/
                         self.$axios.post(global_.baseUrl + '/admin/login',params).then(function(res){
                             console.log(res);
                             if(res.data.ret_code == 0){
-                                self.$message('登录成功！');
+                                self.$message({message:'登录成功！',type:'success'});
                                 localStorage.setItem('ms_username',self.ruleForm.username);
-                                localStorage.setItem('storgePwd',self.ruleForm.password);
+                                // localStorage.setItem('storgePwd',self.ruleForm.password);
                                 self.$router.push('/basetable');
                             }else{
-                                self.$message(res.data.ret_msg);
+                                self.$message(res.data.extra);
                             }
 
                         },function(err){
@@ -119,7 +87,7 @@
                 });
             },
             register: function(){
-                var self = this;
+                let self = this;
                 self.$router.push('/register');
             }
         }

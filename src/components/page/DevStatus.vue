@@ -13,13 +13,14 @@
                 <el-radio-button label="offline">离线</el-radio-button>
             </el-radio-group>
             <div class="handle-box2">
-                <el-input v-model="select_word" placeholder="请输入设备MAC" class="handle-input mr10"></el-input>
+                <el-input v-model="search_word" placeholder="请输入设备MAC" class="handle-input mr10"></el-input>
                 <el-button type="primary" icon="search" @click="search">搜索</el-button>
             </div>
         </div>
 
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column label="状态" width="100":filters="[{ text: 'online', value: '在线' }, { text: 'offline', value: '离线' }]" :filter-method="filterTag">
+            <el-table-column prop="update_time" label="更新时间" width="180"></el-table-column>
+            <el-table-column prop="status" label="状态" width="100":filters="[{ text: '在线', value: 'online' }, { text: '离线', value: 'offline' }]" :filter-method="filterTag">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.status == 'offline' ? 'warning' : 'success'" close-transition>{{scope.row.status == 'online'?'在线':(scope.row.status == 'inactive'?'未激活':'离线')}}</el-tag>
                 </template>
@@ -27,20 +28,14 @@
             <el-table-column prop="mac" label="路由Mac" width="180"></el-table-column>
             <el-table-column prop="dev_type" label="设备型号" width="150"></el-table-column>
             <el-table-column prop="rom_verion" label="固件版本" width="150"></el-table-column>
-            <el-table-column label="51盒子状态" width="150">
+            <el-table-column prop="box51_status" label="51盒子状态" width="120">
                 <template slot-scope="scope">
-                    <el-tag type="warning" class="orange">{{scope.row.hzzt}}</el-tag>
+                    <el-tag type="warning" class="orange">{{scope.row.box51_status == 'default'?'未知':'离线'}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column prop="dyjzt" label="打印机状态" width="120">
+            <el-table-column prop="printer_status" label="打印机状态">
                 <template slot-scope="scope">
-                    <el-tag :type="scope.row.dyjzt == 'online'?'success': (scope.row.dyjzt == 'offline'?'danger':'warning')">{{scope.row.dyjzt == 'online'?'在线': (scope.row.dyjzt == 'offline'?'离线':'未知')}}</el-tag>
-                </template>
-            </el-table-column>
-            <!--<el-table-column prop="gl" label="操作"></el-table-column>-->
-            <el-table-column label="详情">
-                <template slot-scope="scope">
-                    <el-button class="btn1" type="info" size="small" @click="handleEdit(scope.$index, scope.row)">详情</el-button>
+                    <el-tag :type="scope.row.printer_status == 'default'?'warning': 'success'">{{scope.row.printer_status == 'default'?'未知': '离线'}}</el-tag>
                 </template>
             </el-table-column>
         </el-table>
@@ -62,40 +57,6 @@
         data: function(){
             const self = this;
             return {
-                url: './static/datasource.json',
-                information: {
-                    pagination:{},
-                    data:[]
-                },
-                columns: [
-                    {
-                        name: 'Id',
-                        key: 'id',
-                    },
-                    {
-                        name: 'Name',
-                        key: 'name',
-                    },
-                    {
-                        name: 'email',
-                        key: 'email',
-                    },
-                    {
-                        name: 'ip',
-                        key: 'ip',
-                    }
-                ],
-                actions: [
-                    {
-                        text: 'Click',
-                        class: 'btn-primary',
-                        event: function(e, row) {
-                            self.$message('选中的行数： ' + row.row.id)
-                        }
-                    }
-                ],
-                query:'',
-
                 radio3:'all',
                 tableData2:[
                     {
@@ -127,7 +88,7 @@
                     }
 
                 ],
-                select_word:'',
+                search_word:'',
 
                 loading:false,
                 pageTotal:0,
@@ -149,7 +110,6 @@
                 //    sort:'asc'
                 // };
                 self.$axios.post(global_.baseUrl+'/device/list'+url ,params).then(function(res){
-                   // console.log(res);
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         if(JSON.stringify(params) == '{}'){
@@ -182,39 +142,39 @@
                 this.getData({page_size:10,current_page:this.currentPage},url);
             },
             search: function(){
+                var self = this;
+                var reg_name = /^[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}$/;
+                var reg_name2 = /^[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}$/;
+                if(self.search_word == ''){
+                    self.$message({message:'输入不能为空',type:'warning'});
+                    return false;
+                }
+                if(!reg_name.test(self.search_word) && !reg_name2.test(self.search_word)){
+                    self.$message({message:'设备MAC输入有误',type:'warning'});
+                    return false;
+                }
+                self.loading = true;
+                var params = {
+                    filter:{"mac":self.search_word}
+                };
+                self.$axios.post(global_.baseUrl+'/device/list',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.pageTotal = res.data.extra.length;
+                        self.listData = res.data.extra.slice(0,10);
+                    }
+                })
 
             },
             filterTag:function(value, row) {
-                return row.zt === value;
-            },
-            test: function(event){
-                console.log(event);
-            },
-            arraySpanMethod: function(row, column, rowIndex, columnIndex){
-                if (rowIndex % 2 === 0) {
-                    if (columnIndex === 0) {
-                        return [1, 2];
-                    } else if (columnIndex === 1) {
-                        return [0, 0];
-                    }
-                }
-            },
-            changePage:function(values) {
-                this.information.pagination.per_page = values.perpage;
-                this.information.data = this.information.data;
-            },
-            onSearch:function(searchQuery) {
-                this.query = searchQuery;
+                return row.status == value;
             }
         }
     }
 </script>
-
-<style src="../../../static/css/datasource.css"></style>
 <style>
     .rad-group{margin-bottom:20px;}
     .handle-input{  width: 300px;  display: inline-block;  }
     .handle-box2{display:inline-block;float:right;}
-    /*.el-table_1_column_5{color:#eb9e05;}*/
-    .orange{color:#eb9e05;background-color:none;}
+    .orange{color:#eb9e05;background:none;}
 </style>
