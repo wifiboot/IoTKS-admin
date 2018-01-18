@@ -106,37 +106,15 @@
                         ]
                     },
                     {
-                        icon: 'el-icon-date',
-                        index: '8',
-                        title: '表单',
+                        icon: 'el-icon-star-off',
+                        index: '9',
+                        title: '辅助工具',
                         subs: [
                             {
-                                index: 'baseform',
-                                title: '基本表单'
-                            },
-                            {
-                                index: 'vueeditor',
-                                title: '编辑器'
-                            },
-                            {
-                                index: 'markdown',
-                                title: 'markdown'
-                            },
-                            {
-                                index: 'upload',
-                                title: '文件上传'
+                                index: 'sysinfo',
+                                title: '路由SYSINFO查询'
                             }
                         ]
-                    },
-                    {
-                        icon: 'el-icon-star-on',
-                        index: 'basecharts',
-                        title: '图表'
-                    },
-                    {
-                        icon: 'el-icon-upload2',
-                        index: 'drag',
-                        title: '拖拽'
                     }
                 ]
             }
