@@ -63,15 +63,6 @@
                             route_mac:self.form0.route_mac
                         };
                         self.$axios.defaults.withCredentials = true;
-                        // self.$axios({
-                        //     method:"POST",
-                        //     url:global_.baseUrl+'/manage/sysinfo',
-                        //     data:params,
-                        //     header:{'Access-Control-Allow-Origin':global_.baseUrl}
-                        // }).then(function(res){
-                        //     console.log(res)
-                        // });
-                        // return false;
                         self.$axios.post(global_.baseUrl+'/manage/sysinfo',params,{withCredentials:true}).then(function(res){
                             // console.log(res);
                             self.fullscreenLoading  = false;
