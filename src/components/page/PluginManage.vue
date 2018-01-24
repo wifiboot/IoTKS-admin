@@ -41,6 +41,7 @@
                         ref="upload"
                         name="file_name"
                         action="http://api.rom.kunteng.org/pkg/upload"
+                        with-credentials="true"
                         :data="form"
                         :beforeUpload="beforeUpload"
                         :on-change="handleChange"
@@ -50,8 +51,8 @@
                         <el-button size="small" type="primary">选择文件</el-button>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="插件名称" prop="pkg_name" :label-width="formLabelWidth">
-                    <el-input v-model="form.pkg_name" class="diainp" :disabled="true"></el-input>
+                <el-form-item label="插件名称" prop="pkg_str_name" :label-width="formLabelWidth">
+                    <el-input v-model="form.pkg_str_name" class="diainp" :disabled="true"></el-input>
                 </el-form-item>
                 <el-form-item label="版本号" prop="pkg_version" :label-width="formLabelWidth">
                     <el-input v-model="form.pkg_version" class="diainp" auto-complete="off"></el-input>
@@ -65,7 +66,7 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveAdd('form')" v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
+                <el-button type="primary" @click="saveAdd('form')">添 加</el-button>
             </div>
         </el-dialog>
 
@@ -81,14 +82,14 @@
                 pageTotal:0,
                 dialogFormVisible: false,
                 form: {
-                    file_name:'',
                     pkg_name:'',
+                    pkg_str_name:'',
                     pkg_version:'',
                     pkg_developer:'',
                     pkg_info:''
                 },
                 rules: {
-                    pkg_name:[
+                    pkg_str_name:[
                         {required: true, message: '请选择插件', trigger: 'blur'}
                     ],
                     pkg_version:[
@@ -133,8 +134,6 @@
                 console.log(file);
             },
             beforeUpload: function(file){
-                this.form.pkg_name = file.name;
-                this.form.file_name = file.name;
                 return true;
             },
             handleSuccess: function(response,file,fileList){
@@ -145,7 +144,7 @@
                     this.$message({message:'创建成功',type:'success'});
                     this.getData({});
                 }else{
-                    this.$message.error('创建失败');
+                    this.$message.error(response.extra);
                 }
 
             },
@@ -154,7 +153,27 @@
                 this.fullscreenLoading  = false;
             },
             handleChange:function(file, fileList) {
-                this.form.pkg_name = file.name;
+                var self = this;
+                self.form.pkg_name = file.name;
+                //解析文件名称
+                var strName = file.name;
+                var arrName = strName.split('_');
+                if(strName.indexOf('_')>0 && arrName.length >= 3){
+                    if(/[0-9]/.test(arrName[1])){//通用插件名称如：base-files_157-r47727_ramips_24kec.ipk
+                        self.form.pkg_str_name = arrName[0];
+                        self.form.pkg_version = arrName[1]
+                    }else if(/[0-9]/.test(arrName[2])){
+                        self.form.pkg_str_name = arrName[0] + '_' + arrName[1];
+                        self.form.pkg_version = arrName[2]
+                    }else{
+                        self.$message({message:'文件名称不符合标准',type:'warning'});
+                        return false
+                    }
+
+                }else{
+                    self.$message({message:'文件名称不符合标准',type:'warning'});
+                    return false
+                }
             },
             saveAdd: function(formName){
                 var self = this;

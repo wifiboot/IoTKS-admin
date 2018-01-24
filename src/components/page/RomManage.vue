@@ -56,6 +56,7 @@
                         ref="upload"
                         name="file_name"
                         action="http://api.rom.kunteng.org/rom/upload"
+                        with-credentials="true"
                         :data="form"
                         :beforeUpload="beforeUpload"
                         :on-change="handleChange"
@@ -93,7 +94,8 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveAdd('form')" v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>
+                <!--<el-button type="primary" @click="saveAdd('form')" v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>-->
+                <el-button type="primary" @click="saveAdd('form')">添 加</el-button>
             </div>
         </el-dialog>
 
@@ -103,6 +105,8 @@
 <script>
     import global_ from 'components/common/Global';
     import md5 from 'js-md5';
+    var fs = require('fs');
+    var crypto = require('crypto');
     export default {
         data: function(){
             return {
@@ -227,7 +231,7 @@
             beforeUpload: function(file){
                 // console.log(file);
                 this.form.file_name = file.name;
-                this.form.md5_value = md5(file.name);
+                // this.form.md5_value = md5(file.name);
                 return true;
             },
             handleSuccess: function(response,file,fileList){
@@ -357,10 +361,24 @@
                     console.log(err);
                 })
             },
-            handleChange:function(file, fileList) {
-//                console.log(file,fileList);
+            handleChange:function(file) {
+               // console.log(file.name);
+               var self = this;
                 this.form.file_name = file.name;
-                this.form.md5_value = md5(file.name);
+                this.form.rom_version = file.name.split('-')[2] || '';
+
+                var reader=new FileReader();
+                reader.onload=function(f){
+                    var md5sum = crypto.createHash('md5');
+                    //md5sum.update(String.fromCharCode.apply(null, this.result));
+                    md5sum.update(this.result, 'binary');
+                    //console.log('dd:', this.result);
+                    var str = md5sum.digest('hex');
+                    self.form.md5_value = str;
+                }
+                //reader.readAsBinaryString(fileList[0]);
+                reader.readAsBinaryString(file.raw);
+
             },
             filterTag:function(value, row) {
                 return row.ver_type === value;
@@ -376,22 +394,14 @@
     }
 </script>
 
-<!--<style src="../../../static/css/datasource.css"></style>-->
 <style>
     .rad-group{margin-bottom:20px;}
     .handle-input{  width: 300px;  display: inline-block;  }
     .handle-box2{display:inline-block;float:right;}
-    /*.el-table_1_column_5{color:#eb9e05;}*/
     .orange{color:#eb9e05;background-color:none;}
     .btn2{margin-bottom:5px;margin-left:0;}
     .diainp{width:217px;}
     .diainp2{width:400px;}
-    .upload-demo .el-upload {
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-    }
-    .upload-demo .el-upload:hover {
-        border-color: #409EFF;
-    }
+    .upload-demo .el-upload {cursor: pointer;position: relative;overflow: hidden;}
+    .upload-demo .el-upload:hover {border-color: #409EFF;}
 </style>

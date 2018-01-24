@@ -62,8 +62,8 @@
                         var params = {
                             route_mac:self.form0.route_mac
                         };
-                        self.$axios.defaults.withCredentials = true;
-                        self.$axios.post(global_.baseUrl+'/manage/sysinfo',params,{withCredentials:true}).then(function(res){
+                        // self.$axios.defaults.withCredentials = true;
+                        self.$axios.post(global_.baseUrl+'/manage/sysinfo',params).then(function(res){
                             // console.log(res);
                             self.fullscreenLoading  = false;
                             self.loading = false;

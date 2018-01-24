@@ -41,6 +41,7 @@
                         ref="upload"
                         name="file_name"
                         action="http://api.rom.kunteng.org/script/upload"
+                        with-credentials="true"
                         :data="form"
                         :beforeUpload="beforeUpload"
                         :on-change="handleChange"

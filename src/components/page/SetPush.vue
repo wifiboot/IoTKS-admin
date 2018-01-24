@@ -17,12 +17,8 @@
                             </el-form-item>
                             <el-form-item label="选择设备型号" prop="dev_type">
                                 <el-select v-model="form0.dev_type" placeholder="请选择" @change="changeDev">
-                                    <el-option
-                                        v-for="item in typeListData"
-                                        :key="item"
-                                        :label="item"
-                                        :value="item">
-                                    </el-option>
+                                    <el-option v-for="item in typeListData" :key="item" :label="item" :value="item"></el-option>
+                                    <!--<el-option v-for="item in ListData" :key="item.dev_type" :label="item.dev_type" :value="item.dev_type"></el-option>-->
                                 </el-select>
                             </el-form-item>
                             <el-form-item label="选择ROM版本" prop="dest_version">
@@ -36,32 +32,30 @@
                                 </el-select>
                             </el-form-item>
                             <el-form-item label="所选文件">
-                                <!--<a>{{filetest}}</a>-->
-                                <el-input v-model="filetest" class="diainp" :disabled="true"></el-input>
+                                <el-input v-model="form0.firmware_file" class="diainp2" :disabled="true"></el-input>
                             </el-form-item>
-                            <el-form-item label="升级方式" prop="upgrade_type">
-                                <el-radio-group v-model="form0.upgrade_type">
+                            <el-form-item label="升级方式" prop="upgrade_mode">
+                                <el-radio-group v-model="form0.upgrade_mode">
                                     <el-radio label="1">实时自动升级</el-radio>
                                     <el-radio label="2">用户自动升级</el-radio>
                                     <el-radio label="3">定时自动升级(整点时刻)</el-radio>
                                 </el-radio-group>
                             </el-form-item>
-                            <el-form-item label="配置更新" prop="update">
-                                <el-radio-group v-model="form0.update">
-                                    <el-radio label="1">保留用户原有配置</el-radio>
-                                    <el-radio label="2">更改用户原有配置(慎选)</el-radio>
+                            <el-form-item label="配置更新" prop="reflash">
+                                <el-radio-group v-model="form0.reflash">
+                                    <el-radio label="0">保留用户原有配置</el-radio>
+                                    <el-radio label="1">更改用户原有配置(慎选)</el-radio>
                                 </el-radio-group>
                             </el-form-item>
-                            <el-form-item label="超时时间" prop="expires_time">
-                                <el-input v-model="form0.expires_time" class="inp100"></el-input>
+                            <el-form-item label="超时时间" prop="expired_time">
+                                <el-input v-model="form0.expired_time" class="inp100"></el-input>
                                 <a>&nbsp;小时</a>
                             </el-form-item>
-                            <el-form-item label="操作人" prop="user_name">
-                                <el-input v-model="form0.user_name" class="diainp"></el-input>
+                            <el-form-item label="操作人" prop="operator_name">
+                                <el-input v-model="form0.operator_name" class="diainp"></el-input>
                             </el-form-item>
                             <el-form-item>
-                                <el-button type="primary" @click="onRomSubmit('form0')">执行</el-button>
-                                <!--<el-button>取消</el-button>-->
+                                <el-button type="primary" @click="onRomSubmit('form0')" v-loading.fullscreen.lock="fullscreenLoading">执行</el-button>
                             </el-form-item>
                         </el-form>
                     </div>
@@ -165,7 +159,7 @@
 
 <script>
     import global_ from 'components/common/Global';
-    import md5 from 'js-md5';
+    var crypto = require('crypto');
     export default {
         data: function () {
             return {
@@ -173,13 +167,15 @@
                     router_mac: '',
                     dev_type: '',
                     dest_version: '',
-                    upgrade_type: '1',
-                    update:'1',
-                    user_name: '',
-                    expires_time:''
-
+                    firmware_file:'',
+                    firmware_md5:'',
+                    upgrade_mode: '1',
+                    reflash:'0',
+                    operator_name: '',
+                    expired_time:''
                 },
                 typeListData:[],
+                ListData:[],
                 romListData:[],
                 rules0: {
                     router_mac: [
@@ -192,16 +188,16 @@
                     dest_version: [
                         {required: true, message: '请选择ROM版本', trigger: 'change'}
                     ],
-                    upgrade_type: [
+                    upgrade_mode: [
                         {required: true, message: '请选择升级方式', trigger: 'change'}
                     ],
-                    update:[
+                    reflash:[
                         { required: true, message: '请选择配置更新', trigger: 'change'}
                     ],
-                    expires_time: [
+                    expired_time: [
                         {required: true, message: '请输入超时时间', trigger: 'blur'}
                     ],
-                    user_name: [
+                    operator_name: [
                         {required: true, message: '请输入操作人', trigger: 'blur'}
                     ]
 
@@ -398,48 +394,63 @@
                     }
                 ],
                 romtest:[],
-                filetest:''
+                filetest:'',
+                fullscreenLoading: false,
             }
         },
         created:function () {
             this.getTypes();
             this.getRomList();
-//            this.getSysinfo()
-//             console.log(md5(''));
         },
         methods: {
             onRomSubmit:function (formName) {
-//                this.$message.success('提交成功！');
                 var self = this;
                 self.$refs[formName].validate(function (valid) {
                     if (valid) {
-                        console.log('验证成功')
+                        var params = {
+                            route_mac:self.form0.router_mac,
+                            operator_name:self.form0.operator_name,
+                            dev_type:self.form0.dev_type,
+                            dest_version:self.form0.dest_version,
+                            firmware_file:self.form0.firmware_file,
+                            firmware_md5:self.form0.firmware_md5,
+                            upgrade_mode:self.form0.upgrade_mode,
+                            reflash:self.form0.reflash,
+                            expired_time:self.form0.expired_time
+                        };
+                        self.fullscreenLoading = true;
+                        self.$axios.post(global_.baseUrl + '/task/add/sysupgrade',params).then(function (res) {
+                            // console.log(res.data);
+                            self.fullscreenLoading = false;
+                            if(res.data.ret_code == '1001'){
+                                self.$message({message:res.data.extra,type:'warning'});
+                                setTimeout(function(){
+                                    self.$router.replace('login');
+                                },2000)
+                            }
+                            if(res.data.ret_code == 0){
+                                self.$message({message:'推送成功',type:'success'});
+                            }else{
+                                self.$message.error('推送失败')
+                            }
+                        })
+
                     } else {
                         return false;
                         console.log('验证失败');
                     }
                 });
-                var params = {
-                    devnum: self.form0.devnum,
-                    romversion: self.form0.romversion,
-                    update: self.form0.update,
-                    router_mac: self.splitStr(self.form0.router_mac).join(','),
-                    user_name:localStorage.getItem('ms_username'),
-                    dev_type:self.dev_type,
-                    upgrade_type:self.form0.upgrade_type,
-                    expires_time:self.form0.expires_time,
-                    firmware_url: self.filetest
-                };
-                console.log(params);
-                return false;
-                self.$axios.post(global_.baseUrl + '/task/add/sysupgrade', {params}).then(function (res) {
-//                    console.log(res);
-                })
 
             },
             getTypes: function(){//获取设备型号
                 var self = this;
                 self.$axios.post(global_.baseUrl+'/devtype/types').then(function(res){
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.typeListData = res.data.extra;
                     }
@@ -448,8 +459,14 @@
             getRomList: function(){//获取rom版本
                 var self = this;
                 self.$axios.post(global_.baseUrl+'/rom/list').then(function(res){
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
-                        self.romListData = res.data.extra;
+                        self.ListData = res.data.extra;
                     }
                 })
             },
@@ -460,16 +477,20 @@
                     router_mac: self.splitStr(self.form0.router_mac).join(','),
                     task_type:self.task_type,
                     upgrade_type:self.form0.upgrade_type,
-                    expires_time:self.form0.expires_time,
+                    expired_time:self.form0.expired_time,
                     firmware_url: self.filetest
                 };
-                console.log(params);
                 self.$axios({
                     method: 'get',
                     headers: {'Content-Type': 'application/json'},
                     url: global_.baseUrl + '/device/sysinfo'
-//                            data:{wx:'wlife'}
                 }).then(function (response) {
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     console.log(response);
                 }, function (err) {
                     console.log(err);
@@ -477,22 +498,38 @@
             },
             changeDev: function(){
                 var self = this;
-                var curdevnum = self.form0.devnum;
-                var list = self.datatest[0].models;
+
+                self.form0.dest_version = '';
+                self.form0.firmware_file = '';
+                self.form0.firmware_md5 = '';
+
+                var curdevnum = self.form0.dev_type;
+                var resultArr = [];
+                var list = self.ListData;
                 for(var i=0;i<list.length;i++){
-                    if(list[i].name == curdevnum){
-                        self.romtest = list[i].roms || [];
-                        self.form0.romversion = list[i].roms[0].name + ' ' + list[i].roms[0].oem || '';
-                        self.filetest = list[i].roms[0].file || '';
+                    if(list[i].dev_type == curdevnum){
+                        resultArr.push(list[i])
                     }
                 }
+                self.romListData = resultArr;
+                if(resultArr.length){
+                    self.form0.dest_version = resultArr[0].rom_version || '';
+                    self.form0.firmware_file = resultArr[0].file_name || '';
+                    self.form0.firmware_md5 = resultArr[0].md5_value || '';
+                }
+
             },
             changeRom: function(){
                 var self = this;
-
-                var curromv = self.form0.romversion;
-                console.log(curromv);
-
+                var curromv = self.form0.dest_version;
+                var resultArr = [];
+                var list = self.ListData;
+                for(var i=0;i<list.length;i++){
+                    if(list[i].dev_type == self.form0.dev_type && list[i].rom_version == curromv){
+                        self.form0.firmware_file = list[i].file_name;
+                        self.form0.firmware_md5 = list[i].md5_value
+                    }
+                }
 
             },
             handleClick:function () {
@@ -532,15 +569,10 @@
     }
 </script>
 <style>
-    .mb40 {
-        margin-bottom: 40px;
-    }
-
-    .tab-cont {
-        padding: 40px; /*border-top:1px solid #dfe6ec;*/
-    }
+    .mb40 {margin-bottom: 40px;}
+    .tab-cont {padding: 40px; /*border-top:1px solid #dfe6ec;*/}
     .diainp{width:217px;}
+    .diainp2{width:450px;}
     .inp100{width:100px;}
-
     /*.textarea-mac{height:160px;}*/
 </style>

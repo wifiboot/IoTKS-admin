@@ -9,7 +9,7 @@
         <div class="handle-box">
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">新建用户</el-button>
             <el-input v-model="search_word" placeholder="请输入渠道名称或账号查找" class="handle-input mr10"></el-input>
-            <el-button type="primary" icon="search" @click="search('searchForm')">查询</el-button>
+            <el-button type="primary" icon="search" @click="search">查询</el-button>
         </div>
         <div class='rad-group'>
             <el-radio-group v-model="radio3" @change="changeTab">
@@ -18,7 +18,7 @@
                 <el-radio-button label="已冻结"></el-radio-button>
             </el-radio-group>
         </div>
-        <el-table :data="userData" border style="width: 100%" ref="multipleTable" v-loading="loading">
+        <el-table :data="userData" border style="width: 100%" ref="multipleTable" :empty-text="emptyMsg" v-loading="loading">
             <el-table-column prop="user_account" label="账 号" width="150"></el-table-column>
             <el-table-column prop="user_name" label="渠道名称" width="110"></el-table-column>
             <el-table-column prop="user_phone" label="联系电话" width="130"></el-table-column>
@@ -27,7 +27,6 @@
                     <el-tag :type="scope.row.user_status == '1' ? 'warning' : 'success'" close-transition>{{scope.row.user_status=='1'?'已冻结':'未冻结'}}</el-tag>
                 </template>
             </el-table-column>
-            <!--<el-table-column prop="ly" label="路由" width="80"></el-table-column>-->
             <el-table-column label="渠道类型" width="140">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.user_type == '0' ? 'danger' : 'info'" close-transition>{{scope.row.user_type == '0'?'超级管理员':'管理员'}}</el-tag>
@@ -39,12 +38,12 @@
                     <el-tag type="warning">{{scope.row.user_online_count + '/ ' + scope.row.user_device_count}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column label="操作">
+            <el-table-column label="操作" width="260">
                 <template slot-scope="scope">
-                    <el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.zh)">重置密码</el-button>
+                    <el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.user_account)">修改密码</el-button>
+                    <el-button class="btn1" size="small" type="text" @click="toRouter(scope.row)">导入路由</el-button>
                     <el-button class="btn1" size="small" v-if="scope.row.user_status =='0'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>
                     <el-button class="btn1" size="small" v-else @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>
-                    <el-button class="btn1" size="small" type="success" @click="toRouter(scope.row)">导入路由</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -56,7 +55,23 @@
                 :total="pageTotal">
             </el-pagination>
         </div>
-
+        <el-dialog title="修改密码" :visible.sync="showDialogPwd" class="digcont">
+            <el-form :model="formP" ref="formP" :rules="rulesP">
+                <el-form-item label="密码" prop="user_password" :label-width="formLabelWidth">
+                    <el-input v-model="formP.user_password" type="password" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="新密码" prop="user_new_password" :label-width="formLabelWidth">
+                    <el-input v-model="formP.user_new_password" type="password" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="确认密码" prop="user_validate_password" :label-width="formLabelWidth">
+                    <el-input v-model="formP.user_validate_password" type="password" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="showDialogPwd = false">取 消</el-button>
+                <el-button type="primary" @click="savePwdChange('formP')" v-loading.fullscreen.lock="fullscreenLoading">确 定</el-button>
+            </div>
+        </el-dialog>
         <el-dialog title="新建子渠道" :visible.sync="dialogFormVisible" class="digcont">
             <el-form :model="form" :rules="rules" ref="form">
                 <el-form-item label="账号" prop="user" :label-width="formLabelWidth">
@@ -158,51 +173,7 @@
     export default {
         data: function() {
             return {
-                url: './static/vuetable.json',
-                tableData: [],
-                cur_page: 1,
-                multipleSelection: [],
-                select_cate: '',
-                select_word: '',
-                del_list: [],
-//                is_search: false,
-
                 radio3:'全部',
-                tableData2:[
-                    {
-                        "zh":"test@163.com",
-                        "qdmc": "D4EE073B9180",
-                        "lxdh":"13547895762",
-                        "djzt":'frozen',
-                        "ly":"1/1",
-                        "zxsb":7,
-                        "cjsj":"2017/11/13 11:41"
-                    },{
-                        "zh":"reytg@163.com",
-                        "qdmc": "D4EE073B9180",
-                        "lxdh":"13547895654",
-                        "djzt":'Not frozen',
-                        "ly":"6/1",
-                        "zxsb":8,
-                        "cjsj":"2017/11/13 11:41"
-                    },{
-                        "zh":"test@163.com",
-                        "qdmc": "D4EE073B9180",
-                        "lxdh":"13547895762",
-                        "djzt":'frozen',
-                        "ly":"1/1",
-                        "zxsb":7,
-                        "cjsj":"2017/11/13 11:41"
-                    },{
-                        "zh":"gdgd@163.com",
-                        "qdmc": "D4EE073B5432",
-                        "lxdh":"13547895762",
-                        "djzt":'Not frozen',
-                        "ly":"1/1",
-                        "zxsb":0,
-                        "cjsj":"2017/11/13 11:41"
-                    }
-                ],
                 dialogFormVisible: false,
                 form: {
                     user:'',
@@ -237,10 +208,8 @@
                     ]
                 },
                 formLabelWidth: '120px',
-
                 provs:global_.provs,
                 citys: [],
-
                 showDialog:false,
                 radiotoRout:'文件上传',
                 fileList:[{name: '路由器导入模板.xls', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}],
@@ -251,7 +220,29 @@
                 userData:[],
                 loading:false,
                 pageTotal:0,
-                currentPage:1
+                currentPage:1,
+                emptyMsg:'暂无数据',
+                formP:{
+                    user_account:localStorage.getItem('ms_username'),
+                    user_password:'',
+                    user_new_password:'',
+                    user_validate_password:''
+                },
+                rulesP: {
+                    user_password:[
+                        {required: true, message: '请输入密码', trigger: 'blur'}
+                    ],
+                    user_new_password:[
+                        {required: true, message: '请输入新密码', trigger: 'blur'}
+                    ],
+                    user_validate_password:[
+                        {required: true, message: '请输入确认密码', trigger: 'blur'},
+                        {validator:this.validateRepwd,trigger:'blur'}
+                    ]
+                },
+                showDialogPwd: false,
+                curAccount:'',
+                fullscreenLoading: false,
             }
         },
         created: function(){
@@ -265,6 +256,15 @@
                 var self = this;
                 self.$axios.get(global_.baseUrl+'/admin/all',params).then(function(res){
                     // console.log(res.data);
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == '1003'){
+                        self.emptyMsg = res.data.extra;
+                    }
                     if(res.data.ret_code == 0){
                         if(JSON.stringify(params) == '{}'){
                             self.pageTotal = res.data.data.length;
@@ -272,7 +272,6 @@
                         }else{
                             self.userData = res.data.data;
                         }
-
                     }
                 })
             },
@@ -284,8 +283,17 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/admin/revoke',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 1){
+                        self.$message({message:res.data.extra,type:'warning'});
+                    }
                     if(res.data.ret_code == 0){
-                        self.$message({message:'操作成功',type:'success'});
+                        self.$message({message:res.data.extra,type:'success'});
                         self.getUsers();
                     }
 
@@ -304,8 +312,14 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/admin/restore',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
-                        self.$message({message:'操作成功',type:'success'});
+                        self.$message({message:res.data.extra,type:'success'});
                         self.getUsers();
                     }
 
@@ -333,6 +347,12 @@
                         user_city:self.form.selectProv+self.form.selectCity+self.form.addr
                     };
                     self.$axios.post(global_.baseUrl + '/admin/register',params).then(function(res){
+                        if(res.data.ret_code == '1001'){
+                            self.$message({message:res.data.extra,type:'warning'});
+                            setTimeout(function(){
+                                self.$router.replace('login');
+                            },2000)
+                        }
                         if(res.data.ret_code == 0){
                             self.$message('注册成功！');
                             self.dialogFormVisible = false;
@@ -345,21 +365,89 @@
                 });
 
             },
-            frozen: function(account){
+            search: function(){
                 var self = this;
-                self.$confirm('确认执行该操作？')
-                    .then(function(){
-                        console.log('确认');
-                    })
-                    .catch();
+                if(self.search_word == ''){
+                    self.$message({message:'输入不能为空',type:'warning'});
+                    return false;
+                }
+                self.loading = true;
+                var params = {
+                    user:self.search_word
+                };
+                self.$axios.post(global_.baseUrl+'/admin/query',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == '1003'){
+                        self.emptyMsg = res.data.extra;
+                    }
+                    if(res.data.ret_code == 0){
+                        if(JSON.stringify(params) == '{}'){
+                            self.pageTotal = res.data.data.length;
+                            self.userData = res.data.data.slice(0,10);
+                        }else{
+                            self.userData = res.data.data;
+                        }
+                    }
+                    if(res.data.ret_code == 0){
+                        self.pageTotal = res.data.extra.length;
+                        self.listData = res.data.extra.slice(0,10);
+                    }
+                })
+
             },
             resetPwd: function(account){
                 var self = this;
-                self.$confirm('确认重置该账号？')
-                    .then(function(){
-                        console.log('确认重置');
-                    })
-                    .catch();
+                self.showDialogPwd = true;
+                self.curAccount = account;
+            },
+            savePwdChange: function(formName){
+                var self = this;
+                self.$refs[formName].validate(function(valid){
+                    if(valid){
+                        var params = {
+                            user_account: self.curAccount,
+                            user_password:self.formP.user_password,
+                            user_new_password: self.formP.user_new_password
+                        };
+                        self.fullscreenLoading  = true;
+                        self.$axios.post(global_.baseUrl+'/admin/change',params).then(function(res){
+                            self.fullscreenLoading  = false;
+                            if(res.data.ret_code == '1001'){
+                                self.$message({message:res.data.extra,type:'warning'});
+                                setTimeout(function(){
+                                    self.$router.replace('login');
+                                },2000)
+                            }
+                            if(res.data.ret_code == 0){
+                                self.showDialogPwd = false;
+                                self.$message({message:res.data.extra,type:'success'})
+                            }else{
+                                self.$message.error(res.data.extra);
+                            }
+                        },function(err){
+                            self.fullscreenLoading  = false;
+                            self.$message.error(err);
+                        })
+                    }else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                })
+
+
+            },
+            validateRepwd: function(rule,value,callback){
+                if(value !== this.formP.user_new_password){
+                    callback(new Error('两次输入密码不一致'));
+                }else{
+                    callback();
+                }
             },
             validateUser: function(rule,value,callback){
                 if(value === ''){
@@ -426,20 +514,6 @@
                 this.currentPage = val;
                 this.getUsers({page_size:10,current_page:this.currentPage});
             },
-            search:function(formstr){
-                var self = this;
-                if(self.search_word == ''){
-                    self.$message({
-                        message: '输入不能为空',
-                        type: 'warning'
-                    });
-                    return false;
-                }
-                var params = {
-                    search_word:self.search_word
-                }
-
-            },
             filterTag:function(value, row) {
                 return row.user_status == value;
             }
@@ -451,9 +525,8 @@
     .handle-box{  margin-bottom: 20px;  }
     .handle-select{  width: 120px;  }
     .handle-input{  width: 300px;  display: inline-block;  }
-
     .rad-group{margin-bottom:20px;}
-    .btn1{margin-bottom:5px;margin-top:5px;margin-left:0;}
+    .btn1{margin-bottom:5px;margin-top:5px;/*margin-left:0;*/}
     /*.digcont{width:600px;}*/
     .diainp{width:217px;}
     .diainp2{width:400px;}

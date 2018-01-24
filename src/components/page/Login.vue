@@ -65,7 +65,7 @@
                             user_password: self.ruleForm.password
                         };
                         self.$axios.post(global_.baseUrl + '/admin/login',params).then(function(res){
-                            console.log(res);
+                            // console.log(res);
                             if(res.data.ret_code == 0){
                                 self.$message({message:'登录成功！',type:'success'});
                                 localStorage.setItem('ms_username',self.ruleForm.username);
