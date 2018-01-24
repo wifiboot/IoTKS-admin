@@ -1,5 +1,7 @@
 <script>
     var uniUrl = 'https://wifi.kunteng.org';
+    var baseUrl = 'http://api.rom.kunteng.org:8090';	
+    	
     //时间转换
     function timeStamp( second_time ){
         var time = parseInt(second_time) + "秒";
@@ -22,6 +24,7 @@
     }
     export default {
         uniUrl,
+	baseUrl,
         timeStamp
     }
 </script>
