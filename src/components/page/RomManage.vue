@@ -104,8 +104,6 @@
 
 <script>
     import global_ from 'components/common/Global';
-    import md5 from 'js-md5';
-    var fs = require('fs');
     var crypto = require('crypto');
     export default {
         data: function(){
