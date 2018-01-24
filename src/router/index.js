@@ -30,6 +30,14 @@ export default new Router({
                         component: resolve => require(['../components/page/PushResult.vue'], resolve)     // vue-datasource组件
                 },
                 {
+                    path: '/pushresultdetail',
+                        component: resolve => require(['../components/page/PushResultDetail.vue'], resolve)     // vue-datasource组件
+                },
+                {
+                    path: '/updateromstatus',
+                        component: resolve => require(['../components/page/UpdateRomStatus.vue'], resolve)     // vue-datasource组件
+                },
+                {
                     path: '/devstatus',
                         component: resolve => require(['../components/page/DevStatus.vue'], resolve)     // vue-datasource组件
                 },
@@ -50,38 +58,22 @@ export default new Router({
                         component: resolve => require(['../components/page/ModelManage.vue'], resolve)     // vue-datasource组件
                 },
                 {
-                    path: '/vuetable',
-                    component: resolve => require(['../components/page/VueTable.vue'], resolve)     // vue-datasource组件
-                },
-                {
-                    path: '/baseform',
-                    component: resolve => require(['../components/page/BaseForm.vue'], resolve)
-                },
-                {
-                    path: '/vueeditor',
-                    component: resolve => require(['../components/page/VueEditor.vue'], resolve)    // Vue-Quill-Editor组件
-                },
-                {
-                    path: '/markdown',
-                    component: resolve => require(['../components/page/Markdown.vue'], resolve)     // Vue-Quill-Editor组件
-                },
-                {
-                    path: '/upload',
-                    component: resolve => require(['../components/page/Upload.vue'], resolve)       // Vue-Core-Image-Upload组件
-                },
-                {
                     path: '/basecharts',
                     component: resolve => require(['../components/page/BaseCharts.vue'], resolve)   // vue-schart组件
                 },
                 {
-                    path: '/drag',
-                    component: resolve => require(['../components/page/DragList.vue'], resolve)    // 拖拽列表组件
+                    path: '/sysinfo',
+                    component: resolve => require(['../components/page/Sysinfo.vue'], resolve)   // vue-schart组件
                 }
             ]
         },
         {
             path: '/login',
             component: resolve => require(['../components/page/Login.vue'], resolve)
+        },
+        {
+            path: '/register',
+                component: resolve => require(['../components/page/Register.vue'], resolve)
         },
     ]
 })
