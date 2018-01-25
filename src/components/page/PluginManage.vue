@@ -40,7 +40,7 @@
                         class="upload-demo"
                         ref="upload"
                         name="file_name"
-                        action="http://api.rom.kunteng.org/pkg/upload"
+                        :action="uploadUrl"
                         with-credentials="true"
                         :data="form"
                         :beforeUpload="beforeUpload"
@@ -78,6 +78,7 @@
     export default {
         data: function() {
             return {
+                uploadUrl:global_.baseUrl+'/pkg/upload',
                 currentPage: 1,
                 pageTotal:0,
                 dialogFormVisible: false,

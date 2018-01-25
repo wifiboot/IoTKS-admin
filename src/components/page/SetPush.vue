@@ -34,7 +34,7 @@
                                 <el-input v-model="form0.firmware_file" class="diainp2" :disabled="true"></el-input>
                             </el-form-item>
                             <el-form-item label="升级方式" prop="upgrade_mode">
-                                <el-radio-group v-model="form0.upgrade_mode">
+                                <el-radio-group v-model="form0.upgrade_mode" @change="changeUpgrade">
                                     <el-radio label="1">实时自动升级</el-radio>
                                     <el-radio label="2">用户自动升级</el-radio>
                                     <el-radio label="3">定时自动升级(整点时刻)</el-radio>
@@ -47,7 +47,7 @@
                                 </el-radio-group>
                             </el-form-item>
                             <el-form-item label="超时时间" prop="expired_time">
-                                <el-input v-model="form0.expired_time" class="inp100"></el-input>
+                                <el-input v-model="form0.expired_time" :disabled="form0.isTime" class="inp100"></el-input>
                                 <a>&nbsp;小时</a>
                             </el-form-item>
                             <el-form-item label="操作人" prop="operator_name">
@@ -78,7 +78,7 @@
                                 </el-select>
                             </el-form-item>
                             <el-form-item label="选择插件的版本" prop="pkg_version">
-                                <el-select v-model="form1.pkg_version" placeholder="请选择" @change="changePluginVersion">
+                                <el-select v-model="form1.pkg_version" placeholder="请选择">
                                     <el-option
                                         v-for="item in pVerlist"
                                         :key="item.pkg_version"
@@ -166,7 +166,8 @@
                     upgrade_mode: '1',
                     reflash:'0',
                     operator_name: '',
-                    expired_time:''
+                    expired_time:'0',
+                    isTime: true
                 },
                 typeListData:[],
                 ListData:[],
@@ -528,6 +529,15 @@
                 }
 
             },
+            changeUpgrade: function(value){
+                if(value == '1'){
+                    this.form0.expired_time = '0';
+                    this.form0.isTime =  true;
+                }else{
+                    this.form0.expired_time = '';
+                    this.form0.isTime =  false;
+                }
+            },
             handleClick:function (tab,event) {
                 var self = this;
                 // console.log(tab,event);
@@ -599,6 +609,12 @@
             getPkgData: function(){//获取插件列表
                 var self = this;
                 self.$axios.post(global_.baseUrl+'/pkg/list').then(function(res){
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.pluginListData = res.data.data;
                     }

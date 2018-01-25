@@ -55,7 +55,7 @@
                         class="upload-demo"
                         ref="upload"
                         name="file_name"
-                        action="http://api.rom.kunteng.org/rom/upload"
+                        :action="uploadUrl"
                         with-credentials="true"
                         :data="form"
                         :beforeUpload="beforeUpload"
@@ -108,55 +108,9 @@
     export default {
         data: function(){
             return {
-                url: './static/datasource.json',
-                information: {
-                    pagination:{},
-                    data:[]
-                },
-
+                uploadUrl:global_.baseUrl+'/rom/upload',
                 dialogFormVisible:false,
                 radio3:'全部',
-                tableData2:[
-                    {
-                        "cjsj":"2017-11-17 14:05:58",
-                        "bbh":"2.11.2514",
-                        "oem":"LD",
-                        "bblx":"test",
-                        "sbxh":"zc9525a",
-                        "xpxh":"MT7628AN",
-                        "gxsm":"企业智能中枢测试"
-                    },
-                    {
-                        "cjsj":"2017-11-17 14:05:58",
-                        "bbh":"2.11.2514",
-                        "oem":"LD",
-                        "bblx":"official",
-                        "sbxh":"zc9525a",
-                        "xpxh":"MT7628AN+MT7610E",
-                        "gxsm":"LD"
-                    },
-                    {
-                        "cjsj":"2017-11-17 14:05:58",
-                        "bbh":"2.11.2514",
-                        "oem":"ZC",
-                        "bblx":"official",
-                        "sbxh":"zc9525a",
-                        "xpxh":"MT7628AN",
-                        "gxsm":"航信打印版本"
-                    },
-                    {
-                        "cjsj":"2017-11-17 14:05:58",
-                        "bbh":"2.11.2514",
-                        "oem":"LD",
-                        "bblx":"test",
-                        "sbxh":"zc9525a",
-                        "xpxh":"MT7628AN",
-                        "gxsm":"企业智能中枢测试"
-                    }
-
-
-                ],
-
                 form: {
                     file_name:'',
                     rom_version:'',

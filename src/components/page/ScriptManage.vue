@@ -10,8 +10,8 @@
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">上传脚本</el-button>
         </div>
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column prop="script_name" label="脚本名称" width="250"></el-table-column>
-            <el-table-column prop="script_version" label="版本号" width="150"></el-table-column>
+            <el-table-column prop="script_name" label="脚本名称" width="380"></el-table-column>
+            <!--<el-table-column prop="script_version" label="版本号" width="150"></el-table-column>-->
             <el-table-column prop="script_developer" label="开发者" width="110"></el-table-column>
             <el-table-column prop="script_create_time" label="上传时间" width="150"></el-table-column>
             <el-table-column prop="script_info" label="脚本说明" width="110"></el-table-column>
@@ -40,7 +40,7 @@
                         class="upload-demo"
                         ref="upload"
                         name="file_name"
-                        action="http://api.rom.kunteng.org/script/upload"
+                        :action="uploadUrl"
                         with-credentials="true"
                         :data="form"
                         :beforeUpload="beforeUpload"
@@ -54,8 +54,8 @@
                 <el-form-item label="脚本名称" :label-width="formLabelWidth">
                     <el-input v-model="form.script_name" class="diainp" :disabled="true" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="版本号" :label-width="formLabelWidth">
-                    <el-input v-model="form.script_version" class="diainp" auto-complete="off"></el-input>
+                <el-form-item label="MD5串码" prop="script_md5" :label-width="formLabelWidth">
+                    <el-input v-model="form.script_md5" class="diainp" :disabled="true" auto-complete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="开发者" :label-width="formLabelWidth">
                     <el-input v-model="form.script_developer" class="diainp" auto-complete="off"></el-input>
@@ -75,46 +75,20 @@
 
 <script>
     import global_ from 'components/common/Global';
+    var crypto = require('crypto');
     export default {
         data: function() {
             return {
+                uploadUrl:global_.baseUrl+'/script/upload',
                 currentPage: 1,
                 pageTotal:0,
-                tableData2:[
-                    {
-                        "cjmc":"apbridge",
-                        "bbh": "0.7.2.2",
-                        "kfz":"王爱明",
-                        "scsj":'2017/11/13 11:41'
-                    },{
-                        "cjmc":"apfree_wifidog",
-                        "bbh": "2.3.0.7.2.2",
-                        "kfz":"张华",
-                        "scsj":'2017/11/13 18:20'
-                    },{
-                        "cjmc":"apbridge",
-                        "bbh": "0.7.2.2",
-                        "kfz":"傅山",
-                        "scsj":'2017/11/13 11:41'
-                    },{
-                        "cjmc":"apbridge",
-                        "bbh": "0.7.2.2",
-                        "kfz":"我爱罗",
-                        "scsj":'2017/11/13 11:41'
-                    },{
-                        "cjmc":"apbridge",
-                        "bbh": "0.7.2.2",
-                        "kfz":"王爱明",
-                        "scsj":'2017/11/13 11:41'
-                    }
-                ],
                 dialogFormVisible: false,
                 form: {
                     file_name:'',
                     script_name:'',
-                    script_version:'',
                     script_developer:'',
-                    script_info:''
+                    script_info:'',
+                    script_md5:''
                 },
                 rules: {
                     script_name:[
@@ -144,7 +118,12 @@
                 var self = this;
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/script/list',params).then(function(res){
-                    // console.log(res);
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         if(JSON.stringify(params) == '{}'){
@@ -161,8 +140,8 @@
                 console.log(file);
             },
             beforeUpload: function(file){
-                this.form.script_name = file.name;
-                this.form.file_name = file.name;
+                // this.form.script_name = file.name;
+                // this.form.file_name = file.name;
                 return true;
             },
             handleSuccess: function(response,file,fileList){
@@ -182,7 +161,20 @@
                 this.fullscreenLoading  = false;
             },
             handleChange:function(file, fileList) {
+                var self = this;
+                console.log(file);
                 this.form.script_name = file.name;
+                var reader=new FileReader();
+                reader.onload=function(f){
+                    var md5sum = crypto.createHash('md5');
+                    //md5sum.update(String.fromCharCode.apply(null, this.result));
+                    md5sum.update(this.result, 'binary');
+                    //console.log('dd:', this.result);
+                    var str = md5sum.digest('hex');
+                    self.form.script_md5 = str;
+                }
+                //reader.readAsBinaryString(fileList[0]);
+                reader.readAsBinaryString(file.raw);
             },
             saveAdd: function(formName){
                 var self = this;
@@ -209,7 +201,6 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/script/download',params).then(function(res){
                     self.loading = false;
-                    console.log(res);
                     var blob = new Blob([res.data]);
                     var reader = new FileReader();
                     reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表情href
