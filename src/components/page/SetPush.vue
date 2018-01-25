@@ -9,7 +9,6 @@
         <div class='rad-group mb40'>
             <el-tabs v-model="task_type" type="card" @tab-click="handleClick">
                 <el-tab-pane label="升级ROM" name="1">
-
                     <div class="form-box tab-cont">
                         <el-form :model="form0" :rules="rules0" ref="form0" label-width="150px">
                             <el-form-item label="输入指定MAC" prop="router_mac">
@@ -59,42 +58,37 @@
                             </el-form-item>
                         </el-form>
                     </div>
-
                 </el-tab-pane>
                 <el-tab-pane label="安装插件" name="2">
 
                     <div class="form-box tab-cont">
                         <el-form :model="form1" :rules="rules1" ref="form1" label-width="150px">
-                            <el-form-item label="输入指定MAC" prop="mac">
-                                <el-input class="textarea-mac" type="textarea" v-model="form1.mac"
+                            <el-form-item label="输入指定MAC" prop="route_mac">
+                                <el-input class="textarea-mac" type="textarea" v-model="form1.route_mac"
                                           placeholder="以换行符分割，最多输入100条mac"></el-input>
                             </el-form-item>
-                            <el-form-item label="选择要安装的插件" prop="plugin">
-                                <!--<el-select v-model="form1.plug" placeholder="请选择">-->
-                                <!--<el-option key="apbridge" label="apbridge" value="bbk"></el-option>-->
-                                <!--<el-option key="apfree_wifidog" label="apfree_wifidog" value="xtc"></el-option>-->
-                                <!--</el-select>-->
-                                <el-select v-model="form1.plugin" placeholder="请选择">
+                            <el-form-item label="选择要安装的插件" prop="pkg_str_name">
+                                <el-select v-model="form1.pkg_str_name" placeholder="请选择" @change="changePlugin">
                                     <el-option
-                                        v-for="item in pluginList"
-                                        :key="item.value"
-                                        :label="item.label"
-                                        :value="item.value">
+                                        v-for="item in pluginListData"
+                                        :key="item.pkg_str_name"
+                                        :label="item.pkg_str_name"
+                                        :value="item.pkg_str_name">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item label="选择插件的版本" prop="plug">
-                                <el-select v-model="form1.plug" placeholder="请选择">
-                                    <el-option key="apbridge" label="0.7.22" value="bbk"></el-option>
-                                    <el-option key="apfree_wifidog" label="apfree_wifidog" value="xtc"></el-option>
-                                    <el-option key="apmodectl" label="apmodectl" value="imoo"></el-option>
-                                    <el-option key="apmodectl_wd" label="apmodectl_wd" value="imoo"></el-option>
-                                    <el-option key="cloudPlugin" label="cloudPlugin" value="imoo"></el-option>
-                                    <el-option key="frpc" label="frpc" value="imoo"></el-option>
+                            <el-form-item label="选择插件的版本" prop="pkg_version">
+                                <el-select v-model="form1.pkg_version" placeholder="请选择" @change="changePluginVersion">
+                                    <el-option
+                                        v-for="item in pVerlist"
+                                        :key="item.pkg_version"
+                                        :label="item.pkg_verion"
+                                        :value="item.pkg_version">
+                                    </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item label="操作人" prop="name">
-                                <el-input v-model="form1.name" class="diainp"></el-input>
+                            <el-form-item label="操作人" prop="logo">
+                                <el-input v-model="form1.logo" class="diainp"></el-input>
                             </el-form-item>
                             <el-form-item>
                                 <el-button type="primary" @click="onPluginSubmit('form1')">安装</el-button>
@@ -202,24 +196,28 @@
                     ]
 
                 },
+
                 form1: {
-                    mac: '',
-                    plugin: '',
-                    plug: '',
-                    name: ''
+                    route_mac: '',
+                    pkg_str_name: '',
+                    pkg_version: '',
+                    logo: ''
                 },
+                pluginListData:[],
+                pVerlist:[],
                 rules1: {
-                    mac: [
+                    route_mac: [
                         {required: true, message: '请输入MAC', trigger: 'blur'},
                         {validator: this.validateMac, trigger: 'blur'}
                     ],
-                    plugin: [
+                    pkg_str_name: [
                         {required: true, message: '请选择要安装的插件', trigger: 'change'}
                     ],
-                    plug: [
+                    pkg_version: [
                         {required: true, message: '请选择插件的版本', trigger: 'change'}
                     ]
                 },
+
                 form2: {
                     mac: '',
                     plug: '',
@@ -431,7 +429,7 @@
                             if(res.data.ret_code == 0){
                                 self.$message({message:'推送成功',type:'success'});
                             }else{
-                                self.$message.error('推送失败')
+                                self.$message.error(res.data.extra);
                             }
                         })
 
@@ -498,11 +496,9 @@
             },
             changeDev: function(){
                 var self = this;
-
                 self.form0.dest_version = '';
                 self.form0.firmware_file = '';
                 self.form0.firmware_md5 = '';
-
                 var curdevnum = self.form0.dev_type;
                 var resultArr = [];
                 var list = self.ListData;
@@ -532,8 +528,12 @@
                 }
 
             },
-            handleClick:function () {
-
+            handleClick:function (tab,event) {
+                var self = this;
+                // console.log(tab,event);
+                if(tab.name == '2'){
+                    self.getPkgData({});
+                }
             },
             validateMac: function (rule, value, callback) {
                 var self = this;
@@ -561,10 +561,64 @@
                 return temp;
             },
             onPluginSubmit: function (formName) {
+                var self = this;
+                self.$refs[formName].validate(function (valid) {
+                    if (valid) {
+                        var params = {
+                            route_mac:self.form1.route_mac,
+                            pkg_str_name: self.form1.pkg_str_name,
+                            pkg_version:self.form1.pkg_version,
+                            logo:self.form1.logo
+                        };
+                        self.fullscreenLoading = true;
+                        self.$axios.post(global_.baseUrl + '/manage/apps',params).then(function (res) {
+                            self.fullscreenLoading = false;
+                            if(res.data.ret_code == '1001'){
+                                self.$message({message:res.data.extra,type:'warning'});
+                                setTimeout(function(){
+                                    self.$router.replace('login');
+                                },2000)
+                            }
+                            if(res.data.ret_code == 0){
+                                self.$message({message:res.data.extra,type:'success'});
+                            }else{
+                                self.$message.error(res.data.extra)
+                            }
+                        })
+
+                    } else {
+                        return false;
+                        console.log('验证失败');
+                    }
+                });
 
             },
             onJavaSubmit: function () {
-            }
+
+            },
+            getPkgData: function(){//获取插件列表
+                var self = this;
+                self.$axios.post(global_.baseUrl+'/pkg/list').then(function(res){
+                    if(res.data.ret_code == 0){
+                        self.pluginListData = res.data.data;
+                    }
+                })
+            },
+            changePlugin: function(){
+                var self = this;
+                var curplugin = self.form1.pkg_str_name;
+                var resultArr = [];
+                var list = self.pluginListData;
+                for(var i=0;i<list.length;i++){
+                    if(list[i].pkg_str_name == self.form1.pkg_str_name){
+                        resultArr.push(list[i]);
+                    }
+                }
+                self.pVerlist = resultArr;
+                if(resultArr.length){
+                    self.form1.pkg_version = resultArr[0].pkg_version || '';
+                }
+            },
         }
     }
 </script>
