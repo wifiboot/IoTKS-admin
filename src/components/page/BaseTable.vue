@@ -38,10 +38,10 @@
                     <el-tag type="warning">{{scope.row.user_online_count + '/ ' + scope.row.user_device_count}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column label="操作" width="260">
+            <el-table-column label="操作" width="240" fixed="right">
                 <template slot-scope="scope">
                     <el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.user_account)">修改密码</el-button>
-                    <el-button class="btn1" size="small" type="text" @click="toRouter(scope.row)">导入路由</el-button>
+                    <el-button class="btn1" size="small" type="text" @click="toRouter(scope.row.user_id)">导入路由</el-button>
                     <el-button class="btn1" size="small" v-if="scope.row.user_status =='0'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>
                     <el-button class="btn1" size="small" v-else @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>
                 </template>
@@ -121,9 +121,9 @@
             </div>
         </el-dialog>
 
-        <el-dialog title="导入路由" :visible.sync="showDialog" class="digcont">
+        <el-dialog title="导入路由" :visible.sync="showRouterDialog" class="digcont">
             <el-tabs v-model="activeName2" type="card" @tab-click="handleClick">
-                <el-tab-pane label="文件上传" name="first">
+                <el-tab-pane label="文件上传" name="1">
                     <div class="mb30">
                         路由导入模板.xls
                         <a href="http://cloud.kunteng.org/yunac/static/tmp/routers.xls" target="_blank">
@@ -149,17 +149,21 @@
                         <el-button type="primary" @click="showDialog = false">保 存</el-button>
                     </div>
                 </el-tab-pane>
-                <el-tab-pane label="手动导入" name="second">
+                <el-tab-pane label="手动导入" name="2">
                     <div style="margin-bottom:16px;">*批量添加功能MAC之间以换行分割，每行一个MAC；MAC格式为12位字母或数字组合，不区分大小写:</div>
-                    <el-input
-                        type="textarea"
-                        :rows="5"
-                        placeholder="请输入内容"
-                        v-model="textarea_macs">
-                    </el-input>
+                    <el-form :model="formRouter2" ref="formRouter2" :rules="rulesRouter2">
+                        <el-form-item prop="route_mac">
+                            <el-input
+                                type="textarea"
+                                :rows="5"
+                                placeholder="请输入内容"
+                                v-model="formRouter2.route_mac">
+                            </el-input>
+                        </el-form-item>
+                    </el-form>
                     <div class="mt30">
-                        <el-button @click="showDialog = false">取 消</el-button>
-                        <el-button type="primary" @click="showDialog = false">保 存</el-button>
+                        <el-button @click="showRouterDialog = false">取 消</el-button>
+                        <el-button type="primary" @click="saveToRouterChange('formRouter2')">保 存</el-button>
                     </div>
                 </el-tab-pane>
             </el-tabs>
@@ -210,11 +214,11 @@
                 formLabelWidth: '120px',
                 provs:global_.provs,
                 citys: [],
-                showDialog:false,
+                showRouterDialog:false,
                 radiotoRout:'文件上传',
                 fileList:[{name: '路由器导入模板.xls', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}],
                 search_word:'',
-                activeName2:'first',
+                activeName2:'2',
                 textarea_macs:'',
 
                 userData:[],
@@ -242,14 +246,19 @@
                 },
                 showDialogPwd: false,
                 curAccount:'',
+                curUserid:'',
                 fullscreenLoading: false,
+                formRouter2:{route_mac:''},
+                rulesRouter2: {
+                    route_mac: [
+                        {required: true, message: '请输入MAC', trigger: 'blur'},
+                        {validator: this.validateMac, trigger: 'blur'}
+                    ]
+                },
             }
         },
         created: function(){
            this.getUsers({});
-        },
-        computed: {
-
         },
         methods: {
             getUsers: function(params){//获取渠道列表
@@ -442,6 +451,44 @@
 
 
             },
+            toRouter: function(userid){
+                var self = this;
+                self.showRouterDialog = true;
+                self.curUserid = userid;
+            },
+            saveToRouterChange: function(formName){
+                var self = this;
+                self.$refs[formName].validate(function(valid){
+                    if(valid){
+                        var params = {
+                            user_id: self.curUserid,
+                            route_mac:self.formRouter2.route_mac
+                        };
+                        self.fullscreenLoading  = true;
+                        self.$axios.post(global_.baseUrl+'/device/import',params).then(function(res){
+                            self.fullscreenLoading  = false;
+                            if(res.data.ret_code == '1001'){
+                                self.$message({message:res.data.extra,type:'warning'});
+                                setTimeout(function(){
+                                    self.$router.replace('login');
+                                },2000)
+                            }
+                            if(res.data.ret_code == 0){
+                                self.showDialogPwd = false;
+                                self.$message({message:'导入成功',type:'success'})
+                            }else{
+                                self.$message.error(res.data.extra);
+                            }
+                        },function(err){
+                            self.fullscreenLoading  = false;
+                            self.$message.error(err);
+                        })
+                    }else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                })
+            },
             validateRepwd: function(rule,value,callback){
                 if(value !== this.formP.user_new_password){
                     callback(new Error('两次输入密码不一致'));
@@ -470,6 +517,31 @@
                 }else{
                     callback();
                 }
+            },
+            validateMac: function (rule, value, callback) {
+                var self = this;
+                var reg_name = /^[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}$/;
+                var reg_name2 = /^[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}$/;
+                var macarr = self.splitStr(value);
+                for (var i = 0, len = macarr.length; i < len; i++) {
+                    if (!reg_name.test(macarr[i]) && !reg_name2.test(macarr[i])) {
+                        callback(new Error('输入有误，以逗号或回车分隔'));
+                    } else {
+                        callback();
+                    }
+                }
+            },
+            //按逗号和回车分隔字符串
+            splitStr: function (str) {
+                var temp = str.split(/[\n,]/g);
+                for (var i = 0; i < temp.length; i++) {
+                    if (temp[i] == "") {
+                        temp.splice(i, 1);
+                        //删除数组索引位置应保持不变
+                        i--;
+                    }
+                }
+                return temp;
             },
             handleClick:function(tab,event){
 
@@ -504,11 +576,6 @@
             },
             handlePreview:function(file) {
                 console.log(file);
-            },
-            toRouter: function(data){
-                var self = this;
-                self.showDialog = true;
-                console.log(data);
             },
             handleCurrentChange:function(val){
                 this.currentPage = val;
