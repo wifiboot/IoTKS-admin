@@ -7,17 +7,17 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">新建用户</el-button>
+            <el-button type="primary" icon="plus" :disabled="isSuper" class="handle-del mr10" @click="dialogFormVisible=true">新建用户</el-button>
             <el-input v-model="search_word" placeholder="请输入渠道名称或账号查找" class="handle-input mr10"></el-input>
             <el-button type="primary" icon="search" @click="search">查询</el-button>
         </div>
-        <div class='rad-group'>
+        <!--<div class='rad-group'>
             <el-radio-group v-model="radio3" @change="changeTab">
                 <el-radio-button label="全部"></el-radio-button>
                 <el-radio-button label="未冻结"></el-radio-button>
                 <el-radio-button label="已冻结"></el-radio-button>
             </el-radio-group>
-        </div>
+        </div>-->
         <el-table :data="userData" border style="width: 100%" ref="multipleTable" :empty-text="emptyMsg" v-loading="loading">
             <el-table-column prop="user_account" label="账 号" width="150"></el-table-column>
             <el-table-column prop="user_name" label="渠道名称" width="110"></el-table-column>
@@ -41,7 +41,7 @@
             <el-table-column label="操作" width="240" fixed="right">
                 <template slot-scope="scope">
                     <el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.user_account)">修改密码</el-button>
-                    <el-button class="btn1" size="small" type="text" @click="toRouter(scope.row.user_id)">导入路由</el-button>
+                    <el-button class="btn1" size="small" :disabled="scope.row.user_type =='1'?false:true" type="text" @click="toRouter(scope.row.user_account)">导入路由</el-button>
                     <el-button class="btn1" size="small" v-if="scope.row.user_status =='0'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>
                     <el-button class="btn1" size="small" v-else @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>
                 </template>
@@ -178,6 +178,7 @@
         data: function() {
             return {
                 radio3:'全部',
+                isSuper:false,
                 dialogFormVisible: false,
                 form: {
                     user:'',
@@ -246,7 +247,7 @@
                 },
                 showDialogPwd: false,
                 curAccount:'',
-                curUserid:'',
+                curAccount2:'',
                 fullscreenLoading: false,
                 formRouter2:{route_mac:''},
                 rulesRouter2: {
@@ -265,6 +266,7 @@
                 var self = this;
                 self.$axios.get(global_.baseUrl+'/admin/all',params).then(function(res){
                     // console.log(res.data);
+                    console.log(document.cookie['SID']);
                     if(res.data.ret_code == '1001'){
                         self.$message({message:res.data.extra,type:'warning'});
                         setTimeout(function(){
@@ -273,6 +275,7 @@
                     }
                     if(res.data.ret_code == '1003'){
                         self.emptyMsg = res.data.extra;
+                        self.isSuper = true;
                     }
                     if(res.data.ret_code == 0){
                         if(JSON.stringify(params) == '{}'){
@@ -451,17 +454,17 @@
 
 
             },
-            toRouter: function(userid){
+            toRouter: function(account){
                 var self = this;
                 self.showRouterDialog = true;
-                self.curUserid = userid;
+                self.curAccount2 = account;
             },
             saveToRouterChange: function(formName){
                 var self = this;
                 self.$refs[formName].validate(function(valid){
                     if(valid){
                         var params = {
-                            user_id: self.curUserid,
+                            user_name: self.curAccount2,
                             route_mac:self.formRouter2.route_mac
                         };
                         self.fullscreenLoading  = true;
@@ -474,7 +477,7 @@
                                 },2000)
                             }
                             if(res.data.ret_code == 0){
-                                self.showDialogPwd = false;
+                                self.showRouterDialog = false;
                                 self.$message({message:'导入成功',type:'success'})
                             }else{
                                 self.$message.error(res.data.extra);

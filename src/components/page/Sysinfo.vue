@@ -28,13 +28,11 @@
 
 <script>
     import global_ from 'components/common/Global';
-    import md5 from 'js-md5';
     export default {
         data: function () {
             return {
                 form0: {
                     route_mac: ''
-
                 },
                 form1:{
                     result:''
@@ -44,7 +42,6 @@
                         {required: true, message: '请输入指定MAC', trigger: 'blur'},
                         {validator: this.validateMac, trigger: 'blur'}
                     ]
-
                 },
                 fullscreenLoading:false,
             }
@@ -63,12 +60,12 @@
                             route_mac:self.form0.route_mac
                         };
                         // self.$axios.defaults.withCredentials = true;
-                        self.$axios.post(global_.baseUrl+'/manage/sysinfo',params).then(function(res){
+                        self.$axios.post(global_.baseUrl+'/device/sysinfo',params).then(function(res){
                             // console.log(res);
                             self.fullscreenLoading  = false;
                             self.loading = false;
                             if(res.data.ret_code == 0){
-                                self.form1.result = res.data.extra;
+                                self.form1.result = JSON.stringify(res.data.extra);
                             }else{
                                 self.$message.error(res.data.extra);
                             }

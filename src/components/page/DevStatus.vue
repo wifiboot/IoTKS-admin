@@ -26,9 +26,10 @@
                 </template>
             </el-table-column>
             <el-table-column prop="mac" label="路由Mac" width="180"></el-table-column>
-            <el-table-column prop="dev_type" label="设备型号" width="150"></el-table-column>
-            <el-table-column prop="rom_verion" label="固件版本" width="150"></el-table-column>
-            <el-table-column prop="box51_status" label="51盒子状态" width="120">
+            <el-table-column prop="dev_type" label="设备型号" width="140"></el-table-column>
+            <el-table-column prop="rom_verion" label="固件版本" width="140"></el-table-column>
+            <el-table-column prop="user_name" label="账号" width="140"></el-table-column>
+            <!--<el-table-column prop="box51_status" label="51盒子状态" width="120">
                 <template slot-scope="scope">
                     <el-tag type="warning" class="orange">{{scope.row.box51_status == 'default'?'未知':'离线'}}</el-tag>
                 </template>
@@ -36,6 +37,11 @@
             <el-table-column prop="printer_status" label="打印机状态">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.printer_status == 'default'?'warning': 'success'">{{scope.row.printer_status == 'default'?'未知': '离线'}}</el-tag>
+                </template>
+            </el-table-column>-->
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-button class="btn1" size="small" type="text" @click="reset(scope.row.mac)">重启路由</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -58,66 +64,80 @@
             const self = this;
             return {
                 radio3:'all',
-                tableData2:[
-                    {
-                        "zt":"离线",
-                        "lymac":"D4ee073BB0E0",
-                        "sbxh":"zc9525a",
-                        "gjbb":"1.08.1659",
-                        "hzzt":0,
-                        "dyjzt":"online",
-                        "gl":"无线信息"
-                    },
-                    {
-                        "zt":"未激活",
-                        "lymac":"D4ee073BB0E0",
-                        "sbxh":"9525a",
-                        "gjbb":"1.03.599",
-                        "hzzt":0,
-                        "dyjzt":"offline",
-                        "gl":"无线信息"
-                    },
-                    {
-                        "zt":"离线",
-                        "lymac":"D4ee073BB0E0",
-                        "sbxh":"zc9525a",
-                        "gjbb":"1.08.1659",
-                        "hzzt":0,
-                        "dyjzt":"offline",
-                        "gl":"无线信息"
-                    }
-
-                ],
                 search_word:'',
-
                 loading:false,
                 pageTotal:0,
                 listData:[],
-                currentPage:1
+                currentPage:1,
+                curUser:''
 
             }
         },
         created: function(){
-            this.getData({},'');
+            this.getUser();
         },
         methods: {
+            getUser: function(){
+                var self = this;
+                self.$axios.post(global_.baseUrl+'/admin/info').then(function(res){
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 0){
+                        self.curUser = res.data.ret_msg;
+                        if(self.curUser == '1'){//普通管理员
+                            self.getData({filter:{user_name:localStorage.getItem('ms_username')}},'')
+                        }else if(self.curUser == '0'){
+                            self.getData({},'')
+                        }
+                    }
+                })
+            },
             getData: function(params,url){
                 var self = this;
+                if(self.curUser == '1'){
+                    params.filter.user_name = localStorage.getItem('ms_username');
+                }
                 self.loading = true;
-                // var params = {
-                //    page_size:10,
-                //    current_page:1,
-                //    sort:'asc'
-                // };
                 self.$axios.post(global_.baseUrl+'/device/list'+url ,params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
-                        if(JSON.stringify(params) == '{}'){
+                        if(!params.hasOwnProperty('current_page')){
                             self.pageTotal = res.data.extra.length;
                             self.listData = res.data.extra.slice(0,10);
                         }else{
                             self.listData = res.data.extra;
                         }
+                    }
+                })
+            },
+            reset: function(mac){
+                var self = this;
+                var params = {
+                    route_mac:mac
+                };
+                self.loading = true;
+                self.$axios.post(global_.baseUrl+'/manage/reboot',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 0){
+                        self.$message({message:res.data.extra,type:'success'})
+                    }else{
+                        self.$message.error(res.data.extra);
                     }
                 })
             },
@@ -132,7 +152,6 @@
             },
             handleCurrentChange:function(val){
                 this.currentPage = val;
-                console.log(this.radio3,this.currentPage);
                 var url = '';
                 if(this.radio3 == 'all'){
                     url = '';
@@ -159,6 +178,12 @@
                 };
                 self.$axios.post(global_.baseUrl+'/device/list',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.pageTotal = res.data.extra.length;
                         self.listData = res.data.extra.slice(0,10);

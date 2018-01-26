@@ -10,24 +10,13 @@
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建版本</el-button>
         </div>
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <!--<el-table-column label="状态" width="100":filters="[{ text: '离线', value: '离线' }, { text: '未激活', value: '未激活' }]" :filter-method="filterTag">-->
-                <!--<template slot-scope="scope">-->
-                    <!--<el-tag :type="scope.row.zt == '离线' ? 'warning' : 'success'" close-transition>{{scope.row.zt}}</el-tag>-->
-                <!--</template>-->
-            <!--</el-table-column>-->
             <el-table-column prop="create_date" label="创建时间" width="170"></el-table-column>
             <el-table-column prop="rom_version" label="版本号" width="170"></el-table-column>
-            <!--<el-table-column prop="oem" label="OEM" width="70"></el-table-column>-->
             <el-table-column prop="ver_type" label="版本类型" width="160" :filters="[{ text: '测试版本', value: '测试版本' }, { text: '正式版本', value: '正式版本' }]" :filter-method="filterTag">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.ver_type == '测试版本' ? 'warning' : 'success'"  size="small" close-transition>{{scope.row.ver_type}}</el-tag>
                 </template>
             </el-table-column>
-            <!--<el-table-column label="51盒子状态" width="150">-->
-                <!--<template scope="scope">-->
-                    <!--<el-tag type="warning">{{scope.row.hzzt}}</el-tag>-->
-                <!--</template>-->
-            <!--</el-table-column>-->
             <el-table-column prop="dev_type" label="设备型号" width="160"></el-table-column>
             <el-table-column prop="comment" label="更新说明" width="160"></el-table-column>
             <el-table-column label="操作">
@@ -94,7 +83,6 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <!--<el-button type="primary" @click="saveAdd('form')" v-loading.fullscreen.lock="fullscreenLoading">添 加</el-button>-->
                 <el-button type="primary" @click="saveAdd('form')">添 加</el-button>
             </div>
         </el-dialog>
@@ -149,6 +137,12 @@
             getTypes: function(){//获取设备类型
                 var self = this;
                 self.$axios.post(global_.baseUrl+'/devtype/types').then(function(res){
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.typeListData = res.data.extra;
                     }
@@ -165,6 +159,12 @@
                 self.$axios.post(global_.baseUrl+'/rom/list',params).then(function(res){
 //                    console.log(res);
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         if(JSON.stringify(params) == '{}'){
                             self.pageTotal = res.data.extra.length;
@@ -187,11 +187,10 @@
                 return true;
             },
             handleSuccess: function(response,file,fileList){
-                console.log(response);
                 if(response.ret_code == 0){
                     this.$message({message:'创建成功',type:'success'});
                 }else{
-                    this.$message.error('创建失败');
+                    this.$message.error(response.extra);
                 }
                 this.fullscreenLoading  = false;
 
@@ -228,7 +227,7 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/rom/download',params).then(function(res){
                     self.loading = false;
-                    console.log(res);
+                    // console.log(res);
                     var blob = new Blob([res.data]);
                     var reader = new FileReader();
                     reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表情href
@@ -241,14 +240,17 @@
                         a.click();
 //                        $(a).remove();
                     }
-
-                    if(res.data.ret_code == 0){
-                        self.$message({message:'删除成功',type:'success'});
-                        self.getData();
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }else{
+                        self.$message.error(res.data.extra);
                     }
 
                 },function(err){
-                    self.$message.error('删除失败');
+                    self.$message.error('下载失败');
                     self.loading = false;
                     console.log(err);
                 })
@@ -262,6 +264,12 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/rom/del',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.$message({message:'删除成功',type:'success'});
                         self.getData();
@@ -282,6 +290,12 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/rom/release',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
                         self.getData();
@@ -290,7 +304,6 @@
                 },function(err){
                     self.$message.error('操作失败');
                     self.loading = false;
-                    console.log(err);
                 })
             },
             revokeRom: function(id,fileName){//下架操作
@@ -302,6 +315,12 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/rom/revoke',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
                         self.getData();
@@ -310,7 +329,6 @@
                 },function(err){
                     self.$message.error('操作失败');
                     self.loading = false;
-                    console.log(err);
                 })
             },
             handleChange:function(file) {
