@@ -6,7 +6,7 @@
                 <el-breadcrumb-item>ROM列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class="handle-box rad-group">
+        <div class="handle-box rad-group" v-if="isShow">
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建版本</el-button>
         </div>
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
@@ -18,8 +18,8 @@
                 </template>
             </el-table-column>
             <el-table-column prop="dev_type" label="设备型号" width="160"></el-table-column>
-            <el-table-column prop="comment" label="更新说明" width="160"></el-table-column>
-            <el-table-column label="操作">
+            <el-table-column prop="comment" label="更新说明"></el-table-column>
+            <el-table-column label="操作" v-if="isShow">
                 <template slot-scope="scope">
                     <el-button class="btn1" type="text" size="small" @click="downloadRom(scope.row._id,scope.row.file_name,scope.row.rom_status)">下载</el-button>
                     <el-button class="btn1" type="text" size="small" @click="delRom(scope.row._id,scope.row.file_name)">删除</el-button>
@@ -97,6 +97,7 @@
         data: function(){
             return {
                 uploadUrl:global_.baseUrl+'/rom/upload',
+                isShow:localStorage.getItem('userMsg') =='1'?false:true,
                 dialogFormVisible:false,
                 radio3:'全部',
                 form: {
@@ -145,6 +146,8 @@
                     }
                     if(res.data.ret_code == 0){
                         self.typeListData = res.data.extra;
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
                 })
             },
@@ -173,6 +176,8 @@
                             self.listData = res.data.extra;
                         }
 
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
                 })
             },
@@ -273,6 +278,8 @@
                     if(res.data.ret_code == 0){
                         self.$message({message:'删除成功',type:'success'});
                         self.getData();
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){
@@ -299,6 +306,8 @@
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
                         self.getData();
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){
@@ -324,6 +333,8 @@
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
                         self.getData();
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){

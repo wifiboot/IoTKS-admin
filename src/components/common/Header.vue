@@ -9,7 +9,6 @@
                 </span>
                 <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item command="changepwd">修改密码</el-dropdown-item>
-                    <el-dropdown-item command="revoke">冻结账户</el-dropdown-item>
                     <el-dropdown-item command="loginout">退出</el-dropdown-item>
                 </el-dropdown-menu>
             </el-dropdown>
@@ -122,6 +121,7 @@
                         if(res.data.ret_code == 0){
                             self.$message({message:res.data.extra,type:'success'});
                             localStorage.removeItem('ms_username');
+                            localStorage.removeItem('userMsg');
                             self.$router.push('/login');
                         }else{
                             self.$message.error(res.data.extra);

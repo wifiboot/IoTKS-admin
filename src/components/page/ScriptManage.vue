@@ -6,7 +6,7 @@
                 <el-breadcrumb-item>脚本列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class="handle-box">
+        <div class="handle-box" v-if="isShow">
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">上传脚本</el-button>
         </div>
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
@@ -14,8 +14,8 @@
             <!--<el-table-column prop="script_version" label="版本号" width="150"></el-table-column>-->
             <el-table-column prop="script_developer" label="开发者" width="110"></el-table-column>
             <el-table-column prop="script_create_time" label="上传时间" width="150"></el-table-column>
-            <el-table-column prop="script_info" label="脚本说明" width="110"></el-table-column>
-            <el-table-column label="操作">
+            <el-table-column prop="script_info" label="脚本说明"></el-table-column>
+            <el-table-column label="操作" v-if="isShow">
                 <template slot-scope="scope">
                     <el-button type="text" size="small" @click="downloadScript(scope.row.script_name,scope.row.script_status)">下载</el-button>
                     <el-button type="text" size="small" @click="delScript(scope.row.script_name)">删除</el-button>
@@ -80,6 +80,7 @@
         data: function() {
             return {
                 uploadUrl:global_.baseUrl+'/script/upload',
+                isShow:localStorage.getItem('userMsg') =='1'?false:true,
                 currentPage: 1,
                 pageTotal:0,
                 dialogFormVisible: false,
@@ -132,7 +133,8 @@
                         }else{
                             self.listData = res.data.data;
                         }
-
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
                 })
             },
@@ -217,6 +219,8 @@
                     if(res.data.ret_code == 0){
                         self.$message({message:'下载成功',type:'success'});
                         self.getData();
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){
@@ -237,7 +241,7 @@
                         self.$message({message:'删除成功',type:'success'});
                         self.getData({});
                     }else{
-                        self.$message.error('删除失败');
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){
@@ -257,6 +261,8 @@
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
                         self.getData({});
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){
@@ -277,7 +283,7 @@
                         self.$message({message:'操作成功',type:'success'});
                         self.getData({});
                     }else{
-                        self.$message.error('操作失败')
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){

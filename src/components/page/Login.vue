@@ -56,6 +56,17 @@
             getData: function(){
                 let self = this;
             },
+            getUser: function(){
+                var self = this;
+                self.$axios.post(global_.baseUrl+'/admin/info').then(function(res){
+                    if(res.data.ret_code == 0){
+                        localStorage.setItem('userMsg',res.data.ret_msg);
+                        if(res.data.ret_msg == '1'){//普通管理员
+
+                        }
+                    }
+                })
+            },
             submitForm:function(formName) {
                 const self = this;
                 self.$refs[formName].validate(function(valid){
@@ -69,8 +80,8 @@
                             if(res.data.ret_code == 0){
                                 self.$message({message:'登录成功！',type:'success'});
                                 localStorage.setItem('ms_username',self.ruleForm.username);
-                                // localStorage.setItem('storgePwd',self.ruleForm.password);
-                                self.$router.push('/basetable');
+                                self.getUser();
+                                self.$router.push('/basetable')
                             }else{
                                 self.$message(res.data.extra);
                             }

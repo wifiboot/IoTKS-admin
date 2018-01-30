@@ -7,9 +7,9 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box">
-            <el-button type="primary" icon="plus" :disabled="isSuper" class="handle-del mr10" @click="dialogFormVisible=true">新建用户</el-button>
+            <el-button type="primary" icon="plus" :disabled="isSuper=='0'?false:true" class="handle-del mr10" @click="dialogFormVisible=true">新建用户</el-button>
             <el-input v-model="search_word" placeholder="请输入渠道名称或账号查找" class="handle-input mr10"></el-input>
-            <el-button type="primary" icon="search" @click="search">查询</el-button>
+            <el-button type="primary" icon="search" :disabled="isSuper=='0'?false:true" @click="search">查询</el-button>
         </div>
         <!--<div class='rad-group'>
             <el-radio-group v-model="radio3" @change="changeTab">
@@ -178,7 +178,7 @@
         data: function() {
             return {
                 radio3:'全部',
-                isSuper:false,
+                isSuper:localStorage.getItem('userMsg'),
                 dialogFormVisible: false,
                 form: {
                     user:'',
@@ -265,17 +265,14 @@
             getUsers: function(params){//获取渠道列表
                 var self = this;
                 self.$axios.get(global_.baseUrl+'/admin/all',params).then(function(res){
-                    // console.log(res.data);
-                    console.log(document.cookie['SID']);
-                    if(res.data.ret_code == '1001'){
+                    if(res.data.ret_code == '1001'){//未登录状态
                         self.$message({message:res.data.extra,type:'warning'});
                         setTimeout(function(){
                             self.$router.replace('login');
                         },2000)
                     }
-                    if(res.data.ret_code == '1003'){
+                    if(res.data.ret_code == '1003'){//权限不足
                         self.emptyMsg = res.data.extra;
-                        self.isSuper = true;
                     }
                     if(res.data.ret_code == 0){
                         if(JSON.stringify(params) == '{}'){

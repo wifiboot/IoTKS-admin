@@ -6,7 +6,7 @@
                 <el-breadcrumb-item>设备型号列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class="handle-box">
+        <div class="handle-box" v-if="isShow">
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">添加型号</el-button>
         </div>
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
@@ -15,8 +15,8 @@
             <el-table-column prop="dev_vendor" label="设备类型" width="130"></el-table-column>
             <el-table-column prop="chip_type" label="芯片型号" width="170"></el-table-column>
             <el-table-column prop="chip_vendor" label="芯片厂商" width="130"></el-table-column>
-            <el-table-column prop="comment" label="更新说明" width="130"></el-table-column>
-            <el-table-column label="操作">
+            <el-table-column prop="comment" label="更新说明"></el-table-column>
+            <el-table-column label="操作" v-if="isShow">
                 <template slot-scope="scope">
                     <el-button class="btn1" size="small" type="danger" @click="delDev(scope.row._id)">删除</el-button>
                 </template>
@@ -69,45 +69,8 @@
     export default {
         data: function() {
             return {
+                isShow:localStorage.getItem('userMsg') =='1'?false:true,
                 cur_page: 1,
-                tableData2:[
-                    {
-                        "tjsj":'2017/11/13 11:41',
-                        "sbxh": "kt9761ld",
-                        "sblx":"企业智能中枢",
-                        "xpxh":'MT7628AN',
-                        "xpcs":"北京坤腾畅联科技有限公司",
-                        "sbcs":"坤腾"
-                    },{
-                        "tjsj":'2017/11/13 16:41',
-                        "sbxh": "r7800",
-                        "sblx":"R7800",
-                        "xpxh":'IPQ8064',
-                        "xpcs":"ARM",
-                        "sbcs":"ARM"
-                    },{
-                        "tjsj":'2017/11/13 11:41',
-                        "sbxh": "kt9761ld",
-                        "sblx":"企业智能中枢",
-                        "xpxh":'MT7628AN',
-                        "xpcs":"高通",
-                        "sbcs":"坤腾"
-                    },{
-                        "tjsj":'2017/11/13 11:41',
-                        "sbxh": "kt9761ld",
-                        "sblx":"企业智能中枢",
-                        "xpxh":'MT7628AN',
-                        "xpcs":"kunteng",
-                        "sbcs":"test"
-                    },{
-                        "tjsj":'2017/11/13 11:41',
-                        "sbxh": "kt9761ld",
-                        "sblx":"路由器",
-                        "xpxh":'MT7628AN',
-                        "xpcs":"北京坤腾畅联科技有限公司",
-                        "sbcs":"坤腾"
-                    }
-                ],
                 dialogFormVisible: false,
                 form: {
                     dev_name:'',

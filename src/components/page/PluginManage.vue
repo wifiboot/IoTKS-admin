@@ -6,7 +6,7 @@
                 <el-breadcrumb-item>插件列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class="handle-box">
+        <div class="handle-box" v-if="isShow">
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">上传插件</el-button>
         </div>
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
@@ -14,8 +14,8 @@
             <el-table-column prop="pkg_version" label="版本号" width="150"></el-table-column>
             <el-table-column prop="pkg_developer" label="开发者" width="110"></el-table-column>
             <el-table-column prop="pkg_create_time" label="上传时间" width="150"></el-table-column>
-            <el-table-column prop="pkg_info" label="插件说明" width="110"></el-table-column>
-            <el-table-column label="操作">
+            <el-table-column prop="pkg_info" label="插件说明"></el-table-column>
+            <el-table-column label="操作" v-if="isShow">
                 <template slot-scope="scope">
                     <el-button type="text" size="small" @click="downloadPlugin(scope.row.pkg_name,scope.row.pkg_status)">下载</el-button>
                     <el-button type="text" size="small" @click="delPlugin(scope.row.pkg_name)">删除</el-button>
@@ -79,6 +79,7 @@
         data: function() {
             return {
                 uploadUrl:global_.baseUrl+'/pkg/upload',
+                isShow:localStorage.getItem('userMsg') =='1'?false:true,
                 currentPage: 1,
                 pageTotal:0,
                 dialogFormVisible: false,
@@ -128,6 +129,8 @@
                             self.listData = res.data.data;
                         }
 
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
                 })
             },
@@ -218,6 +221,8 @@
                     if(res.data.ret_code == 0){
                         self.$message({message:'下载成功',type:'success'});
                         self.getData();
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){
@@ -238,7 +243,7 @@
                         self.$message({message:'删除成功',type:'success'});
                         self.getData({});
                     }else{
-                        self.$message.error('删除失败');
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){
@@ -258,6 +263,8 @@
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
                         self.getData({});
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){
@@ -278,7 +285,7 @@
                         self.$message({message:'操作成功',type:'success'});
                         self.getData({});
                     }else{
-                        self.$message.error('操作失败')
+                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){

@@ -24,7 +24,100 @@
     export default {
         data() {
             return {
-                items: []
+                items: [
+                    {
+                        icon: 'el-icon-menu',
+                        index: '2',
+                        title: '渠道管理',
+                        subs: [
+                            {
+                                index: 'basetable',
+                                title: '渠道列表'
+                            },
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-upload',
+                        index: '3',
+                        title: '批量执行任务',
+                        subs: [
+                            {
+                                index: 'setpush',
+                                title: '发起推送'
+                            },
+                            {
+                                index: 'pushresult',
+                                title: '推送结果'
+                            }
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-setting',
+                        index: '4',
+                        title: '设备管理',
+                        subs: [
+                            {
+                                index: 'devstatus',
+                                title: '设备状态'
+                            }
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-star-on',
+                        index: '5',
+                        title: 'ROM管理',
+                        subs: [
+                            {
+                                index: 'rommanage',
+                                title: 'ROM列表'
+                            }
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-date',
+                        index: '6',
+                        title: '插件管理',
+                        subs: [
+                            {
+                                index: 'pluginmanage',
+                                title: '插件列表'
+                            }
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-document',
+                        index: '7',
+                        title: '脚本管理',
+                        subs: [
+                            {
+                                index: 'scriptmanage',
+                                title: '脚本列表'
+                            }
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-share',
+                        index: '8',
+                        title: '设备型号管理',
+                        subs: [
+                            {
+                                index: 'modelmanage',
+                                title: '设备型号列表'
+                            }
+                        ]
+                    },
+                    {
+                        icon: 'el-icon-star-off',
+                        index: '9',
+                        title: '辅助工具',
+                        subs: [
+                            {
+                                index: 'sysinfo',
+                                title: '路由SYSINFO查询'
+                            }
+                        ]
+                    }
+                ]
             }
         },
         computed:{
@@ -40,6 +133,17 @@
                         self.curUser = res.data.ret_msg;
                         if(self.curUser == '1'){//普通管理员
                             self.items = [
+                                {
+                                    icon: 'el-icon-menu',
+                                    index: '2',
+                                    title: '渠道管理',
+                                    subs: [
+                                        {
+                                            index: 'basetable',
+                                            title: '渠道列表'
+                                        },
+                                    ]
+                                },
                                 {
                                     icon: 'el-icon-upload',
                                     index: '3',
@@ -63,6 +167,39 @@
                                         {
                                             index: 'devstatus',
                                             title: '设备状态'
+                                        }
+                                    ]
+                                },
+                                {
+                                    icon: 'el-icon-star-on',
+                                    index: '5',
+                                    title: 'ROM管理',
+                                    subs: [
+                                        {
+                                            index: 'rommanage',
+                                            title: 'ROM列表'
+                                        }
+                                    ]
+                                },
+                                {
+                                    icon: 'el-icon-date',
+                                    index: '6',
+                                    title: '插件管理',
+                                    subs: [
+                                        {
+                                            index: 'pluginmanage',
+                                            title: '插件列表'
+                                        }
+                                    ]
+                                },
+                                {
+                                    icon: 'el-icon-document',
+                                    index: '7',
+                                    title: '脚本管理',
+                                    subs: [
+                                        {
+                                            index: 'scriptmanage',
+                                            title: '脚本列表'
                                         }
                                     ]
                                 },
@@ -189,9 +326,9 @@
                 })
             },
         },
-        mounted: function(){
-            this.getUser();
-        },
+        // mounted: function(){
+        //     this.getUser();
+        // },
     }
 </script>
 
