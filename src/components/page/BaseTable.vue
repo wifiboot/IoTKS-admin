@@ -7,7 +7,7 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box">
-            <el-button type="primary" icon="plus" :disabled="isSuper=='0'?false:true" class="handle-del mr10" @click="dialogFormVisible=true">新建用户</el-button>
+            <el-button type="primary" icon="plus" :disabled="isSuper=='0'?false:true" class="handle-del mr10" @click="dialogFormVisible=true">新建渠道</el-button>
             <el-input v-model="search_word" placeholder="请输入渠道名称或账号查找" class="handle-input mr10"></el-input>
             <el-button type="primary" icon="search" :disabled="isSuper=='0'?false:true" @click="search">查询</el-button>
         </div>
@@ -124,29 +124,39 @@
         <el-dialog title="导入路由" :visible.sync="showRouterDialog" class="digcont">
             <el-tabs v-model="activeName2" type="card" @tab-click="handleClick">
                 <el-tab-pane label="文件上传" name="1">
-                    <div class="mb30">
-                        路由导入模板.xls
-                        <a href="http://cloud.kunteng.org/yunac/static/tmp/routers.xls" target="_blank">
-                            <el-button class="btn1" size="small" type="primary">下载</el-button>
-                        </a>
+                    <div>
+                        <h4>下载示范模板</h4>
+                        <p class="mb30">
+                            路由导入模板.xls
+                            <a href="http://cloud.kunteng.org/yunac/static/tmp/routers.xls" target="_blank">
+                                <el-button class="btn1" size="small" type="primary">下载</el-button>
+                            </a>
+                        </p>
                     </div>
-                    <el-upload
-                        class="upload-demo"
-                        ref="upload"
-                        action="https://jsonplaceholder.typicode.com/posts/"
-                        :on-preview="handlePreview"
-                        :on-remove="handleRemove"
-                        :file-list="fileList"
-                        :auto-upload="false">
-                        <div>
-                            <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-                        </div>
-                        <div slot="tip" style="margin-top:20px;" class="el-upload__tip">只能上传XXX文件，且不超过500kb</div>
-                    </el-upload>
+                    <div>
+                        <h4>上传</h4>
+                        <el-form :model="formMacfile" ref="formMacfile">
+                            <el-form-item label="">
+                                <el-upload
+                                    class="upload-demo"
+                                    ref="upload"
+                                    name="file_name"
+                                    :action="uploadUrl"
+                                    with-credentials="true"
+                                    :data="formMacfile"
+                                    :beforeUpload="beforeUpload"
+                                    :on-change="handleChange"
+                                    :on-success="handleSuccess"
+                                    :file-list="fileList"
+                                    :auto-upload="false">
+                                    <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                                </el-upload>
+                            </el-form-item>
+                        </el-form>
+                    </div>
                     <div class="mt30">
                         <el-button @click="showDialog = false">取 消</el-button>
-                        <el-button type="primary" @click="showDialog = false">保 存</el-button>
+                        <el-button type="primary" @click="fileAdd('formMacfile')">保 存</el-button>
                     </div>
                 </el-tab-pane>
                 <el-tab-pane label="手动导入" name="2">
@@ -174,9 +184,11 @@
 
 <script>
     import global_ from 'components/common/Global';
+    var crypto = require('crypto');
     export default {
         data: function() {
             return {
+                uploadUrl:global_.baseUrl+'/device/import/excel',
                 radio3:'全部',
                 isSuper:localStorage.getItem('userMsg'),
                 dialogFormVisible: false,
@@ -217,9 +229,9 @@
                 citys: [],
                 showRouterDialog:false,
                 radiotoRout:'文件上传',
-                fileList:[{name: '路由器导入模板.xls', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}],
+                fileList:[],
                 search_word:'',
-                activeName2:'2',
+                activeName2:'1',
                 textarea_macs:'',
 
                 userData:[],
@@ -256,6 +268,9 @@
                         {validator: this.validateMac, trigger: 'blur'}
                     ]
                 },
+                formMacfile:{
+                    user_name:''
+                }
             }
         },
         created: function(){
@@ -455,6 +470,7 @@
                 var self = this;
                 self.showRouterDialog = true;
                 self.curAccount2 = account;
+                self.formMacfile.user_name = account;
             },
             saveToRouterChange: function(formName){
                 var self = this;
@@ -563,27 +579,50 @@
                 console.log(city);
                 console.log(this.selectCity)
             },
-            changeTab: function(){
-                console.log(this.radio3);
-                this.$message('选择'+ this.radio3);
-            },
-            submitUpload:function() {
-                console.log('上传到服务器');
-                this.$refs.upload.submit();
-            },
-            handleRemove:function(file, fileList) {
-                console.log(file, fileList);
-            },
-            handlePreview:function(file) {
-                console.log(file);
-            },
             handleCurrentChange:function(val){
                 this.currentPage = val;
                 this.getUsers({page_size:10,current_page:this.currentPage});
             },
             filterTag:function(value, row) {
                 return row.user_status == value;
-            }
+            },
+            fileAdd: function(formName){
+                var self = this;
+                self.$refs.upload.submit();
+            },
+            beforeUpload: function(file){
+                var testmsg=file.name.substring(file.name.lastIndexOf('.')+1);
+                const extension = testmsg === 'xls';
+                const extension2 = testmsg === 'xlsx';
+                const extension3 = testmsg === 'doc';
+                const extension4 = testmsg === 'docx';
+                const isLt2M = file.size / 1024 / 1024 < 10;
+                if (!extension && !extension2 && !extension3 && !extension4) {
+                    this.$message({message:'上传模板只能是 xls格式!',type:'warning'});
+                    return false;
+                }
+                if (!isLt2M) {
+                    this.$message({message:'上传模板大小不能超过 10MB!',type:'warning'});
+                    return false;
+                }
+                // else{
+                //     return extension || extension2 || extension3 || extension4 && isLt2M;
+                // }
+            },
+            handleSuccess: function(response,file,fileList){
+                if(response.ret_code == 0){
+                    this.$message({message:'创建成功',type:'success'});
+                }else{
+                    this.$message.error(response.extra);
+                }
+                this.showRouterDialog = false;
+            },
+            handleError: function(response,file,fileList){
+                this.$message.error('操作失败');
+            },
+            handleChange:function(file) {
+                var self = this;
+            },
         }
     }
 </script>

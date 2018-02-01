@@ -39,9 +39,10 @@
                     <el-tag :type="scope.row.printer_status == 'default'?'warning': 'success'">{{scope.row.printer_status == 'default'?'未知': '离线'}}</el-tag>
                 </template>
             </el-table-column>-->
-            <el-table-column label="操作">
+            <el-table-column label="操作" width="170" fixed="right">
                 <template slot-scope="scope">
                     <el-button class="btn1" size="small" type="text" @click="reset(scope.row.mac)">重启路由</el-button>
+                    <el-button class="btn1" size="small" type="danger" @click="reset(scope.row.mac)">删除路由</el-button>
                 </template>
             </el-table-column>
         </el-table>

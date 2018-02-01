@@ -7,10 +7,10 @@
             </el-breadcrumb>
         </div>
         <div class='rad-group'>
-            <el-radio-group v-model="radio3" @change="changeTab">
-                <el-radio-button label="1">ROM升级</el-radio-button>
-                <el-radio-button label="2">插件升级</el-radio-button>
-                <el-radio-button label="3">脚本推送</el-radio-button>
+            <el-radio-group v-model="curRadio" @change="changeTab">
+                <el-radio-button label="firmware">ROM升级</el-radio-button>
+                <el-radio-button label="apps">插件升级</el-radio-button>
+                <el-radio-button label="remote_cmd">脚本推送</el-radio-button>
             </el-radio-group>
             <div class="handle-box2">
                 <el-input v-model="search_word" placeholder="请输入任务ID" class="handle-input mr10"></el-input>
@@ -40,12 +40,14 @@
             <el-table-column prop="request_msg" label="操作" width="120">
                 <template slot-scope="scope">
                     <!--<el-tag>{{JSON.parse(scope.row.request_msg).item == 'sysinfo'?'ROM升级':'其他'}}</el-tag>-->
-                    <el-tag>{{radio3 == '1'?'ROM升级':'其他'}}</el-tag>
+                    <el-tag type="primary">{{curRadio == 'firmware'?'ROM升级':(curRadio == 'apps'?'插件升级':'脚本升级')}}</el-tag>
                 </template>
             </el-table-column>
             <el-table-column prop="request_timestamp" label="时间" width="170"></el-table-column>
             <el-table-column prop="_id" label="任务ID" width="320"></el-table-column>
-            <el-table-column prop="mac" label="指定MAC" width="150"></el-table-column>
+            <el-table-column prop="mac" label="指定MAC" width="150">
+                <template slot-scope="scope">{{scope.row.mac.toString()}}</template>
+            </el-table-column>
             <el-table-column prop="upgrade_mode" label="升级方式" width="100">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.upgrade_mode == '1' ? 'warning' : 'success'" close-transition>{{scope.row.upgrade_mode == '1'?'实时自动':(scope.row.upgrade_mode == '2'?'用户自动':'定时自动')}}</el-tag>
@@ -69,9 +71,9 @@
                 </el-table-column>
             </el-table-column>
             <el-table-column prop="operator_name" label="操作人" width="120"></el-table-column>
-            <el-table-column label="详情">
+            <el-table-column label="详情" fixed="right">
                 <template slot-scope="scope">
-                    <el-button class="btn1" type="info" size="small" @click="handleEdit(scope.row._id)">详情</el-button>
+                    <el-button class="btn1" type="info" size="small" @click="goDetail(scope.row._id)">详情</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -93,7 +95,7 @@
         data: function(){
             const self = this;
             return {
-                radio3:'1',
+                curRadio:'firmware',
                 search_word:'',
                 listData:[],
                 pageTotal:0,
@@ -103,17 +105,12 @@
             }
         },
         created:function(){
-            this.getData({});
+            this.getFirmwareData({});
         },
         methods: {
-            getData: function(params){
+            getFirmwareData: function(params){
                 var self = this;
-                self.$axios({
-                    method:'post',
-                    headers: {'Content-Type': 'application/json'},
-                    url: global_.baseUrl + '/task/list/sysupgrade',
-                    data:params
-                }).then(function(res) {
+                self.$axios.post(global_.baseUrl+'/task/list/sysupgrade',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == '1001'){
                         self.$message({message:res.data.extra,type:'warning'});
@@ -128,7 +125,31 @@
                         }else{
                             self.listData = res.data.extra;
                         }
-
+                    }
+                },function(err){
+                    self.loading = false;
+                    console.log(err);
+                });
+            },
+            getAppsData: function(params){
+                var self = this;
+                self.$axios.post(global_.baseUrl+'/manage/apps_result',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 0){
+                        if(JSON.stringify(params) == '{}'){
+                            self.pageTotal = res.data.extra.length;
+                            self.listData = res.data.extra.slice(0,10);
+                        }else{
+                            self.listData = res.data.extra;
+                        }
+                    }else{
+                        self.$message.error(res.data.extra)
                     }
                 },function(err){
                     self.loading = false;
@@ -136,11 +157,14 @@
                 });
             },
             changeTab: function(){
-                console.log(this.radio3);
+                var self = this;
+                if(self.curRadio == 'apps'){
+                    self.getAppsData({});
+                }
             },
             handleCurrentChange:function(val){
                 this.currentPage = val;
-                this.getData({page_size:10,current_page:this.currentPage});
+                this.getFirmwareData({page_size:10,current_page:this.currentPage});
             },
             search: function(){
                 var self = this;
@@ -167,6 +191,9 @@
                 })
 
             },
+            goDetail: function(id){
+                this.$router.push({path:'/pushresultdetail',query:{curid:id,curRadio:this.curRadio}});
+            }
         },
     }
 </script>

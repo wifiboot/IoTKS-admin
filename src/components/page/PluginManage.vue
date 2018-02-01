@@ -17,10 +17,8 @@
             <el-table-column prop="pkg_info" label="插件说明"></el-table-column>
             <el-table-column label="操作" v-if="isShow">
                 <template slot-scope="scope">
-                    <el-button type="text" size="small" @click="downloadPlugin(scope.row.pkg_name,scope.row.pkg_status)">下载</el-button>
-                    <el-button type="text" size="small" @click="delPlugin(scope.row.pkg_name)">删除</el-button>
-                    <el-button type="danger" size="small" v-if="scope.row.pkg_status =='0'" @click="revokePlugin(scope.row.pkg_name)">下架</el-button>
-                    <el-button type="success" size="small" v-else @click="releasePlugin(scope.row.pkg_name)">上架</el-button>
+                    <el-button type="success" size="small" @click="downloadPlugin(scope.row.pkg_name)">下载</el-button>
+                    <el-button type="danger" size="small" @click="delPlugin(scope.row.pkg_name)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -192,12 +190,8 @@
                 self.fullscreenLoading  = true;
                 self.$refs.upload.submit();
             },
-            downloadPlugin: function(fileName,status){//下载
+            downloadPlugin: function(fileName){//下载
                 var self = this;
-                if(status != '0'){
-                    self.$message({message:'插件已下架',type:'warning'});
-                    return false;
-                }
                 var params = {
                     pkg_name:fileName
                 };
@@ -250,48 +244,6 @@
                     self.$message.error('删除失败');
                     self.loading = false;
                     // console.log(err);
-                })
-            },
-            releasePlugin: function(fileName){//上架操作
-                var self = this;
-                var params = {
-                    pkg_name:fileName
-                };
-                self.loading = true;
-                self.$axios.post(global_.baseUrl+'/pkg/release',params).then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == 0){
-                        self.$message({message:'操作成功',type:'success'});
-                        self.getData({});
-                    }else{
-                        self.$message.error(res.data.extra)
-                    }
-
-                },function(err){
-                    self.$message.error('操作失败');
-                    self.loading = false;
-                    console.log(err);
-                })
-            },
-            revokePlugin: function(fileName){//下架操作
-                var self = this;
-                var params = {
-                    pkg_name:fileName
-                };
-                self.loading = true;
-                self.$axios.post(global_.baseUrl+'/pkg/revoke',params).then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == 0){
-                        self.$message({message:'操作成功',type:'success'});
-                        self.getData({});
-                    }else{
-                        self.$message.error(res.data.extra)
-                    }
-
-                },function(err){
-                    self.$message.error('操作失败');
-                    self.loading = false;
-                    console.log(err);
                 })
             },
             handleCurrentChange:function(val){

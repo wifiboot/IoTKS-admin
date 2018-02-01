@@ -17,10 +17,8 @@
             <el-table-column prop="script_info" label="脚本说明"></el-table-column>
             <el-table-column label="操作" v-if="isShow">
                 <template slot-scope="scope">
-                    <el-button type="text" size="small" @click="downloadScript(scope.row.script_name,scope.row.script_status)">下载</el-button>
-                    <el-button type="text" size="small" @click="delScript(scope.row.script_name)">删除</el-button>
-                    <el-button type="danger" size="small" v-if="scope.row.script_status =='0'" @click="revokeScript(scope.row.script_name)">下架</el-button>
-                    <el-button type="success" size="small" v-else @click="releaseScript(scope.row.script_name)">上架</el-button>
+                    <el-button type="success" size="small" @click="downloadScript(scope.row.script_name)">下载</el-button>
+                    <el-button type="danger" size="small" @click="delScript(scope.row.script_name)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -191,12 +189,8 @@
                 // self.fullscreenLoading  = true;
                 self.$refs.upload.submit();
             },
-            downloadScript: function(fileName,status){//下载
+            downloadScript: function(fileName){//下载
                 var self = this;
-                if(status != '0'){
-                    self.$message({message:'脚本已下架',type:'warning'});
-                    return false;
-                }
                 var params = {
                     script_name:fileName
                 };

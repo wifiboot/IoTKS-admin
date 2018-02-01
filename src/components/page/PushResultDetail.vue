@@ -12,18 +12,18 @@
                 <el-button type="primary" icon="search" @click="search">搜索</el-button>
             </div>
         </div>
-        <el-table :data="tableData2" border style="width: 100%" ref="multipleTable">
+        <el-table :data="appsData" border style="width: 100%" ref="multipleTable">
             <!--<el-table-column type="selection" width="55"></el-table-column>-->
-            <el-table-column prop="wcsj" label="完成时间" width="180"></el-table-column>
-            <el-table-column prop="lymac" label="路由MAC" width="140"></el-table-column>
-            <el-table-column prop="sbzt" label="设备状态" width="100">
+            <el-table-column prop="response_timestamp" label="完成时间" width="180"></el-table-column>
+            <el-table-column prop="mac" label="路由MAC" width="140"></el-table-column>
+            <el-table-column prop="pubsub_status" label="设备状态" width="100">
                 <template slot-scope="scope">
-                    <el-tag :type="scope.row.sbzt == 'online' ? 'success' : 'warning'" close-transition>{{scope.row.sbzt == 'online'?'在线': (scope.row.sbzt == 'offline'?'离线':'未知')}}</el-tag>
+                    <el-tag :type="scope.row.pubsub_status == 'response_ok' ? 'success' : 'warning'" close-transition>{{scope.row.pubsub_status == 'response_ok'?'在线': (scope.row.sbzt == 'offline'?'离线':'未知')}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column prop="zdmac" label="之前版本" width="140"></el-table-column>
-            <el-table-column prop="sjfs" label="更新后版本" width="120"></el-table-column>
-            <el-table-column prop="czr" label="推送人" width="100"></el-table-column>
+            <el-table-column prop="" label="之前版本" width="140"></el-table-column>
+            <el-table-column prop="" label="更新后版本" width="120"></el-table-column>
+            <el-table-column prop="operator_name" label="推送人" width="100"></el-table-column>
             <el-table-column prop="sjzt" label="升级状态" width="100">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.sjzt == 'success' ? 'success' : 'danger'" close-transition>{{scope.row.sjzt == 'success'?'成功': (scope.row.sjzt == 'fail'?'失败':'未知')}}</el-tag>
@@ -41,13 +41,14 @@
 </template>
 
 <script>
-    import axios from 'axios';
-    import Datasource from 'vue-datasource';
+    import global_ from 'components/common/Global';
     export default {
         data: function(){
             const self = this;
             return {
-                url: './static/datasource.json',
+                curId:'',
+                curRadio:'',
+                loading:false,
                 information: {
                     pagination:{},
                     data:[]
@@ -83,58 +84,67 @@
 
                 radio3:'ROM升级',
 
-                tableData2:[
-                    {
-                        "wcsj":"2017-11-28 18:18:29",
-                        "lymac":"D4EE71263AA",
-                        "sbzt":"online",
-                        "rwid":"01029",
-                        "zdmac":"D4EE71263AA",
-                        "sjfs":"实时自动",
-                        "sjzt":"fail",
-                        "czr":"王集",
-                    },
-                    {
-                        "wcsj":"2017-11-28 18:18:29",
-                        "lymac":"D4EE71263AA",
-                        "sbzt":"offline",
-                        "sj":"2017-11-28 18:18:29",
-                        "rwid":"01029",
-                        "zdmac":"D4EE71263AA",
-                        "sjfs":"实时自动",
-                        "sjzt":"success",
-                        "czr":"王集",
-                    },
-                    {
-                        "wcsj":"2017-11-28 18:18:29",
-                        "lymac":"D4EE71263AA",
-                        "sbzt":"online",
-                        "sj":"2017-11-28 18:18:29",
-                        "rwid":"01029",
-                        "sjfs":"实时自动",
-                        "sjzt":"fail",
-                        "czr":"王集",
-                    },
-                    {
-                        "wcsj":"2017-11-28 18:18:29",
-                        "lymac":"D4EE71263AA",
-                        "sbzt":"online",
-                        "sj":"2017-11-28 18:18:29",
-                        "rwid":"01029",
-                        "zdmac":"D4EE71263AA",
-                        "sjfs":"实时自动",
-                        "sjzt":"fail",
-                        "czr":"王集",
-                    }
-                ],
+                appsData:[],
+                filewareData:[],
                 select_word:''
 
             }
         },
-        components: {
-//            Datasource
+        created: function(){
+            this.getParams();
         },
         methods: {
+            getParams: function(){
+                var self = this;
+                self.curId = self.$route.query.curid;
+                self.curRadio = self.$route.query.curRadio;
+                if(self.curRadio == 'apps'){//插件升级
+                    self.getAppsDetailData();
+                }
+                if(self.curRadio == 'firmware'){
+                    self.getFirmwareData();
+                }
+            },
+            getAppsDetailData: function(){
+                var self = this;
+                self.$axios.post(global_.baseUrl+'/manage/apps_detail',{uuid:self.curId}).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 0){
+                        self.appsData = res.data.extra
+                    }else{
+                        self.$message.error(res.data.extra)
+                    }
+                },function(err){
+                    self.loading = false;
+                    console.log(err);
+                });
+            },
+            getFirmwareData: function(){
+                var self = this;
+                self.$axios.post(global_.baseUrl+'/task/list/detail',{uuid:self.curId}).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 0){
+                        self.filewareData = res.data.extra
+                    }else{
+                        self.$message.error(res.data.extra)
+                    }
+                },function(err){
+                    self.loading = false;
+                    console.log(err);
+                });
+            },
             handleEdit: function(mac){
                 this.$router.push('/updateromstatus');
             },
@@ -179,19 +189,8 @@
                 })
             }
         },
-        beforeMount:function(){
-            var self = this;
-            if(process.env.NODE_ENV === 'development'){
-                this.url = '/ms/table/source';
-            };
-            axios.get(this.url).then(function(res){
-                self.information = res.data;
-            })
-        }
     }
 </script>
-
-<style src="../../../static/css/datasource.css"></style>
 <style>
     .rad-group{margin-bottom:20px;}
     .handle-input{  width: 300px;  display: inline-block;  }
