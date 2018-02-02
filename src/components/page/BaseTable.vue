@@ -7,7 +7,7 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box">
-            <el-button type="primary" icon="plus" :disabled="isSuper=='0'?false:true" class="handle-del mr10" @click="dialogFormVisible=true">新建渠道</el-button>
+            <el-button type="primary" icon="plus" :disabled="isSuper=='0'?false:true" class="handle-del mr10" @click="dialogFormVisible=true">新建子渠道</el-button>
             <el-input v-model="search_word" placeholder="请输入渠道名称或账号查找" class="handle-input mr10"></el-input>
             <el-button type="primary" icon="search" :disabled="isSuper=='0'?false:true" @click="search">查询</el-button>
         </div>
@@ -40,7 +40,8 @@
             </el-table-column>
             <el-table-column label="操作" width="240" fixed="right">
                 <template slot-scope="scope">
-                    <el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.user_account)">修改密码</el-button>
+                    <!--<el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.user_account)">修改密码</el-button>-->
+                    <el-button class="btn1" size="small" type="text" @click="resetPassword(scope.row.user_account)">重置密码</el-button>
                     <el-button class="btn1" size="small" :disabled="scope.row.user_type =='1'?false:true" type="text" @click="toRouter(scope.row.user_account)">导入路由</el-button>
                     <el-button class="btn1" size="small" v-if="scope.row.user_status =='0'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>
                     <el-button class="btn1" size="small" v-else @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>
@@ -429,6 +430,32 @@
                 var self = this;
                 self.showDialogPwd = true;
                 self.curAccount = account;
+            },
+            resetPassword:function(account){
+                var self = this;
+                var params = {
+                    user_account:account
+                }
+                self.loading  = true;
+                self.$axios.post(global_.baseUrl+'/admin/reset',params).then(function(res){
+                    self.loading  = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 0){
+                        self.showDialogPwd = false;
+                        self.$message({message:res.data.extra,type:'success'})
+                    }else{
+                        self.$message.error(res.data.extra);
+                    }
+                },function(err){
+                    self.fullscreenLoading  = false;
+                    self.$message.error(err);
+                })
+
             },
             savePwdChange: function(formName){
                 var self = this;

@@ -9,10 +9,10 @@
         <div class='rad-group mb40'>
             <el-tabs v-model="task_type" type="card" @tab-click="handleClick">
                 <el-tab-pane label="升级ROM" name="1">
-                    <div class="form-box tab-cont">
+                    <div class="form-box tab-cont form-box2">
                         <el-form :model="form0" :rules="rules0" ref="form0" label-width="150px">
                             <el-form-item label="输入指定MAC" prop="router_mac">
-                                <el-input type="textarea" v-model="form0.router_mac"></el-input>
+                                <el-input type="textarea" v-model="form0.router_mac" class="diainp2"></el-input>
                             </el-form-item>
                             <el-form-item label="选择设备型号" prop="dev_type">
                                 <el-select v-model="form0.dev_type" placeholder="请选择" @change="changeDev">
@@ -69,11 +69,10 @@
                 </el-tab-pane>
                 <el-tab-pane label="安装插件" name="2">
 
-                    <div class="form-box tab-cont">
+                    <div class="form-box tab-cont form-box2">
                         <el-form :model="form1" :rules="rules1" ref="form1" label-width="150px">
                             <el-form-item label="输入指定MAC" prop="route_mac">
-                                <el-input class="textarea-mac" type="textarea" v-model="form1.route_mac"
-                                          placeholder="以换行符分割，最多输入100条mac"></el-input>
+                                <el-input class="textarea-mac diainp2" type="textarea" v-model="form1.route_mac" placeholder="以换行符分割，最多输入100条mac"></el-input>
                             </el-form-item>
                             <el-form-item label="选择要安装的插件" prop="pkg_str_name">
                                 <el-select v-model="form1.pkg_str_name" placeholder="请选择" @change="changePlugin">
@@ -95,8 +94,27 @@
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item label="操作人" prop="logo">
-                                <el-input v-model="form1.logo" class="diainp"></el-input>
+                            <el-form-item label="升级方式" prop="pkg_mode" :inline="true">
+                                <el-radio-group v-model="form1.pkg_mode" @change="changePkgMode" :inline="true">
+                                    <el-radio label="1">实时自动升级</el-radio>
+                                    <el-radio label="2">用户自动升级</el-radio>
+                                    <el-radio label="3">定时自动升级(整点时刻)</el-radio>
+                                </el-radio-group>
+                                <el-select :inline="true" v-if="form1.pkg_mode=='3'?true:false" v-model="form1.pkg_mode_time" style="width:70px;" placeholder="0">
+                                    <el-option
+                                        v-for="item in pkgmodeTime"
+                                        :key="item"
+                                        :label="item"
+                                        :value="item">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="超时时间" prop="expired_time">
+                                <el-input v-model="form1.expired_time" :disabled="form1.isTime" class="inp100"></el-input>
+                                <a>&nbsp;小时</a>
+                            </el-form-item>
+                            <el-form-item label="操作人" prop="operator">
+                                <el-input v-model="form1.operator" class="diainp"></el-input>
                             </el-form-item>
                             <el-form-item>
                                 <el-button type="primary" @click="onPluginSubmit('form1')">安装</el-button>
@@ -108,11 +126,10 @@
                 </el-tab-pane>
                 <el-tab-pane label="推送脚本" name="3">
 
-                    <div class="form-box tab-cont">
+                    <div class="form-box tab-cont form-box2">
                         <el-form ref="form" :model="form2" :rules="rules2" label-width="150px">
                             <el-form-item label="输入指定MAC" prop="mac">
-                                <el-input class="textarea-mac" type="textarea" v-model="form2.mac"
-                                          placeholder="以换行符分割，最多输入100条mac"></el-input>
+                                <el-input class="textarea-mac diainp2" type="textarea" v-model="form2.mac" placeholder="以换行符分割，最多输入100条mac"></el-input>
                             </el-form-item>
                             <el-form-item label="选择要安装的脚本" prop="plug">
                                 <el-select v-model="form2.plug" placeholder="请选择">
@@ -210,8 +227,13 @@
                     route_mac: '',
                     pkg_str_name: '',
                     pkg_version: '',
-                    logo: ''
+                    pkg_mode: '1',
+                    pkg_mode_time:'',
+                    expired_time:'0',
+                    isTime: true,
+                    operator: ''
                 },
+                pkgmodeTime:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
                 pluginListData:[],
                 pVerlist:[],
                 rules1: {
@@ -224,7 +246,13 @@
                     ],
                     pkg_version: [
                         {required: true, message: '请选择插件的版本', trigger: 'change'}
-                    ]
+                    ],
+                    pkg_mode: [
+                        {required: true, message: '请选择升级方式', trigger: 'change'}
+                    ],
+                    expired_time: [
+                        {required: true, message: '请输入超时时间', trigger: 'blur'}
+                    ],
                 },
 
                 form2: {
@@ -245,39 +273,6 @@
                         {required: true, message: '请选择脚本的版本', trigger: 'change'}
                     ]
                 },
-                pluginList: [
-                    {
-                        value: 'apbridge',
-                        label: 'apbridge'
-                    }, {
-                        value: 'apfree_wifidog',
-                        label: 'apfree_wifidog'
-                    }, {
-                        value: 'frpc',
-                        label: 'frpc'
-                    }, {
-                        value: 'cloudPlugin',
-                        label: 'cloudPlugin'
-                    }, {
-                        value: 'apbridge',
-                        label: 'apbridge'
-                    }, {
-                        value: 'apmodectl',
-                        label: 'apmodectl'
-                    }, {
-                        value: 'kt-base-files',
-                        label: 'kt-base-files'
-                    }, {
-                        value: 'apbridge',
-                        label: 'apbridge'
-                    }, {
-                        value: 'jsInjector',
-                        label: 'jsInjector'
-                    }, {
-                        value: 'apbridge',
-                        label: 'apbridge'
-                    }
-                ],
                 task_type: '1',
                 value: '',
 
@@ -470,7 +465,9 @@
                             route_mac:self.form1.route_mac,
                             pkg_str_name: self.form1.pkg_str_name,
                             pkg_version:self.form1.pkg_version,
-                            logo:self.form1.logo
+                            pkg_mode: self.form1.pkg_mode,
+                            expired_time:self.form1.expired_time,
+                            operator:self.form1.operator
                         };
                         self.fullscreenLoading = true;
                         self.$axios.post(global_.baseUrl + '/manage/apps',params).then(function (res) {
@@ -508,7 +505,10 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        self.pluginListData = res.data.data;
+                        var result = res.data.data;
+                        for(var i in result){
+                            self.pluginListData.push({pkg_str_name:result[i]._id.pkg_str_name,pkg_version:result[i]._id.pkg_version});
+                        }
                     }
                 })
             },
@@ -527,6 +527,18 @@
                     self.form1.pkg_version = resultArr[0].pkg_version || '';
                 }
             },
+            changePkgMode: function(value){
+                if(value == '1'){
+                    this.form1.expired_time = '0';
+                    this.form1.isTime =  true;
+                }else{
+                    this.form1.expired_time = ' ';
+                    this.form1.isTime =  false;
+                }
+                if(value == '3'){
+
+                }
+            },
         }
     }
 </script>
@@ -537,4 +549,5 @@
     .diainp2{width:450px;}
     .inp100{width:100px;}
     /*.textarea-mac{height:160px;}*/
+    .form-box2{width:700px;}
 </style>

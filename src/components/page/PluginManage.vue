@@ -10,15 +10,17 @@
             <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">上传插件</el-button>
         </div>
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <el-table-column prop="pkg_name" label="插件名称" width="250"></el-table-column>
-            <el-table-column prop="pkg_version" label="版本号" width="150"></el-table-column>
-            <el-table-column prop="pkg_developer" label="开发者" width="110"></el-table-column>
-            <el-table-column prop="pkg_create_time" label="上传时间" width="150"></el-table-column>
-            <el-table-column prop="pkg_info" label="插件说明"></el-table-column>
+            <el-table-column prop="pkg_str_name" label="插件名称"></el-table-column>
+            <el-table-column prop="pkg_version" label="版本号"></el-table-column>
+            <!--<el-table-column prop="pkg_developer" label="开发者" width="110"></el-table-column>-->
+            <!--<el-table-column prop="pkg_create_time" label="上传时间" width="150"></el-table-column>-->
+            <!--<el-table-column prop="pkg_info" label="插件说明"></el-table-column>-->
             <el-table-column label="操作" v-if="isShow">
                 <template slot-scope="scope">
-                    <el-button type="success" size="small" @click="downloadPlugin(scope.row.pkg_name)">下载</el-button>
-                    <el-button type="danger" size="small" @click="delPlugin(scope.row.pkg_name)">删除</el-button>
+                    <el-button type="success" size="small" @click="detail(scope.row.pkg_str_name,scope.row.pkg_version)">查看详情</el-button>
+                    <!--<el-button type="danger" size="small" @click="delPlugin(scope.row.pkg_name)">编辑</el-button>-->
+                    <!--<el-button type="success" size="small" @click="downloadPlugin(scope.row.pkg_name)">下载</el-button>-->
+                    <!--<el-button type="danger" size="small" @click="delPlugin(scope.row.pkg_name)">删除</el-button>-->
                 </template>
             </el-table-column>
         </el-table>
@@ -30,7 +32,23 @@
                 :total="pageTotal">
             </el-pagination>
         </div>
-
+        <div class="detailTable" v-if="isShowDetail">
+            <h4>插件相关信息</h4>
+            <el-table :data="detailData" border style="width: 100%" ref="multipleTable" v-loading="loading">
+                <el-table-column prop="pkg_create_time" label="上传时间"></el-table-column>
+                <el-table-column prop="pkg_name" label="插件名称" width="360"></el-table-column>
+                <el-table-column prop="pkg_version" label="版本号"></el-table-column>
+                <el-table-column prop="pkg_developer" label="开发者"></el-table-column>
+                <!--<el-table-column prop="pkg_create_time" label="上传时间" width="150"></el-table-column>-->
+                <!--<el-table-column prop="pkg_info" label="插件说明"></el-table-column>-->
+                <el-table-column label="操作" v-if="isShow">
+                    <template slot-scope="scope">
+                        <el-button type="success" size="small" @click="downloadPlugin(scope.row.pkg_name)">下载</el-button>
+                        <el-button type="danger" size="small" @click="delPlugin(scope.row.pkg_name)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
         <el-dialog title="添加插件版本" :visible.sync="dialogFormVisible" class="digcont">
             <el-form :model="form" :rules="rules" ref="form">
                 <el-form-item label="上传ipk文件" :label-width="formLabelWidth">
@@ -106,7 +124,9 @@
                 fileList:[],
                 fullscreenLoading:false,
                 listData:[],
-                loading:false
+                detailData:[],
+                loading:false,
+                isShowDetail:false
             }
         },
         created: function(){
@@ -117,16 +137,24 @@
                 var self = this;
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/pkg/list',params).then(function(res){
-                   // console.log(res);
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
+                        var result = [];
                         if(JSON.stringify(params) == '{}'){
                             self.pageTotal = res.data.data.length;
-                            self.listData = res.data.data.slice(0,10);
+                            result = res.data.data.slice(0,10);
                         }else{
-                            self.listData = res.data.data;
+                            result = res.data.data;
                         }
-
+                        for(var i in result){
+                            self.listData.push({pkg_str_name:result[i]._id.pkg_str_name,pkg_version:result[i]._id.pkg_version});
+                        }
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -212,6 +240,12 @@
 //                        $(a).remove();
                     }
 
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.$message({message:'下载成功',type:'success'});
                         self.getData();
@@ -233,6 +267,12 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/pkg/del',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.$message({message:'删除成功',type:'success'});
                         self.getData({});
@@ -249,17 +289,42 @@
             handleCurrentChange:function(val){
                 this.currentPage = val;
                 this.getData({page_size:10,current_page:this.currentPage});
+            },
+            detail: function(name,version){
+                var self = this;
+                var params = {
+                    pkg_str_name:name,
+                    pkg_version:version
+                }
+                self.loading = true;
+                self.$axios.post(global_.baseUrl+'/pkg/detail',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 0){
+                        self.isShowDetail = true;
+                        self.detailData = res.data.extra;
+                    }else{
+                        self.$message.error(res.data.extra)
+                    }
+                })
             }
         }
     }
 </script>
 
 <style scoped>
-.handle-box{margin-bottom: 20px;}
-.handle-select{width: 120px;}
-.handle-input{width: 300px;display: inline-block;}
-.rad-group{margin-bottom:20px;}
-.diainp{width:217px;}
-.diainp2{width:400px;}
-.upload-demo{}
+    .handle-box{margin-bottom: 20px;}
+    .handle-select{width: 120px;}
+    .handle-input{width: 300px;display: inline-block;}
+    .rad-group{margin-bottom:20px;}
+    .diainp{width:217px;}
+    .diainp2{width:400px;}
+    .upload-demo{}
+    .detailTable{margin-top:20px;}
+    .detailTable h4{padding-bottom:10px;color:#333;}
 </style>

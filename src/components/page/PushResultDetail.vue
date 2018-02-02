@@ -6,36 +6,63 @@
                 <el-breadcrumb-item>执行结果</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class=''>
-            <div class="handle-box2 rad-group">
-                <el-input v-model="select_word" placeholder="请输入任务ID" class="handle-input mr10"></el-input>
-                <el-button type="primary" icon="search" @click="search">搜索</el-button>
-            </div>
+        <div v-if="isShow=='firmware'?true:false">
+            <h4>基本信息</h4>
+            <el-table :data="firmwareData" border style="width: 100%;margin:20px 0 40px;" ref="multipleTable">
+                <el-table-column prop="additions.dest_version" label="下发版本"></el-table-column>
+                <el-table-column prop="" label="设备型号"></el-table-column>
+                <el-table-column prop="" label="升级方式">
+                    <template slot-scope="scope">{{scope.row.additions.upgrade_mode == '1'?'实时自动': (scope.row.additions.upgrade_mode == '2'?'用户自动':'定时自动')}}</template>
+                </el-table-column>
+                <el-table-column prop="" label="配置更新"></el-table-column>
+                <el-table-column prop="operator_name" label="执行人"></el-table-column>
+            </el-table>
+            <hr style="margin-bottom:40px;height:1px;border:none;border-top:1px solid #ddd;">
+            <el-table :data="firmwareData" border style="width: 100%" ref="multipleTable">
+                <el-table-column prop="response_timestamp" label="完成时间" width="180"></el-table-column>
+                <el-table-column prop="mac" label="路由MAC" width="180"></el-table-column>
+                <el-table-column prop="" label="之前版本" width="180"></el-table-column>
+                <el-table-column prop="additions.dest_version" label="更新后版本" width="180"></el-table-column>
+                <el-table-column prop="additions.upgrade_status" label="升级状态" width="100">
+                    <template slot-scope="scope">
+                        <el-tag :type="scope.row.additions.upgrade_status == 'sysupgrade_ok' ? 'success' : 'danger'" close-transition>{{scope.row.additions.upgrade_status == 'sysupgrade_ok'?'成功': (scope.row.sjzt == 'fail'?'失败':'未知')}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作">
+                    <template slot-scope="scope">
+                        <el-button class="btn1" type="info" size="small" @click="handleEdit(scope.row.mac)">详情</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
         </div>
-        <el-table :data="appsData" border style="width: 100%" ref="multipleTable">
-            <!--<el-table-column type="selection" width="55"></el-table-column>-->
-            <el-table-column prop="response_timestamp" label="完成时间" width="180"></el-table-column>
-            <el-table-column prop="mac" label="路由MAC" width="140"></el-table-column>
-            <el-table-column prop="pubsub_status" label="设备状态" width="100">
-                <template slot-scope="scope">
-                    <el-tag :type="scope.row.pubsub_status == 'response_ok' ? 'success' : 'warning'" close-transition>{{scope.row.pubsub_status == 'response_ok'?'在线': (scope.row.sbzt == 'offline'?'离线':'未知')}}</el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column prop="" label="之前版本" width="140"></el-table-column>
-            <el-table-column prop="" label="更新后版本" width="120"></el-table-column>
-            <el-table-column prop="operator_name" label="推送人" width="100"></el-table-column>
-            <el-table-column prop="sjzt" label="升级状态" width="100">
-                <template slot-scope="scope">
-                    <el-tag :type="scope.row.sjzt == 'success' ? 'success' : 'danger'" close-transition>{{scope.row.sjzt == 'success'?'成功': (scope.row.sjzt == 'fail'?'失败':'未知')}}</el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column label="操作">
-                <template slot-scope="scope">
-                    <el-button class="btn1" type="info" size="small" @click="handleEdit(scope.row.lymac)">详情</el-button>
-                </template>
-            </el-table-column>
-        </el-table>
-
+        <div v-if="isShow=='apps'?true:false">
+            <h4>基本信息</h4>
+            <el-table :data="appsData" border style="width: 100%;margin:20px 0 40px;" ref="multipleTable">
+                <el-table-column prop="" label="插件名称"></el-table-column>
+                <el-table-column prop="" label="插件版本"></el-table-column>
+                <el-table-column prop="operator_name" label="执行人"></el-table-column>
+            </el-table>
+            <hr style="margin-bottom:40px;height:1px;border:none;border-top:1px solid #ddd;">
+            <el-table :data="appsData" border style="width: 100%" ref="multipleTable">
+                <el-table-column prop="response_timestamp" label="安装时间"></el-table-column>
+                <el-table-column prop="mac" label="路由MAC"></el-table-column>
+                <el-table-column prop="pubsub_status" label="设备状态">
+                    <template slot-scope="scope">
+                        <el-tag :type="scope.row.pubsub_status == 'response_ok' ? 'success' : 'warning'" close-transition>{{scope.row.pubsub_status == 'response_ok'?'在线': (scope.row.sbzt == 'offline'?'离线':'未知')}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="sjzt" label="升级状态">
+                    <template slot-scope="scope">
+                        <el-tag :type="scope.row.pubsub_status == 'response_ok' ? 'success' : 'warning'" close-transition>{{scope.row.pubsub_status == 'response_ok'?'在线': (scope.row.sbzt == 'offline'?'离线':'未知')}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作">
+                    <template slot-scope="scope">
+                        <el-button class="btn1" type="info" size="small" @click="handleEdit(scope.row.mac)">详情</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
 
     </div>
 </template>
@@ -49,44 +76,10 @@
                 curId:'',
                 curRadio:'',
                 loading:false,
-                information: {
-                    pagination:{},
-                    data:[]
-                },
-                columns: [
-                    {
-                        name: 'Id',
-                        key: 'id',
-                    },
-                    {
-                        name: 'Name',
-                        key: 'name',
-                    },
-                    {
-                        name: 'email',
-                        key: 'email',
-                    },
-                    {
-                        name: 'ip',
-                        key: 'ip',
-                    }
-                ],
-                actions: [
-                    {
-                        text: 'Click',
-                        class: 'btn-primary',
-                        event: function(e, row) {
-                            self.$message('选中的行数： ' + row.row.id)
-                        }
-                    }
-                ],
-                query:'',
-
                 radio3:'ROM升级',
-
                 appsData:[],
-                filewareData:[],
-                select_word:''
+                firmwareData:[],
+                isShow:'apps',
 
             }
         },
@@ -99,9 +92,11 @@
                 self.curId = self.$route.query.curid;
                 self.curRadio = self.$route.query.curRadio;
                 if(self.curRadio == 'apps'){//插件升级
+                    self.isShow = 'apps';
                     self.getAppsDetailData();
                 }
                 if(self.curRadio == 'firmware'){
+                    self.isShow = 'firmware';
                     self.getFirmwareData();
                 }
             },
@@ -136,7 +131,7 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        self.filewareData = res.data.extra
+                        self.firmwareData = res.data.extra
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -147,25 +142,7 @@
             },
             handleEdit: function(mac){
                 this.$router.push('/updateromstatus');
-            },
-            test: function(event){
-                console.log(event);
-            },
-            arraySpanMethod: function(row, column, rowIndex, columnIndex){
-                if (rowIndex % 2 === 0) {
-                    if (columnIndex === 0) {
-                        return [1, 2];
-                    } else if (columnIndex === 1) {
-                        return [0, 0];
-                    }
-                }
-            },
-            changeTab: function(){
-                console.log(this.radio3);
-//                this.$message('选择'+ this.radio3);
-            },
-            search: function(){
-
+                this.$router.push({path:'/updateromstatus',query:{curid:this.curId,curmac:mac,curRadio:this.curRadio}});
             },
             handleCurrentChange:function(val){
 //                this.cur_page = val;

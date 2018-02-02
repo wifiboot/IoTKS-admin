@@ -19,24 +19,6 @@
         </div>
 
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
-            <!--<el-table-column type="expand">
-                <template slot-scope="props">
-                    <el-form label-position="left" inline class="demo-table-expand">
-                        <el-form-item label="hostname">
-                            <span>{{JSON.parse(props.row.response_msg).hostname }}</span>
-                        </el-form-item>
-                        <el-form-item label="boardname">
-                            <span>{{JSON.parse(props.row.response_msg).boardname}}</span>
-                        </el-form-item>
-                        <el-form-item label="fwversion">
-                            <span>{{ JSON.parse(props.row.response_msg).fwversion }}</span>
-                        </el-form-item>
-                        <el-form-item label="ssid">
-                            <span>{{ JSON.parse(props.row.response_msg).ssid }}</span>
-                        </el-form-item>
-                    </el-form>
-                </template>
-            </el-table-column>-->
             <el-table-column prop="request_msg" label="操作" width="120">
                 <template slot-scope="scope">
                     <!--<el-tag>{{JSON.parse(scope.row.request_msg).item == 'sysinfo'?'ROM升级':'其他'}}</el-tag>-->
@@ -158,6 +140,9 @@
             },
             changeTab: function(){
                 var self = this;
+                if(self.curRadio == 'firmware'){
+                    self.getFirmwareData({});
+                }
                 if(self.curRadio == 'apps'){
                     self.getAppsData({});
                 }
