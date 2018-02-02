@@ -8,7 +8,7 @@
         </div>
         <div v-if="isShow=='firmware'?true:false">
             <h4>基本信息</h4>
-            <el-table :data="firmwareData" border style="width: 100%;margin:20px 0 40px;" ref="multipleTable">
+            <el-table :data="firmwareData1" border style="width: 100%;margin:20px 0 40px;" ref="multipleTable">
                 <el-table-column prop="additions.dest_version" label="下发版本"></el-table-column>
                 <el-table-column prop="" label="设备型号"></el-table-column>
                 <el-table-column prop="" label="升级方式">
@@ -37,10 +37,10 @@
         </div>
         <div v-if="isShow=='apps'?true:false">
             <h4>基本信息</h4>
-            <el-table :data="appsData" border style="width: 100%;margin:20px 0 40px;" ref="multipleTable">
-                <el-table-column prop="" label="插件名称"></el-table-column>
-                <el-table-column prop="" label="插件版本"></el-table-column>
-                <el-table-column prop="operator_name" label="执行人"></el-table-column>
+            <el-table :data="appsData1" border style="width: 100%;margin:20px 0 40px;" ref="multipleTable">
+                <el-table-column prop="additions.apps_name" label="插件名称"></el-table-column>
+                <el-table-column prop="additions.apps_version" label="插件版本"></el-table-column>
+                <el-table-column prop="additions.operator" label="执行人"></el-table-column>
             </el-table>
             <hr style="margin-bottom:40px;height:1px;border:none;border-top:1px solid #ddd;">
             <el-table :data="appsData" border style="width: 100%" ref="multipleTable">
@@ -79,6 +79,8 @@
                 radio3:'ROM升级',
                 appsData:[],
                 firmwareData:[],
+                appsData1:[],
+                firmwareData1:[],
                 isShow:'apps',
 
             }
@@ -111,7 +113,8 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        self.appsData = res.data.extra
+                        self.appsData = res.data.extra;
+                        self.appsData1 = res.data.extra.slice(0,1);
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -131,7 +134,8 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        self.firmwareData = res.data.extra
+                        self.firmwareData = res.data.extra;
+                        self.firmwareData1 = res.data.extra.slice(0,1);
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -154,16 +158,6 @@
             },
             onSearch:function(searchQuery) {
                 this.query = searchQuery;
-            }
-        },
-        computed:{
-            getData:function(){
-                const self = this;
-                return self.information.data.filter(function (d) {
-                    if(d.name.indexOf(self.query) > -1){
-                        return d;
-                    }
-                })
             }
         },
     }

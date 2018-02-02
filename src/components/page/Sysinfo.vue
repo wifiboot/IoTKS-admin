@@ -61,9 +61,14 @@
                         };
                         // self.$axios.defaults.withCredentials = true;
                         self.$axios.post(global_.baseUrl+'/device/sysinfo',params).then(function(res){
-                            // console.log(res);
                             self.fullscreenLoading  = false;
                             self.loading = false;
+                            if(res.data.ret_code == '1001'){
+                                self.$message({message:res.data.extra,type:'warning'});
+                                setTimeout(function(){
+                                    self.$router.replace('login');
+                                },2000)
+                            }
                             if(res.data.ret_code == 0){
                                 self.form1.result = JSON.stringify(res.data.extra);
                             }else{

@@ -139,6 +139,5 @@
 </script>
 <style>
     .mb40{margin-bottom:40px;}
-    .tab-cont{padding:40px;/*border-top:1px solid #dfe6ec;*/}
-    /*.textarea-mac{height:160px;}*/
+    .tab-cont{padding:40px;}
 </style>

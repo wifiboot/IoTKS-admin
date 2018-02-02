@@ -154,11 +154,6 @@
             getData: function(params){//获取rom列表
                 var self = this;
                 self.loading = true;
-                // var params = {
-//                    page_size:10,
-//                    current_page:1,
-//                    sort:'asc'
-//                 };
                 self.$axios.post(global_.baseUrl+'/rom/list',params).then(function(res){
 //                    console.log(res);
                     self.loading = false;

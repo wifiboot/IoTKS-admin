@@ -148,6 +148,12 @@
                 // console.log(response);
                 this.fullscreenLoading  = false;
                 this.dialogFormVisible = false;
+                if(response.ret_code == '1001'){
+                    self.$message({message:response.extra,type:'warning'});
+                    setTimeout(function(){
+                        self.$router.replace('login');
+                    },2000)
+                }
                 if(response.ret_code == 0){
                     this.$message({message:'创建成功',type:'success'});
                     this.getData({});
@@ -210,6 +216,12 @@
 //                        $(a).remove();
                     }
 
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.$message({message:'下载成功',type:'success'});
                         self.getData();
@@ -231,6 +243,12 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/script/del',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.$message({message:'删除成功',type:'success'});
                         self.getData({});
@@ -252,6 +270,12 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/script/release',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
                         self.getData({});
@@ -273,6 +297,12 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/script/revoke',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.$message({message:'操作成功',type:'success'});
                         self.getData({});

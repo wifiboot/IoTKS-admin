@@ -36,12 +36,6 @@
                 <el-form-item label="设备型号" prop="dev_name" :label-width="formLabelWidth">
                     <el-input v-model="form.dev_name" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <!--<el-form-item label="芯片型号" :label-width="formLabelWidth">-->
-                    <!--<el-select v-model="form.region" placeholder="请选择芯片型号">-->
-                        <!--<el-option label="区域一" value="shanghai"></el-option>-->
-                        <!--<el-option label="区域二" value="beijing"></el-option>-->
-                    <!--</el-select>-->
-                <!--</el-form-item>-->
                 <el-form-item label="设备厂商" prop="dev_vendor" :label-width="formLabelWidth">
                     <el-input v-model="form.dev_vendor" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
@@ -113,8 +107,13 @@
 //                    sort:'asc'
 //                 };
                 self.$axios.post(global_.baseUrl+'/devtype/list',params).then(function(res){
-//                    console.log(res);
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         if(JSON.stringify(params) == '{}'){
                             self.pageTotal = res.data.extra.length;
@@ -144,10 +143,14 @@
                     comment:self.form.comment
                 };
                 self.loading = true;
-//                console.log(params);
                 self.$axios.post(global_.baseUrl+'/devtype/add',params).then(function(res){
-//                    console.log(res);
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.$message('添加成功');
                         self.getData();
@@ -168,6 +171,12 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/devtype/del',params).then(function(res){
                     self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
                     if(res.data.ret_code == 0){
                         self.$message('删除成功');
                         self.getData();
