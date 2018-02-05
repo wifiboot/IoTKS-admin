@@ -53,7 +53,7 @@
                 </el-table-column>
             </el-table-column>
             <el-table-column prop="operator_name" label="操作人" width="120"></el-table-column>
-            <el-table-column label="详情" fixed="right">
+            <el-table-column label="详情">
                 <template slot-scope="scope">
                     <el-button class="btn1" type="info" size="small" @click="goDetail(scope.row._id)">详情</el-button>
                 </template>

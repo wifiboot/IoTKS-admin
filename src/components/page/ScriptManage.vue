@@ -168,7 +168,6 @@
             },
             handleChange:function(file, fileList) {
                 var self = this;
-                console.log(file);
                 this.form.script_name = file.name;
                 var reader=new FileReader();
                 reader.onload=function(f){
@@ -201,19 +200,26 @@
                     script_name:fileName
                 };
                 self.loading = true;
+                self.$axios.defaults.timeout = 25000;
                 self.$axios.post(global_.baseUrl+'/script/download',params).then(function(res){
                     self.loading = false;
-                    var blob = new Blob([res.data]);
-                    var reader = new FileReader();
-                    reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表情href
-                    reader.onload = function (e) {
-                        // 转换完成，创建一个a标签用于下载
-                        var a = document.createElement('a');
-                        a.download = fileName;
-                        a.href = e.target.result;
-//                        $("body").append(a);  // 修复firefox中无法触发click
-                        a.click();
-//                        $(a).remove();
+                    if(res.status == 200){
+                        var blob = new Blob([res.data]);
+                        var reader = new FileReader();
+                        reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表情href
+                        reader.onload = function (e) {
+                            // 转换完成，创建一个a标签用于下载
+                            var a = document.createElement('a');
+                            a.download = fileName;
+                            a.href = e.target.result;
+                            // $("body").append(a);
+                            // a.click();
+                            // $(a).remove();
+                            document.body.appendChild(a);  // 修复firefox中无法触发click
+                            a.click();
+                            document.body.removeChild(a);
+
+                        }
                     }
 
                     if(res.data.ret_code == '1001'){
@@ -230,7 +236,7 @@
                     }
 
                 },function(err){
-                    self.$message.error('下载失败');
+                    self.$message.error(res);
                     self.loading = false;
                     console.log(err);
                 })
@@ -325,20 +331,11 @@
 </script>
 
 <style scoped>
-    .handle-box{
-        margin-bottom: 20px;
-    }
-    .handle-select{
-        width: 120px;
-    }
-    .handle-input{
-        width: 300px;
-        display: inline-block;
-    }
-
+    .handle-box{margin-bottom: 20px;}
+    .handle-select{width: 120px;}
+    .handle-input{width: 300px;display: inline-block;}
     .rad-group{margin-bottom:20px;}
     .btn1{margin-bottom:5px;margin-top:5px;margin-left:0;}
-    /*.digcont{width:600px;}*/
     .diainp{width:217px;}
     .diainp2{width:400px;}
     .upload-demo{}

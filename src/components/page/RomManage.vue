@@ -236,9 +236,9 @@
                         var a = document.createElement('a');
                         a.download = fileName;
                         a.href = e.target.result;
-//                        $("body").append(a);  // 修复firefox中无法触发click
+                        document.body.appendChild(a);  // 修复firefox中无法触发click
                         a.click();
-//                        $(a).remove();
+                        document.body.removeChild(a);
                     }
                     if(res.data.ret_code == '1001'){
                         self.$message({message:res.data.extra,type:'warning'});

@@ -33,18 +33,21 @@
                 </template>
             </el-table-column>
             <el-table-column prop="user_create_time" label="创建时间" width="150"></el-table-column>
-            <el-table-column label="在线设备" width="100">
+            <el-table-column label="在线设备">
                 <template slot-scope="scope">
                     <el-tag type="warning">{{scope.row.user_online_count + '/ ' + scope.row.user_device_count}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column label="操作" width="240" fixed="right">
+            <el-table-column label="操作" width="240">
                 <template slot-scope="scope">
                     <!--<el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.user_account)">修改密码</el-button>-->
                     <el-button class="btn1" size="small" type="text" @click="resetPassword(scope.row.user_account)">重置密码</el-button>
-                    <el-button class="btn1" size="small" :disabled="scope.row.user_type =='1'?false:true" type="text" @click="toRouter(scope.row.user_account)">导入路由</el-button>
-                    <el-button class="btn1" size="small" v-if="scope.row.user_status =='0'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>
-                    <el-button class="btn1" size="small" v-else @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>
+                    <!--<el-button class="btn1" size="small" :disabled="scope.row.user_type =='1'?false:true" type="text" @click="toRouter(scope.row.user_account)">导入路由</el-button>-->
+                    <el-button class="btn1" size="small" v-if="scope.row.user_type =='1'?true:false" type="text" @click="toRouter(scope.row.user_account)">导入路由</el-button>
+                    <el-button class="btn1" size="small" v-if="scope.row.user_status =='0' && scope.row.user_type =='1'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>
+                    <el-button class="btn1" size="small" v-else-if="scope.row.user_status =='1' && scope.row.user_type =='1'" @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>
+                    <!--<el-button class="btn1" size="small" v-if="scope.row.user_status =='0'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>-->
+                    <!--<el-button class="btn1" size="small" v-else @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>-->
                 </template>
             </el-table-column>
         </el-table>
