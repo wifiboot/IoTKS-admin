@@ -42,6 +42,7 @@
                 <el-form-item label="上传" :label-width="formLabelWidth">
                     <el-upload
                         class="upload-demo"
+                        multiple="false"
                         ref="upload"
                         name="file_name"
                         :action="uploadUrl"
@@ -187,11 +188,19 @@
                 return true;
             },
             handleSuccess: function(response,file,fileList){
+                var self = this;
                 if(response.ret_code == 0){
                     this.$message({message:'创建成功',type:'success'});
                 }else{
                     this.$message.error(response.extra);
                 }
+                self.form.file_name = '';
+                self.form.rom_version = '';
+                self.form.dev_type = '';
+                self.form.ver_type = '';
+                self.form.md5_value = '';
+                self.form.comment = '';
+                self.fileList3 = [];
                 this.fullscreenLoading  = false;
 
                 this.dialogFormVisible = false;

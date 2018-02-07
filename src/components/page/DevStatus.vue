@@ -42,7 +42,7 @@
             <el-table-column label="操作" width="170">
                 <template slot-scope="scope">
                     <el-button class="btn1" size="small" type="text" @click="reset(scope.row.mac)">重启路由</el-button>
-                    <el-button class="btn1" size="small" type="danger" @click="del(scope.row.mac)">删除路由</el-button>
+                    <el-button class="btn1" v-if="curUser=='0'" size="small" type="danger" @click="del(scope.row.mac)">删除路由</el-button>
                 </template>
             </el-table-column>
         </el-table>

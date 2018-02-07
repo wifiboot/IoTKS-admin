@@ -21,7 +21,7 @@
                 </el-form>
             </div>
             <div class="form-box tab-cont" style="width:90%;" v-if="isShow=='apps'?true:false" v-loading="loading">
-                <el-form :model="formApps" ref="form0" label-width="150px">
+                <el-form :model="formApps" ref="formApps" label-width="150px">
                     <el-form-item label="路由响应信息" prop="response_msg">
                         <el-input type="textarea" :autosize="{ minRows: 3, maxRows: 8}" v-model="formApps.response_msg"></el-input>
                     </el-form-item>
@@ -30,6 +30,16 @@
                     </el-form-item>
                     <el-form-item label="下发插件命令" prop="request_msg">
                         <el-input type="textarea" :autosize="{ minRows: 3, maxRows: 8}" v-model="formApps.request_msg"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <div class="form-box tab-cont" style="width:90%;" v-if="isShow=='script'?true:false" v-loading="loading">
+                <el-form :model="formScript" ref="formScript" label-width="150px">
+                    <el-form-item label="路由响应信息" prop="response_msg">
+                        <el-input type="textarea" :autosize="{ minRows: 3, maxRows: 8}" v-model="formScript.response_msg"></el-input>
+                    </el-form-item>
+                    <el-form-item label="下发脚本命令" prop="request_msg">
+                        <el-input type="textarea" :autosize="{ minRows: 3, maxRows: 8}" v-model="formScript.request_msg"></el-input>
                     </el-form-item>
                 </el-form>
             </div>
@@ -62,6 +72,10 @@
                     script:'',
                     request_msg:''
                 },
+                formScript:{
+                    response_msg: '',
+                    request_msg:''
+                }
             }
         },
         created: function(){
@@ -83,6 +97,34 @@
                     self.titMsg = self.titArr[1];
                     self.getAppsDetailData();
                 }
+                if(self.curRadio == 'script'){
+                    self.isShow = 'script';
+                    self.titMsg = self.titArr[2];
+                    self.getScriptDetailData();
+                }
+            },
+            getFirmwareData: function(){
+                var self = this;
+                self.$axios.post(global_.baseUrl+'/task/list/detail',{uuid:self.curId}).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 0){
+                        var data = res.data.extra[0];
+                        self.formFirmware.msg = data.pubsub_status=='sysupgrade_ok'?'升级成功':'升级失败';
+                        self.formFirmware.response_msg = data.response_msg;
+                        self.formFirmware.request_msg = data.request_msg;
+                    }else{
+                        self.$message.error(res.data.extra)
+                    }
+                },function(err){
+                    self.loading = false;
+                    console.log(err);
+                });
             },
             getAppsDetailData: function(){
                 var self = this;
@@ -111,9 +153,13 @@
                     console.log(err);
                 });
             },
-            getFirmwareData: function(){
+            getScriptDetailData: function(){
                 var self = this;
-                self.$axios.post(global_.baseUrl+'/task/list/detail',{uuid:self.curId}).then(function(res){
+                var params = {
+                    uuid:self.curId,
+                    mac:self.curMac
+                }
+                self.$axios.post(global_.baseUrl+'/manage/script_detail_detail',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == '1001'){
                         self.$message({message:res.data.extra,type:'warning'});
@@ -123,9 +169,8 @@
                     }
                     if(res.data.ret_code == 0){
                         var data = res.data.extra[0];
-                        self.formFirmware.msg = data.pubsub_status=='sysupgrade_ok'?'升级成功':'升级失败';
-                        self.formFirmware.response_msg = data.response_msg;
-                        self.formFirmware.request_msg = data.request_msg;
+                        self.formScript.response_msg = data.response_msg;
+                        self.formScript.request_msg = data.request_msg;
                     }else{
                         self.$message.error(res.data.extra)
                     }

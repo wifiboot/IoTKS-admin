@@ -113,7 +113,7 @@
             this.getData({});
         },
         methods: {
-            getData: function(params){//获取rom列表
+            getData: function(params){
                 var self = this;
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/script/list',params).then(function(res){

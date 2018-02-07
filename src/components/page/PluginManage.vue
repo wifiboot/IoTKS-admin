@@ -73,11 +73,11 @@
                 <el-form-item label="版本号" prop="pkg_version" :label-width="formLabelWidth">
                     <el-input v-model="form.pkg_version" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="开发者" prop="pkg_developer" :label-width="formLabelWidth">
-                    <el-input v-model="form.pkg_developer" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
                 <el-form-item label="插件说明" prop="pkg_info" :label-width="formLabelWidth">
                     <el-input v-model="form.pkg_info" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="开发者" prop="pkg_developer" :label-width="formLabelWidth">
+                    <el-input v-model="form.pkg_developer" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -103,8 +103,8 @@
                     pkg_name:'',
                     pkg_str_name:'',
                     pkg_version:'',
-                    pkg_developer:'',
-                    pkg_info:''
+                    pkg_info:'',
+                    pkg_developer:''
                 },
                 rules: {
                     pkg_str_name:[
@@ -112,9 +112,11 @@
                     ],
                     pkg_version:[
                         {required: true, message: '请输入插件版本', trigger: 'blur'},
+                        {validator:this.validateSpace,trigger:'blur'}
                     ],
                     pkg_info:[
                         {required: true, message: '请输入插件相关信息', trigger: 'blur'},
+                        {validator:this.validateSpace,trigger:'blur'}
                     ]
                 },
                 formLabelWidth: '120px',
@@ -133,8 +135,9 @@
             this.getData({});
         },
         methods: {
-            getData: function(params){//获取rom列表
+            getData: function(params){
                 var self = this;
+                self.listData = [];
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/pkg/list',params).then(function(res){
                     self.loading = false;
@@ -203,6 +206,14 @@
                 }else{
                     self.$message({message:'文件名称不符合标准',type:'warning'});
                     return false
+                }
+            },
+            validateSpace: function (rule, value, callback) {
+                var self = this;
+                if(value.indexOf(' ')>=0){
+                    callback(new Error('输入有空格'));
+                }else{
+                    callback();
                 }
             },
             saveAdd: function(formName){
@@ -275,6 +286,7 @@
                     }
                     if(res.data.ret_code == 0){
                         self.$message({message:'删除成功',type:'success'});
+                        self.isShowDetail = false;
                         self.getData({});
                     }else{
                         self.$message.error(res.data.extra)

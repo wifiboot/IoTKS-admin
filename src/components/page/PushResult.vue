@@ -10,7 +10,7 @@
             <el-radio-group v-model="curRadio" @change="changeTab">
                 <el-radio-button label="firmware">ROM升级</el-radio-button>
                 <el-radio-button label="apps">插件升级</el-radio-button>
-                <el-radio-button label="remote_cmd">脚本推送</el-radio-button>
+                <el-radio-button label="script">脚本推送</el-radio-button>
             </el-radio-group>
             <div class="handle-box2">
                 <el-input v-model="search_word" placeholder="请输入任务ID" class="handle-input mr10"></el-input>
@@ -25,10 +25,10 @@
                     <el-tag type="primary">{{curRadio == 'firmware'?'ROM升级':(curRadio == 'apps'?'插件升级':'脚本升级')}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column prop="request_timestamp" label="时间" width="170"></el-table-column>
+            <el-table-column prop="request_timestamp" sortable label="时间" width="170"></el-table-column>
             <el-table-column prop="_id" label="任务ID" width="320"></el-table-column>
-            <el-table-column prop="mac" label="指定MAC" width="150">
-                <template slot-scope="scope">{{scope.row.mac.toString()}}</template>
+            <el-table-column prop="mac" label="指定MAC" width="160">
+                <template slot-scope="scope">{{scope.row.mac.length>1?scope.row.mac[0] + ' ···':scope.row.mac.toString()}}</template>
             </el-table-column>
             <el-table-column prop="upgrade_mode" label="升级方式" width="100">
                 <template slot-scope="scope">
@@ -138,6 +138,31 @@
                     console.log(err);
                 });
             },
+            getScriptData: function(params){
+                var self = this;
+                self.$axios.post(global_.baseUrl+'/manage/script_result',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 0){
+                        if(JSON.stringify(params) == '{}'){
+                            self.pageTotal = res.data.extra.length;
+                            self.listData = res.data.extra.slice(0,10);
+                        }else{
+                            self.listData = res.data.extra;
+                        }
+                    }else{
+                        self.$message.error(res.data.extra)
+                    }
+                },function(err){
+                    self.loading = false;
+                    console.log(err);
+                });
+            },
             changeTab: function(){
                 var self = this;
                 if(self.curRadio == 'firmware'){
@@ -146,10 +171,26 @@
                 if(self.curRadio == 'apps'){
                     self.getAppsData({});
                 }
+                if(self.curRadio == 'script'){
+                    self.getScriptData({});
+                }
             },
             handleCurrentChange:function(val){
-                this.currentPage = val;
-                this.getFirmwareData({page_size:10,current_page:this.currentPage});
+                var self = this;
+                self.currentPage = val;
+                var params = {
+                    page_size:10,current_page:this.currentPage
+                };
+                if(self.curRadio == 'firmware'){
+                    self.getFirmwareData(params);
+                }
+                if(self.curRadio == 'apps'){
+                    self.getAppsData(params);
+                }
+                if(self.curRadio == 'script'){
+                    self.getScriptData(params);
+                }
+
             },
             search: function(){
                 var self = this;

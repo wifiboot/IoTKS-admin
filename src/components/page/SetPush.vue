@@ -12,7 +12,7 @@
                     <div class="form-box tab-cont form-box2">
                         <el-form :model="form0" :rules="rules0" ref="form0" label-width="150px">
                             <el-form-item label="输入指定MAC" prop="router_mac">
-                                <el-input type="textarea" v-model="form0.router_mac" class="diainp2"></el-input>
+                                <el-input type="textarea" v-model="form0.router_mac"  placeholder="以换行符分割，最多输入100条mac" class="diainp2"></el-input>
                             </el-form-item>
                             <el-form-item label="选择设备型号" prop="dev_type">
                                 <el-select v-model="form0.dev_type" placeholder="请选择" @change="changeDev">
@@ -118,7 +118,6 @@
                             </el-form-item>
                             <el-form-item>
                                 <el-button type="primary" @click="onPluginSubmit('form1')">安装</el-button>
-                                <!--<el-button>取消</el-button>-->
                             </el-form-item>
                         </el-form>
                     </div>
@@ -127,41 +126,31 @@
                 <el-tab-pane label="推送脚本" name="3">
 
                     <div class="form-box tab-cont form-box2">
-                        <el-form ref="form" :model="form2" :rules="rules2" label-width="150px">
-                            <el-form-item label="输入指定MAC" prop="mac">
-                                <el-input class="textarea-mac diainp2" type="textarea" v-model="form2.mac" placeholder="以换行符分割，最多输入100条mac"></el-input>
+                        <el-form ref="form2" :model="form2" :rules="rules2" label-width="150px">
+                            <el-form-item label="输入指定MAC" prop="route_mac">
+                                <el-input class="textarea-mac diainp2" type="textarea" v-model="form2.route_mac" placeholder="以换行符分割，最多输入100条mac"></el-input>
                             </el-form-item>
-                            <el-form-item label="选择要安装的脚本" prop="plug">
-                                <el-select v-model="form2.plug" placeholder="请选择">
-                                    <el-option key="apbridge" label="apbridge" value="bbk"></el-option>
-                                    <el-option key="apfree_wifidog" label="apfree_wifidog" value="xtc"></el-option>
-                                    <el-option key="apmodectl" label="apmodectl" value="imoo"></el-option>
-                                    <el-option key="apmodectl_wd" label="apmodectl_wd" value="imoo"></el-option>
-                                    <el-option key="cloudPlugin" label="cloudPlugin" value="imoo"></el-option>
-                                    <el-option key="frpc" label="frpc" value="imoo"></el-option>
-                                    <el-option key="jsInjector" label="jsInjector" value="imoo"></el-option>
-                                    <el-option key="kt-base-files" label="kt-base-files" value="imoo"></el-option>
-                                    <el-option key="luasocket" label="luasocket" value="imoo"></el-option>
-                                    <el-option key="mosquitto" label="mosquitto" value="imoo"></el-option>
-                                    <el-option key="jsInjector" label="jsInjector" value="imoo"></el-option>
+                            <el-form-item label="选择要安装的脚本" prop="script_name">
+                                <el-select v-model="form2.script_name" placeholder="请选择">
+                                    <el-option
+                                        v-for="item in scriptListData"
+                                        :key="item.script_name"
+                                        :label="item.script_name"
+                                        :value="item.script_name">
+                                    </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item label="选择脚本的版本" prop="version">
-                                <el-select v-model="form2.version" placeholder="请选择">
-                                    <el-option key="apbridge" label="0.7.22" value="bbk"></el-option>
-                                    <el-option key="apfree_wifidog" label="apfree_wifidog" value="xtc"></el-option>
-                                    <el-option key="apmodectl" label="apmodectl" value="imoo"></el-option>
-                                    <el-option key="apmodectl_wd" label="apmodectl_wd" value="imoo"></el-option>
-                                    <el-option key="cloudPlugin" label="cloudPlugin" value="imoo"></el-option>
-                                    <el-option key="frpc" label="frpc" value="imoo"></el-option>
-                                </el-select>
+                            <el-form-item label="服务器端口号" prop="server_port">
+                                <el-input v-model="form2.server_port" class="diainp"></el-input>
                             </el-form-item>
-                            <el-form-item label="操作人" prop="name">
-                                <el-input v-model="form2.name" class="diainp"></el-input>
+                            <el-form-item label="服务器路径" prop="script_url">
+                                <el-input v-model="form2.script_url" class="diainp"></el-input>
+                            </el-form-item>
+                            <el-form-item label="操作人" prop="operator">
+                                <el-input v-model="form2.operator" class="diainp"></el-input>
                             </el-form-item>
                             <el-form-item>
-                                <el-button type="primary" @click="onJavaSubmit('form2')">安装</el-button>
-                                <!--<el-button>取消</el-button>-->
+                                <el-button type="primary" @click="onScriptSubmit('form2')">安装</el-button>
                             </el-form-item>
                         </el-form>
                     </div>
@@ -218,7 +207,8 @@
                         {required: true, message: '请输入超时时间', trigger: 'blur'}
                     ],
                     operator_name: [
-                        {required: true, message: '请输入操作人', trigger: 'blur'}
+                        {required: true, message: '请输入操作人', trigger: 'blur'},
+                        {validator: this.validateSpace, trigger: 'blur'}
                     ]
 
                 },
@@ -256,22 +246,24 @@
                 },
 
                 form2: {
-                    mac: '',
-                    plug: '',
-                    version: '',
-                    name: ''
+                    route_mac: '',
+                    script_name: '',
+                    server_port: '',
+                    script_url:'',
+                    operator: ''
                 },
+                scriptListData:[],
                 rules2: {
-                    mac: [
+                    route_mac: [
                         {required: true, message: '请输入MAC', trigger: 'blur'},
                         {validator: this.validateMac, trigger: 'blur'}
                     ],
-                    plug: [
+                    script_name: [
                         {required: true, message: '请选择要安装的脚本', trigger: 'change'}
-                    ],
-                    version: [
-                        {required: true, message: '请选择脚本的版本', trigger: 'change'}
                     ]
+                    // server_port: [
+                    //     {required: true, message: '请选择脚本的版本', trigger: 'change'}
+                    // ]
                 },
                 task_type: '1',
                 value: '',
@@ -316,6 +308,100 @@
                             }else{
                                 self.$message.error(res.data.extra);
                             }
+                            self.form0.router_mac = '';
+                            self.form0.dev_type = '';
+                            self.form0.dest_version = '';
+                            self.form0.firmware_file = '';
+                            self.form0.firmware_md5 = '';
+                            self.form0.upgrade_mode = '1';
+                            self.form0.upgrade_mode_time = '';
+                            self.form0.reflash = '0';
+                            self.form0.operator_name = '';
+                            self.form0.expired_time = '0';
+                        })
+
+                    } else {
+                        return false;
+                        console.log('验证失败');
+                    }
+                });
+
+            },
+            onPluginSubmit: function (formName) {
+                var self = this;
+                self.$refs[formName].validate(function (valid) {
+                    if (valid) {
+                        var params = {
+                            route_mac:self.form1.route_mac,
+                            pkg_str_name: self.form1.pkg_str_name,
+                            pkg_version:self.form1.pkg_version,
+                            pkg_mode: self.form1.pkg_mode,
+                            expired_time:self.form1.expired_time,
+                            operator:self.form1.operator
+                        };
+                        self.fullscreenLoading = true;
+                        self.$axios.post(global_.baseUrl + '/manage/apps',params).then(function (res) {
+                            self.fullscreenLoading = false;
+                            if(res.data.ret_code == '1001'){
+                                self.$message({message:res.data.extra,type:'warning'});
+                                setTimeout(function(){
+                                    self.$router.replace('login');
+                                },2000)
+                            }
+                            if(res.data.ret_code == 0){
+                                self.$message({message:res.data.extra,type:'success'});
+                            }else{
+                                self.$message.error(res.data.extra)
+                            }
+                            self.form1.route_mac = '';
+                            self.form1.pkg_str_name = '';
+                            self.form1.pkg_version = '';
+                            self.form1.pkg_mode = '1';
+                            self.form1.pkg_mode_time = '';
+                            self.form1.expired_time = '0';
+                            self.form1.isTime = true;
+                            self.form1.operator = '';
+
+                        })
+
+                    } else {
+                        return false;
+                        console.log('验证失败');
+                    }
+                });
+
+            },
+            onScriptSubmit: function(formName) {
+                var self = this;
+                self.$refs[formName].validate(function (valid) {
+                    if (valid) {
+                        var params = {
+                            route_mac:self.form2.route_mac,
+                            script_name: self.form2.script_name,
+                            server_port:self.form2.server_port,
+                            script_url: self.form2.script_url,
+                            operator:self.form1.operator
+                        };
+                        self.fullscreenLoading = true;
+                        self.$axios.post(global_.baseUrl + '/manage/script',params).then(function (res) {
+                            self.fullscreenLoading = false;
+                            if(res.data.ret_code == '1001'){
+                                self.$message({message:res.data.extra,type:'warning'});
+                                setTimeout(function(){
+                                    self.$router.replace('login');
+                                },2000)
+                            }
+                            if(res.data.ret_code == 0){
+                                self.$message({message:res.data.extra,type:'success'});
+                            }else{
+                                self.$message.error(res.data.extra)
+                            }
+                            self.form2.route_mac = '';
+                            self.form2.script_name = '';
+                            self.form2.server_port = '';
+                            self.form2.script_url = '';
+                            self.form2.operator = '';
+
                         })
 
                     } else {
@@ -379,6 +465,41 @@
                     console.log(err);
                 });
             },
+            getPkgData: function(){//获取插件列表
+                var self = this;
+                self.$axios.post(global_.baseUrl+'/pkg/list').then(function(res){
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 0){
+                        var result = res.data.data;
+                        for(var i in result){
+                            self.pluginListData.push({pkg_str_name:result[i]._id.pkg_str_name,pkg_version:result[i]._id.pkg_version});
+                        }
+                    }
+                })
+            },
+            getScriptData: function(){
+                var self = this;
+                self.loading = true;
+                self.$axios.post(global_.baseUrl+'/script/list').then(function(res){
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        self.scriptListData = res.data.data;
+                    }else{
+                        self.$message.error(res.data.extra)
+                    }
+                })
+            },
             changeDev: function(){
                 var self = this;
                 self.form0.dest_version = '';
@@ -427,9 +548,22 @@
             },
             handleClick:function (tab,event) {
                 var self = this;
-                // console.log(tab,event);
+                if(tab.name == '1'){
+                    self.getRomList();
+                }
                 if(tab.name == '2'){
                     self.getPkgData({});
+                }
+                if(tab.name == '3'){
+                    self.getScriptData();
+                }
+            },
+            validateSpace: function (rule, value, callback) {
+                var self = this;
+                if(value.indexOf(' ')>=0){
+                    callback(new Error('输入有空格'));
+                }else{
+                    callback();
                 }
             },
             validateMac: function (rule, value, callback) {
@@ -437,7 +571,11 @@
                 var reg_name = /^[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}$/;
                 var reg_name2 = /^[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}$/;
                 var macarr = self.splitStr(value);
-                for (var i = 0, len = macarr.length; i < len; i++) {
+                var len = macarr.length;
+                if(len > 100){
+                    callback(new Error('输入超过100条'));
+                }
+                for (var i = 0; i < len; i++) {
                     if (!reg_name.test(macarr[i]) && !reg_name2.test(macarr[i])) {
                         callback(new Error('输入有误，以逗号或回车分隔'));
                     } else {
@@ -456,61 +594,6 @@
                     }
                 }
                 return temp;
-            },
-            onPluginSubmit: function (formName) {
-                var self = this;
-                self.$refs[formName].validate(function (valid) {
-                    if (valid) {
-                        var params = {
-                            route_mac:self.form1.route_mac,
-                            pkg_str_name: self.form1.pkg_str_name,
-                            pkg_version:self.form1.pkg_version,
-                            pkg_mode: self.form1.pkg_mode,
-                            expired_time:self.form1.expired_time,
-                            operator:self.form1.operator
-                        };
-                        self.fullscreenLoading = true;
-                        self.$axios.post(global_.baseUrl + '/manage/apps',params).then(function (res) {
-                            self.fullscreenLoading = false;
-                            if(res.data.ret_code == '1001'){
-                                self.$message({message:res.data.extra,type:'warning'});
-                                setTimeout(function(){
-                                    self.$router.replace('login');
-                                },2000)
-                            }
-                            if(res.data.ret_code == 0){
-                                self.$message({message:res.data.extra,type:'success'});
-                            }else{
-                                self.$message.error(res.data.extra)
-                            }
-                        })
-
-                    } else {
-                        return false;
-                        console.log('验证失败');
-                    }
-                });
-
-            },
-            onJavaSubmit: function () {
-
-            },
-            getPkgData: function(){//获取插件列表
-                var self = this;
-                self.$axios.post(global_.baseUrl+'/pkg/list').then(function(res){
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
-                    if(res.data.ret_code == 0){
-                        var result = res.data.data;
-                        for(var i in result){
-                            self.pluginListData.push({pkg_str_name:result[i]._id.pkg_str_name,pkg_version:result[i]._id.pkg_version});
-                        }
-                    }
-                })
             },
             changePlugin: function(){
                 var self = this;

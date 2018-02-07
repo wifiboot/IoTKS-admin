@@ -7,7 +7,7 @@
             </el-breadcrumb>
         </div>
         <div class='rad-group mb40'>
-            <div class="form-box tab-cont">
+            <div class="form-box tab-cont form-box2">
                 <el-form :model="form0" :inline="true" :rules="rules0" ref="form0" label-width="150px">
                     <el-form-item label="MAC地址" prop="route_mac">
                         <el-input v-model="form0.route_mac" class="diainp"></el-input>
@@ -71,6 +71,8 @@
                             }
                             if(res.data.ret_code == 0){
                                 self.form1.result = JSON.stringify(res.data.extra);
+                            }else if(res.data.extra == 'timeout'){
+                                self.$message.error('已超时，请稍后重试');
                             }else{
                                 self.$message.error(res.data.extra);
                             }
@@ -105,4 +107,5 @@
     .tab-cont {padding: 40px; /*border-top:1px solid #dfe6ec;*/}
     .diainp{width:217px;}
     .inp100{width:100px;}
+    .form-box2{width:700px;}
 </style>

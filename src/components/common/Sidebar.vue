@@ -171,50 +171,6 @@
                                     ]
                                 },
                                 {
-                                    icon: 'el-icon-star-on',
-                                    index: '5',
-                                    title: 'ROM管理',
-                                    subs: [
-                                        {
-                                            index: 'rommanage',
-                                            title: 'ROM列表'
-                                        }
-                                    ]
-                                },
-                                {
-                                    icon: 'el-icon-date',
-                                    index: '6',
-                                    title: '插件管理',
-                                    subs: [
-                                        {
-                                            index: 'pluginmanage',
-                                            title: '插件列表'
-                                        }
-                                    ]
-                                },
-                                {
-                                    icon: 'el-icon-document',
-                                    index: '7',
-                                    title: '脚本管理',
-                                    subs: [
-                                        {
-                                            index: 'scriptmanage',
-                                            title: '脚本列表'
-                                        }
-                                    ]
-                                },
-                                {
-                                    icon: 'el-icon-share',
-                                    index: '8',
-                                    title: '设备型号管理',
-                                    subs: [
-                                        {
-                                            index: 'modelmanage',
-                                            title: '设备型号列表'
-                                        }
-                                    ]
-                                },
-                                {
                                     icon: 'el-icon-star-off',
                                     index: '9',
                                     title: '辅助工具',
@@ -326,9 +282,9 @@
                 })
             },
         },
-        // mounted: function(){
-        //     this.getUser();
-        // },
+        mounted: function(){
+            this.getUser();
+        },
     }
 </script>
 

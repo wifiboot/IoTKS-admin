@@ -214,14 +214,19 @@
                 },
                 rules: {
                     user:[
-                        {required: true, message: '请输入账号', trigger: 'blur'}
+                        {required: true, message: '请输入账号', trigger: 'blur'},
+                        {validator:this.validateSpace,trigger:'blur'}
                     ],
                     password:[
                         {required: true, message: '请输入密码', trigger: 'blur'},
+                        {validator:this.validateSpace,trigger:'blur'},
+                        {min:3,max:32,message:'长度在3到32个字符',trigger:'blur'},
                         {validator:this.validatePwd,trigger:'blur'}
                     ],
                     name:[
-                        {required: true, message: '请输入渠道名称', trigger: 'blur'}
+                        {required: true, message: '请输入渠道名称', trigger: 'blur'},
+                        {validator:this.validateSpace,trigger:'blur'},
+                        {validator:this.validateSpace,trigger:'blur'}
                     ],
                     tel:[
                         {required: true, message: '请输入联系电话', trigger: 'blur'},
@@ -283,14 +288,14 @@
         methods: {
             getUsers: function(params){//获取渠道列表
                 var self = this;
-                self.$axios.get(global_.baseUrl+'/admin/all',params).then(function(res){
+                self.$axios.post(global_.baseUrl+'/admin/all',params).then(function(res){
                     if(res.data.ret_code == '1001'){//未登录状态
                         self.$message({message:res.data.extra,type:'warning'});
                         setTimeout(function(){
                             self.$router.replace('login');
                         },2000)
                     }
-                    if(res.data.ret_code == '1003'){//权限不足
+                    if(res.data.ret_code == '1010'){//权限不足
                         self.emptyMsg = res.data.extra;
                     }
                     if(res.data.ret_code == 0){
@@ -383,6 +388,13 @@
                         }
                         if(res.data.ret_code == 0){
                             self.$message('注册成功！');
+                            self.form.user = '';
+                            self.form.password = '';
+                            self.form.name = '';
+                            self.form.tel = '';
+                            self.form.selectProv = '';
+                            self.form.selectCity = '';
+                            self.form.addr = '';
                             self.dialogFormVisible = false;
                             self.getUsers({});
                         }else{
@@ -575,6 +587,14 @@
                     } else {
                         callback();
                     }
+                }
+            },
+            validateSpace: function (rule, value, callback) {
+                var self = this;
+                if(value.indexOf(' ')>=0){
+                    callback(new Error('输入有空格'));
+                }else{
+                    callback();
                 }
             },
             //按逗号和回车分隔字符串
