@@ -12,7 +12,7 @@
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column prop="create_date" label="添加时间" width="170"></el-table-column>
             <el-table-column prop="dev_name" label="设备型号" width="150"></el-table-column>
-            <el-table-column prop="dev_vendor" label="设备类型" width="130"></el-table-column>
+            <el-table-column prop="dev_vendor" label="设备厂商" width="130"></el-table-column>
             <el-table-column prop="chip_type" label="芯片型号" width="170"></el-table-column>
             <el-table-column prop="chip_vendor" label="芯片厂商" width="130"></el-table-column>
             <el-table-column prop="comment" label="更新说明"></el-table-column>
@@ -75,16 +75,20 @@
                 },
                 rules: {
                     dev_name:[
-                        {required: true, message: '请输入设备型号', trigger: 'blur'}
+                        {required: true, message: '请输入设备型号', trigger: 'blur'},
+                        {validator:this.validateSpace,trigger:'blur'}
                     ],
                     dev_vendor:[
                         {required: true, message: '请输入设备厂商', trigger: 'blur'},
+                        {validator:this.validateSpace,trigger:'blur'}
                     ],
                     chip_type:[
-                        {required: true, message: '请输入芯片类型', trigger: 'blur'}
+                        {required: true, message: '请输入芯片类型', trigger: 'blur'},
+                        {validator:this.validateSpace,trigger:'blur'}
                     ],
                     chip_vendor:[
-                        {required: true, message: '请输入芯片厂商', trigger: 'blur'}
+                        {required: true, message: '请输入芯片厂商', trigger: 'blur'},
+                        {validator:this.validateSpace,trigger:'blur'}
                     ]
                 },
                 listData:[],
@@ -190,6 +194,14 @@
             handleCurrentChange:function(val){
                 this.currentPage = val;
                 this.getData({page_size:10,current_page:this.currentPage});
+            },
+            validateSpace: function (rule, value, callback) {
+                var self = this;
+                if(value.indexOf(' ')>=0){
+                    callback(new Error('输入有空格'));
+                }else{
+                    callback();
+                }
             },
         }
     }

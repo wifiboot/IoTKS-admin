@@ -136,7 +136,7 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        self.$message({message:res.data.extra,type:'success'})
+                        self.$message({message:'命令已下发',type:'success'})
                     }else{
                         self.$message.error(res.data.extra);
                     }
@@ -177,8 +177,10 @@
                     return false;
                 }
                 self.loading = true;
+                var mac = self.search_word;
+                var str = (mac.indexOf(':')>=0?mac.replace(/:/g,''):mac).toUpperCase();
                 var params = {
-                    filter:{"mac":self.search_word}
+                    filter:{"mac":str}
                 };
                 self.$axios.post(global_.baseUrl+'/device/list',params).then(function(res){
                     self.loading = false;

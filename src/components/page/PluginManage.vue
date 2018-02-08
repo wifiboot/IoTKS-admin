@@ -35,13 +35,12 @@
         <div class="detailTable" v-if="isShowDetail">
             <h4>插件相关信息</h4>
             <el-table :data="detailData" border style="width: 100%" ref="multipleTable" v-loading="loading">
-                <el-table-column prop="pkg_create_time" label="上传时间"></el-table-column>
+                <el-table-column prop="pkg_create_time" label="上传时间" width="150"></el-table-column>
                 <el-table-column prop="pkg_name" label="插件名称" width="360"></el-table-column>
                 <el-table-column prop="pkg_version" label="版本号"></el-table-column>
                 <el-table-column prop="pkg_developer" label="开发者"></el-table-column>
-                <!--<el-table-column prop="pkg_create_time" label="上传时间" width="150"></el-table-column>-->
-                <!--<el-table-column prop="pkg_info" label="插件说明"></el-table-column>-->
-                <el-table-column label="操作" v-if="isShow">
+                <el-table-column prop="pkg_info" label="插件说明"></el-table-column>
+                <el-table-column label="操作" v-if="isShow" width="140">
                     <template slot-scope="scope">
                         <el-button type="success" size="small" @click="downloadPlugin(scope.row.pkg_name)">下载</el-button>
                         <el-button type="danger" size="small" @click="delPlugin(scope.row.pkg_name)">删除</el-button>
@@ -149,11 +148,11 @@
                     }
                     if(res.data.ret_code == 0){
                         var result = [];
-                        if(JSON.stringify(params) == '{}'){
-                            self.pageTotal = res.data.data.length;
-                            result = res.data.data.slice(0,10);
+                        if(!params.hasOwnProperty('current_page')){
+                            self.pageTotal = res.data.extra.length;
+                            result = res.data.extra.slice(0,10);
                         }else{
-                            result = res.data.data;
+                            result = res.data.extra;
                         }
                         for(var i in result){
                             self.listData.push({pkg_str_name:result[i]._id.pkg_str_name,pkg_version:result[i]._id.pkg_version});
@@ -173,6 +172,12 @@
                 // console.log(response);
                 this.fullscreenLoading  = false;
                 this.dialogFormVisible = false;
+                this.fileList = [];
+                this.form.pkg_name = '';
+                this.form.pkg_str_name = '';
+                this.form.pkg_version = '';
+                this.form.pkg_info = '';
+                this.form.pkg_developer = '';
                 if(response.ret_code == 0){
                     this.$message({message:'创建成功',type:'success'});
                     this.getData({});

@@ -56,8 +56,10 @@
                     if(valid){
                         // console.log('验证成功')
                         self.fullscreenLoading  = true;
+                        var mac = self.form0.route_mac;
+                        var str = (mac.indexOf(':')>=0?mac.replace(/:/g,''):mac).toUpperCase();
                         var params = {
-                            route_mac:self.form0.route_mac
+                            route_mac:str
                         };
                         // self.$axios.defaults.withCredentials = true;
                         self.$axios.post(global_.baseUrl+'/device/sysinfo',params).then(function(res){

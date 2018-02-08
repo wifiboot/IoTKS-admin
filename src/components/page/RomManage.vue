@@ -11,7 +11,8 @@
         </div>
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column prop="create_date" label="创建时间" width="170"></el-table-column>
-            <el-table-column prop="rom_version" label="版本号" width="170"></el-table-column>
+            <el-table-column prop="file_name" label="文件名" width="300"></el-table-column>
+            <el-table-column prop="rom_version" label="ROM版本号" width="170"></el-table-column>
             <el-table-column prop="ver_type" label="版本类型" width="160" :filters="[{ text: '测试版本', value: '测试版本' }, { text: '正式版本', value: '正式版本' }]" :filter-method="filterTag">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.ver_type == '测试版本' ? 'warning' : 'success'"  size="small" close-transition>{{scope.row.ver_type}}</el-tag>
@@ -19,10 +20,10 @@
             </el-table-column>
             <el-table-column prop="dev_type" label="设备型号" width="160"></el-table-column>
             <el-table-column prop="comment" label="更新说明"></el-table-column>
-            <el-table-column label="操作" v-if="isShow">
+            <el-table-column label="操作" v-if="isShow" width="160">
                 <template slot-scope="scope">
                     <el-button class="btn1" type="text" size="small" @click="downloadRom(scope.row._id,scope.row.file_name,scope.row.rom_status)">下载</el-button>
-                    <el-button class="btn1" type="text" size="small" @click="delRom(scope.row._id,scope.row.file_name)">删除</el-button>
+                    <el-button class="btn1" type="text" size="small" @click="delRom(scope.row._id,scope.row.file_name,scope.$index)">删除</el-button>
                     <el-button class="btn1" type="danger" size="small" v-if="scope.row.rom_status =='normal'" @click="revokeRom(scope.row._id,scope.row.file_name)">下架</el-button>
                     <el-button class="btn1" type="success" size="small" v-else @click="releaseRom(scope.row._id,scope.row.file_name)">上架</el-button>
                 </template>
@@ -42,7 +43,6 @@
                 <el-form-item label="上传" :label-width="formLabelWidth">
                     <el-upload
                         class="upload-demo"
-                        multiple="false"
                         ref="upload"
                         name="file_name"
                         :action="uploadUrl"
@@ -59,7 +59,7 @@
                 <el-form-item label="ROM版本号" prop=rom_version :label-width="formLabelWidth">
                     <el-input v-model="form.rom_version" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="设备类型" prop="dev_type" :label-width="formLabelWidth">
+                <el-form-item label="设备型号" prop="dev_type" :label-width="formLabelWidth">
                     <el-select v-model="form.dev_type" placeholder="请选择对应设备型号">
                         <el-option
                             v-for="item in typeListData"
@@ -118,7 +118,10 @@
                     ],
                     ver_type:[
                         {required: true, message: '请输入版本类型', trigger: 'blur'}
-                    ]
+                    ],
+                    md5_value:[
+                        {required: true, message: 'MD5串码不能为空', trigger: 'blur'}
+                    ],
                 },
                 formLabelWidth: '120px',
                 fileList3: [],
@@ -194,19 +197,20 @@
                 }else{
                     this.$message.error(response.extra);
                 }
+                self.fileList3 = [];
                 self.form.file_name = '';
                 self.form.rom_version = '';
                 self.form.dev_type = '';
                 self.form.ver_type = '';
-                self.form.md5_value = '';
+                self.form.md5_value = ' ';
                 self.form.comment = '';
-                self.fileList3 = [];
                 this.fullscreenLoading  = false;
 
                 this.dialogFormVisible = false;
-                this.getData();
+                this.getData({});
             },
             handleError: function(response,file,fileList){
+                var self = this;
                 this.$message.error('操作失败');
                 this.fullscreenLoading  = false;
             },
@@ -264,7 +268,7 @@
                     console.log(err);
                 })
             },
-            delRom: function(id,fileName){//删除
+            delRom: function(id,fileName,i){//删除
                 var self = this;
                 var params = {
                     _id: id,
@@ -281,7 +285,8 @@
                     }
                     if(res.data.ret_code == 0){
                         self.$message({message:'删除成功',type:'success'});
-                        self.getData();
+                        // self.getData({});
+                        self.listData.splice(i,1);
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -347,7 +352,6 @@
                 })
             },
             handleChange:function(file) {
-               // console.log(file.name);
                var self = this;
                 this.form.file_name = file.name;
                 this.form.rom_version = file.name.split('-')[2] || '';
@@ -363,6 +367,7 @@
                 }
                 //reader.readAsBinaryString(fileList[0]);
                 reader.readAsBinaryString(file.raw);
+                self.form.md5_value = self.form.rom_version ==''?' ': self.form.md5_value;
 
             },
             filterTag:function(value, row) {

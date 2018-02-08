@@ -55,11 +55,11 @@
                 <el-form-item label="MD5串码" prop="script_md5" :label-width="formLabelWidth">
                     <el-input v-model="form.script_md5" class="diainp" :disabled="true" auto-complete="off"></el-input>
                 </el-form-item>
+                <el-form-item label="脚本说明" prop="script_info" :label-width="formLabelWidth">
+                    <el-input v-model="form.script_info" class="diainp" auto-complete="off"></el-input>
+                </el-form-item>
                 <el-form-item label="开发者" :label-width="formLabelWidth">
                     <el-input v-model="form.script_developer" class="diainp" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="脚本说明" :label-width="formLabelWidth">
-                    <el-input v-model="form.script_info" class="diainp" auto-complete="off"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -93,11 +93,9 @@
                     script_name:[
                         {required: true, message: '请选择脚本', trigger: 'blur'}
                     ],
-                    script_version:[
-                        {required: true, message: '请输入脚本版本', trigger: 'blur'},
-                    ],
                     script_info:[
                         {required: true, message: '请输入脚本相关信息', trigger: 'blur'},
+                        {validator:this.validateSpace,trigger:'blur'}
                     ]
                 },
                 formLabelWidth: '120px',
@@ -126,10 +124,10 @@
                     self.loading = false;
                     if(res.data.ret_code == 0){
                         if(JSON.stringify(params) == '{}'){
-                            self.pageTotal = res.data.data.length;
-                            self.listData = res.data.data.slice(0,10);
+                            self.pageTotal = res.data.extra.length;
+                            self.listData = res.data.extra.slice(0,10);
                         }else{
-                            self.listData = res.data.data;
+                            self.listData = res.data.extra;
                         }
                     }else{
                         self.$message.error(res.data.extra)
@@ -145,9 +143,14 @@
                 return true;
             },
             handleSuccess: function(response,file,fileList){
-                // console.log(response);
+                var self = this;
                 this.fullscreenLoading  = false;
                 this.dialogFormVisible = false;
+                self.form.file_name = '';
+                self.form.script_name = '';
+                self.form.script_developer = '';
+                self.form.script_info = '';
+                self.form.script_md5 = '';
                 if(response.ret_code == '1001'){
                     self.$message({message:response.extra,type:'warning'});
                     setTimeout(function(){
@@ -193,6 +196,14 @@
                 });
                 // self.fullscreenLoading  = true;
                 self.$refs.upload.submit();
+            },
+            validateSpace: function (rule, value, callback) {
+                var self = this;
+                if(value.indexOf(' ')>=0){
+                    callback(new Error('输入有空格'));
+                }else{
+                    callback();
+                }
             },
             downloadScript: function(fileName){//下载
                 var self = this;

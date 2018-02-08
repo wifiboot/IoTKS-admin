@@ -300,10 +300,10 @@
                     }
                     if(res.data.ret_code == 0){
                         if(JSON.stringify(params) == '{}'){
-                            self.pageTotal = res.data.data.length;
-                            self.userData = res.data.data.slice(0,10);
+                            self.pageTotal = res.data.extra.length;
+                            self.userData = res.data.extra.slice(0,10);
                         }else{
-                            self.userData = res.data.data;
+                            self.userData = res.data.extra;
                         }
                     }
                 })
