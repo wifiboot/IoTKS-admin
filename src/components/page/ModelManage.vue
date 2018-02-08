@@ -157,7 +157,14 @@
                     }
                     if(res.data.ret_code == 0){
                         self.$message('添加成功');
-                        self.getData();
+                        self.getData({});
+
+                        self.form.dev_name = '';
+                        self.form.dev_vendor = '';
+                        self.form.chip_type = '';
+                        self.form.chip_vendor = '';
+                        self.form.comment = '';
+
                         self.dialogFormVisible = false;
                     }
 
