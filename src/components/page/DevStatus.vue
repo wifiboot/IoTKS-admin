@@ -12,10 +12,14 @@
                 <el-radio-button label="online">在线</el-radio-button>
                 <el-radio-button label="offline">离线</el-radio-button>
             </el-radio-group>
-            <div class="handle-box2">
-                <el-input v-model="search_word" placeholder="请输入设备MAC" class="handle-input mr10"></el-input>
-                <el-button type="primary" icon="search" @click="search">搜索</el-button>
-            </div>
+            <el-form :inline="true" class="handle-box2">
+                <el-form-item label="">
+                    <el-input v-model="search_word" placeholder="请输入设备MAC"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="search">搜索</el-button>
+                </el-form-item>
+            </el-form>
         </div>
 
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
@@ -29,16 +33,6 @@
             <el-table-column prop="dev_type" label="设备型号" width="140"></el-table-column>
             <el-table-column prop="rom_verion" label="固件版本" width="140"></el-table-column>
             <el-table-column prop="user_name" label="账号"></el-table-column>
-            <!--<el-table-column prop="box51_status" label="51盒子状态" width="120">
-                <template slot-scope="scope">
-                    <el-tag type="warning" class="orange">{{scope.row.box51_status == 'default'?'未知':'离线'}}</el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column prop="printer_status" label="打印机状态">
-                <template slot-scope="scope">
-                    <el-tag :type="scope.row.printer_status == 'default'?'warning': 'success'">{{scope.row.printer_status == 'default'?'未知': '离线'}}</el-tag>
-                </template>
-            </el-table-column>-->
             <el-table-column label="操作" width="170">
                 <template slot-scope="scope">
                     <el-button class="btn1" size="small" type="text" @click="reset(scope.row.mac)">重启路由</el-button>
@@ -208,4 +202,5 @@
     .handle-input{  width: 300px;  display: inline-block;  }
     .handle-box2{display:inline-block;float:right;}
     .orange{color:#eb9e05;background:none;}
+    .btn-search{position:absolute;}
 </style>

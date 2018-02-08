@@ -6,17 +6,21 @@
                 <el-breadcrumb-item>渠道列表</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
-        <div class="handle-box">
+        <el-form :inline="true" class="handle-box">
+            <el-form-item>
+                <el-button type="primary" icon="plus" :disabled="isSuper=='0'?false:true" class="handle-del mr10" @click="dialogFormVisible=true">新建子渠道</el-button>
+            </el-form-item>
+            <el-form-item label="">
+                <el-input v-model="search_word" placeholder="请输入渠道名称或账号查找" class="handle-input mr10"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" icon="search" :disabled="isSuper=='0'?false:true" @click="search">查询</el-button>
+            </el-form-item>
+        </el-form>
+        <!--<div class="handle-box">
             <el-button type="primary" icon="plus" :disabled="isSuper=='0'?false:true" class="handle-del mr10" @click="dialogFormVisible=true">新建子渠道</el-button>
             <el-input v-model="search_word" placeholder="请输入渠道名称或账号查找" class="handle-input mr10"></el-input>
             <el-button type="primary" icon="search" :disabled="isSuper=='0'?false:true" @click="search">查询</el-button>
-        </div>
-        <!--<div class='rad-group'>
-            <el-radio-group v-model="radio3" @change="changeTab">
-                <el-radio-button label="全部"></el-radio-button>
-                <el-radio-button label="未冻结"></el-radio-button>
-                <el-radio-button label="已冻结"></el-radio-button>
-            </el-radio-group>
         </div>-->
         <el-table :data="userData" border style="width: 100%" ref="multipleTable" :empty-text="emptyMsg" v-loading="loading">
             <el-table-column prop="user_account" label="账 号" width="150"></el-table-column>

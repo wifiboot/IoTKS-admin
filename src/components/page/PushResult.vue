@@ -12,10 +12,14 @@
                 <el-radio-button label="apps">插件升级</el-radio-button>
                 <el-radio-button label="script">脚本推送</el-radio-button>
             </el-radio-group>
-            <div class="handle-box2">
-                <el-input v-model="search_word" placeholder="请输入任务ID" class="handle-input mr10"></el-input>
-                <el-button type="primary" icon="search" @click="search">搜索</el-button>
-            </div>
+            <el-form :inline="true" class="handle-box2">
+                <el-form-item label="">
+                    <el-input v-model="search_word" placeholder="请输入设备MAC"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="search">搜索</el-button>
+                </el-form-item>
+            </el-form>
         </div>
 
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
@@ -199,8 +203,10 @@
                     return false;
                 }
                 self.loading = true;
+                var mac = self.search_word;
+                var str = (mac.indexOf(':')>=0?mac.replace(/:/g,''):mac).toUpperCase();
                 var params = {
-                    filter:{"mac":self.search_word}
+                    filter:{"mac":str}
                 };
                 self.$axios.post(global_.baseUrl+'/device/list',params).then(function(res){
                     self.loading = false;
