@@ -475,7 +475,7 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        var result = res.data.data;
+                        var result = res.data.extra;
                         for(var i in result){
                             self.pluginListData.push({pkg_str_name:result[i]._id.pkg_str_name,pkg_version:result[i]._id.pkg_version});
                         }
@@ -494,7 +494,7 @@
                     }
                     self.loading = false;
                     if(res.data.ret_code == 0){
-                        self.scriptListData = res.data.data;
+                        self.scriptListData = res.data.extra;
                     }else{
                         self.$message.error(res.data.extra)
                     }

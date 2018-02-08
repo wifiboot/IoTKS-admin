@@ -28,7 +28,7 @@
             <el-table-column prop="mac" label="路由Mac" width="180"></el-table-column>
             <el-table-column prop="dev_type" label="设备型号" width="140"></el-table-column>
             <el-table-column prop="rom_verion" label="固件版本" width="140"></el-table-column>
-            <el-table-column prop="user_name" label="账号" width="140"></el-table-column>
+            <el-table-column prop="user_name" label="账号"></el-table-column>
             <!--<el-table-column prop="box51_status" label="51盒子状态" width="120">
                 <template slot-scope="scope">
                     <el-tag type="warning" class="orange">{{scope.row.box51_status == 'default'?'未知':'离线'}}</el-tag>
