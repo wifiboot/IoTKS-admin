@@ -56,10 +56,14 @@
                         {required: true, message: '请输入账号', trigger: 'blur'}
                     ],
                     user_password:[
-                        {required: true, message: '请输入密码', trigger: 'blur'}
+                        {required: true, message: '请输入密码', trigger: 'blur'},
+                        {validator:this.validateSpace,trigger:'blur'},
+                        {min:3,max:32,message:'长度在3到32个字符',trigger:'blur'}
                     ],
                     user_new_password:[
-                        {required: true, message: '请输入新密码', trigger: 'blur'}
+                        {required: true, message: '请输入新密码', trigger: 'blur'},
+                        {validator:this.validateSpace,trigger:'blur'},
+                        {min:3,max:32,message:'长度在3到32个字符',trigger:'blur'}
                     ],
                     user_validate_password:[
                         {required: true, message: '请输入确认密码', trigger: 'blur'},
@@ -107,6 +111,14 @@
             validateRepwd: function(rule,value,callback){
                 if(value !== this.form.user_new_password){
                     callback(new Error('两次输入密码不一致'));
+                }else{
+                    callback();
+                }
+            },
+            validateSpace: function (rule, value, callback) {
+                var self = this;
+                if(value.indexOf(' ')>=0){
+                    callback(new Error('输入有空格'));
                 }else{
                     callback();
                 }
