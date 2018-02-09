@@ -133,46 +133,48 @@
                 var self = this;
                 self.$refs[formName].validate(function(valid){
                     if(valid){
-                        console.log('验证成功')
+                        console.log('验证成功');
+
+                        var params = {
+                            dev_name:self.form.dev_name,
+                            dev_vendor:self.form.dev_vendor,
+                            chip_type:self.form.chip_type,
+                            chip_vendor:self.form.chip_vendor,
+                            comment:self.form.comment
+                        };
+                        self.loading = true;
+                        self.$axios.post(global_.baseUrl+'/devtype/add',params).then(function(res){
+                            self.loading = false;
+                            if(res.data.ret_code == '1001'){
+                                self.$message({message:res.data.extra,type:'warning'});
+                                setTimeout(function(){
+                                    self.$router.replace('login');
+                                },2000)
+                            }
+                            if(res.data.ret_code == 0){
+                                self.$message('添加成功');
+                                self.getData({});
+
+                                self.form.dev_name = '';
+                                self.form.dev_vendor = '';
+                                self.form.chip_type = '';
+                                self.form.chip_vendor = '';
+                                self.form.comment = '';
+
+                                self.dialogFormVisible = false;
+                            }
+
+                        },function(err){
+                            self.loading = false;
+                            self.$message('添加失败');
+                            console.log(err);
+                        })
                     }else{
                         return false;
                         console.log('验证失败');
                     }
                 });
-                var params = {
-                    dev_name:self.form.dev_name,
-                    dev_vendor:self.form.dev_vendor,
-                    chip_type:self.form.chip_type,
-                    chip_vendor:self.form.chip_vendor,
-                    comment:self.form.comment
-                };
-                self.loading = true;
-                self.$axios.post(global_.baseUrl+'/devtype/add',params).then(function(res){
-                    self.loading = false;
-                    if(res.data.ret_code == '1001'){
-                        self.$message({message:res.data.extra,type:'warning'});
-                        setTimeout(function(){
-                            self.$router.replace('login');
-                        },2000)
-                    }
-                    if(res.data.ret_code == 0){
-                        self.$message('添加成功');
-                        self.getData({});
 
-                        self.form.dev_name = '';
-                        self.form.dev_vendor = '';
-                        self.form.chip_type = '';
-                        self.form.chip_vendor = '';
-                        self.form.comment = '';
-
-                        self.dialogFormVisible = false;
-                    }
-
-                },function(err){
-                    self.loading = false;
-                    self.$message('添加失败');
-                    console.log(err);
-                })
             },
             delDev: function(id){
                 var self = this;

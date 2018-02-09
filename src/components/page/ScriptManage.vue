@@ -188,14 +188,13 @@
                 var self = this;
                 self.$refs[formName].validate(function(valid){
                     if(valid){
-                        // console.log('验证成功')
+                        // self.fullscreenLoading  = true;
+                        self.$refs.upload.submit();
                     }else{
                         return false;
                         console.log('验证失败');
                     }
                 });
-                // self.fullscreenLoading  = true;
-                self.$refs.upload.submit();
             },
             validateSpace: function (rule, value, callback) {
                 var self = this;

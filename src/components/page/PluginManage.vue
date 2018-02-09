@@ -225,14 +225,13 @@
                 var self = this;
                 self.$refs[formName].validate(function(valid){
                     if(valid){
-                        // console.log('验证成功')
+                        self.fullscreenLoading  = true;
+                        self.$refs.upload.submit();
                     }else{
                         return false;
                         console.log('验证失败');
                     }
                 });
-                self.fullscreenLoading  = true;
-                self.$refs.upload.submit();
             },
             downloadPlugin: function(fileName){//下载
                 var self = this;

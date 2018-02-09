@@ -208,7 +208,8 @@
                 var params = {
                     filter:{"mac":str}
                 };
-                self.$axios.post(global_.baseUrl+'/device/list',params).then(function(res){
+                var urlStr = self.curRadio=='firmware'?'/task/list/sysupgrade':(self.curRadio=='apps'?'/manage/apps_query':'/manage/script_detail_detail');
+                self.$axios.post(global_.baseUrl + urlStr,params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == '1001'){
                         self.$message({message:res.data.extra,type:'warning'});

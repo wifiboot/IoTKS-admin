@@ -12,7 +12,7 @@
                     <div class="form-box tab-cont form-box2">
                         <el-form :model="form0" :rules="rules0" ref="form0" label-width="150px">
                             <el-form-item label="输入指定MAC" prop="router_mac">
-                                <el-input type="textarea" v-model="form0.router_mac"  placeholder="以换行符分割，最多输入100条mac" class="diainp2"></el-input>
+                                <el-input type="textarea" v-model="form0.router_mac"  placeholder="以换行符分割" class="diainp2"></el-input>
                             </el-form-item>
                             <el-form-item label="选择设备型号" prop="dev_type">
                                 <el-select v-model="form0.dev_type" placeholder="请选择" @change="changeDev">
@@ -39,7 +39,7 @@
                                     <el-radio label="2">用户自动升级</el-radio>
                                     <el-radio label="3">定时自动升级(整点时刻)</el-radio>
                                 </el-radio-group>
-                                <el-select :inline="true" v-if="form0.upgrade_mode=='3'?true:false" v-model="form0.upgrade_mode_time" style="width:70px;" placeholder="0">
+                                <el-select :inline="true" v-if="form0.upgrade_mode=='3'?true:false" v-model="form0.upgrade_time" style="width:70px;" placeholder="0">
                                     <el-option
                                         v-for="item in upgradeTime"
                                         :key="item"
@@ -72,7 +72,7 @@
                     <div class="form-box tab-cont form-box2">
                         <el-form :model="form1" :rules="rules1" ref="form1" label-width="150px">
                             <el-form-item label="输入指定MAC" prop="route_mac">
-                                <el-input class="textarea-mac diainp2" type="textarea" v-model="form1.route_mac" placeholder="以换行符分割，最多输入100条mac"></el-input>
+                                <el-input class="textarea-mac diainp2" type="textarea" v-model="form1.route_mac" placeholder="以换行符分割"></el-input>
                             </el-form-item>
                             <el-form-item label="选择要安装的插件" prop="pkg_str_name">
                                 <el-select v-model="form1.pkg_str_name" placeholder="请选择" @change="changePlugin">
@@ -100,7 +100,7 @@
                                     <el-radio label="2">用户自动升级</el-radio>
                                     <el-radio label="3">定时自动升级(整点时刻)</el-radio>
                                 </el-radio-group>
-                                <el-select :inline="true" v-if="form1.pkg_mode=='3'?true:false" v-model="form1.pkg_mode_time" style="width:70px;" placeholder="0">
+                                <el-select :inline="true" v-if="form1.pkg_mode=='3'?true:false" v-model="form1.upgrade_time" style="width:70px;" placeholder="0">
                                     <el-option
                                         v-for="item in pkgmodeTime"
                                         :key="item"
@@ -128,7 +128,7 @@
                     <div class="form-box tab-cont form-box2">
                         <el-form ref="form2" :model="form2" :rules="rules2" label-width="150px">
                             <el-form-item label="输入指定MAC" prop="route_mac">
-                                <el-input class="textarea-mac diainp2" type="textarea" v-model="form2.route_mac" placeholder="以换行符分割，最多输入100条mac"></el-input>
+                                <el-input class="textarea-mac diainp2" type="textarea" v-model="form2.route_mac" placeholder="以换行符分割"></el-input>
                             </el-form-item>
                             <el-form-item label="选择要安装的脚本" prop="script_name">
                                 <el-select v-model="form2.script_name" placeholder="请选择">
@@ -139,12 +139,6 @@
                                         :value="item.script_name">
                                     </el-option>
                                 </el-select>
-                            </el-form-item>
-                            <el-form-item label="服务器端口号" prop="server_port">
-                                <el-input v-model="form2.server_port" class="diainp"></el-input>
-                            </el-form-item>
-                            <el-form-item label="服务器路径" prop="script_url">
-                                <el-input v-model="form2.script_url" class="diainp"></el-input>
                             </el-form-item>
                             <el-form-item label="操作人" prop="operator">
                                 <el-input v-model="form2.operator" class="diainp"></el-input>
@@ -176,7 +170,7 @@
                     firmware_file:'',
                     firmware_md5:'',
                     upgrade_mode: '1',
-                    upgrade_mode_time:'',
+                    upgrade_time:'0',
                     reflash:'0',
                     operator_name: '',
                     expired_time:'0',
@@ -204,7 +198,8 @@
                         { required: true, message: '请选择配置更新', trigger: 'change'}
                     ],
                     expired_time: [
-                        {required: true, message: '请输入超时时间', trigger: 'blur'}
+                        {required: true, message: '请输入超时时间', trigger: 'blur'},
+                        {validator: this.validateTimeNum, trigger: 'blur'}
                     ],
                     operator_name: [
                         {required: true, message: '请输入操作人', trigger: 'blur'},
@@ -218,7 +213,7 @@
                     pkg_str_name: '',
                     pkg_version: '',
                     pkg_mode: '1',
-                    pkg_mode_time:'',
+                    upgrade_time:'0',
                     expired_time:'0',
                     isTime: true,
                     operator: ''
@@ -241,15 +236,14 @@
                         {required: true, message: '请选择升级方式', trigger: 'change'}
                     ],
                     expired_time: [
-                        {required: true, message: '请输入超时时间', trigger: 'blur'}
+                        {required: true, message: '请输入超时时间', trigger: 'blur'},
+                        {validator: this.validateTimeNum, trigger: 'blur'}
                     ],
                 },
 
                 form2: {
                     route_mac: '',
                     script_name: '',
-                    server_port: '',
-                    script_url:'',
                     operator: ''
                 },
                 scriptListData:[],
@@ -290,6 +284,7 @@
                             firmware_file:self.form0.firmware_file,
                             firmware_md5:self.form0.firmware_md5,
                             upgrade_mode:self.form0.upgrade_mode,
+                            upgrade_time:self.form0.upgrade_time,
                             reflash:self.form0.reflash,
                             expired_time:self.form0.expired_time
                         };
@@ -314,7 +309,7 @@
                             self.form0.firmware_file = '';
                             self.form0.firmware_md5 = '';
                             self.form0.upgrade_mode = '1';
-                            self.form0.upgrade_mode_time = '';
+                            self.form0.upgrade_time = '';
                             self.form0.reflash = '0';
                             self.form0.operator_name = '';
                             self.form0.expired_time = '0';
@@ -336,6 +331,7 @@
                             pkg_str_name: self.form1.pkg_str_name,
                             pkg_version:self.form1.pkg_version,
                             pkg_mode: self.form1.pkg_mode,
+                            upgrade_time: self.form1.upgrade_time,
                             expired_time:self.form1.expired_time,
                             operator:self.form1.operator
                         };
@@ -357,7 +353,7 @@
                             self.form1.pkg_str_name = '';
                             self.form1.pkg_version = '';
                             self.form1.pkg_mode = '1';
-                            self.form1.pkg_mode_time = '';
+                            self.form1.upgrade_time = '';
                             self.form1.expired_time = '0';
                             self.form1.isTime = true;
                             self.form1.operator = '';
@@ -378,8 +374,6 @@
                         var params = {
                             route_mac:self.form2.route_mac,
                             script_name: self.form2.script_name,
-                            server_port:self.form2.server_port,
-                            script_url: self.form2.script_url,
                             operator:self.form1.operator
                         };
                         self.fullscreenLoading = true;
@@ -398,8 +392,6 @@
                             }
                             self.form2.route_mac = '';
                             self.form2.script_name = '';
-                            self.form2.server_port = '';
-                            self.form2.script_url = '';
                             self.form2.operator = '';
 
                         })
@@ -566,15 +558,21 @@
                     callback();
                 }
             },
+            validateTimeNum: function (rule, value, callback) {
+                var self = this;
+                var reg = /^\d+$/;
+                if(!reg.test(value) || Number(value)<24){
+                    callback(new Error('输入必须是数字,且大于24'));
+                }else{
+                    callback();
+                }
+            },
             validateMac: function (rule, value, callback) {
                 var self = this;
                 var reg_name = /^[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}$/;
                 var reg_name2 = /^[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}$/;
                 var macarr = self.splitStr(value);
                 var len = macarr.length;
-                if(len > 100){
-                    callback(new Error('输入超过100条'));
-                }
                 for (var i = 0; i < len; i++) {
                     if (!reg_name.test(macarr[i]) && !reg_name2.test(macarr[i])) {
                         callback(new Error('输入有误，以逗号或回车分隔'));
