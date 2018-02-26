@@ -64,6 +64,7 @@
                         if(res.data.ret_msg == '1'){//普通管理员
 
                         }
+                        self.$router.push('/basetable')
                     }
                 })
             },
@@ -81,7 +82,6 @@
                                 self.$message({message:'登录成功！',type:'success'});
                                 localStorage.setItem('ms_username',self.ruleForm.username);
                                 self.getUser();
-                                self.$router.push('/basetable')
                             }else{
                                 self.$message(res.data.extra);
                             }
