@@ -561,7 +561,7 @@
             validateTimeNum: function (rule, value, callback) {
                 var self = this;
                 var reg = /^\d+$/;
-                if(!self.form0.isTime){
+                if(!self.form0.isTime || !self.form1.isTime){
                     if(!reg.test(value) || Number(value)<24){
                         callback(new Error('输入必须是数字,且大于24'));
                     }else{
