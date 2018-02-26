@@ -7,7 +7,8 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box" v-if="isShow">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">上传插件</el-button>
+            <!--<el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">上传插件</el-button>-->
+            <el-button type="primary" icon="plus" class="handle-del mr10" @click="clickDialogBtn">上传插件</el-button>
         </div>
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column prop="pkg_str_name" label="插件名称"></el-table-column>
@@ -58,7 +59,7 @@
                         :action="uploadUrl"
                         with-credentials="true"
                         :data="form"
-                        :beforeUpload="beforeUpload"
+                        :before-upload="beforeUpload"
                         :on-change="handleChange"
                         :on-success="handleSuccess"
                         :file-list="fileList"
@@ -118,6 +119,7 @@
                         {validator:this.validateSpace,trigger:'blur'}
                     ]
                 },
+                flag:true,
                 formLabelWidth: '120px',
 
                 showDialog:false,
@@ -162,6 +164,12 @@
                     }
                 })
             },
+            clickDialogBtn: function(){
+                this.form.pkg_name = '';
+                this.form.pkg_str_name = '';
+                this.form.pkg_version = '';
+                this.dialogFormVisible=true;
+            },
             handlePreview:function(file) {
                 console.log(file);
             },
@@ -178,6 +186,7 @@
                 this.form.pkg_version = '';
                 this.form.pkg_info = '';
                 this.form.pkg_developer = '';
+                this.$refs.upload.clearFiles();
                 if(response.ret_code == 0){
                     this.$message({message:'创建成功',type:'success'});
                     this.getData({});
@@ -194,7 +203,7 @@
                 var self = this;
                 self.form.pkg_name = file.name;
                 //解析文件名称
-                var strName = file.name;
+                var strName = self.form.pkg_name;
                 var arrName = strName.split('_');
                 if(strName.indexOf('_')>0 && arrName.length >= 3){
                     if(/[0-9]/.test(arrName[1])){//通用插件名称如：base-files_157-r47727_ramips_24kec.ipk

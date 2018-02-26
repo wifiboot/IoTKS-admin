@@ -7,7 +7,7 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box rad-group" v-if="isShow">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">创建版本</el-button>
+            <el-button type="primary" icon="plus" class="handle-del mr10" @click="clickDialogBtn">创建版本</el-button>
         </div>
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column prop="create_date" label="创建时间" width="170"></el-table-column>
@@ -183,6 +183,12 @@
             handleCurrentChange:function(val){
                 this.currentPage = val;
                 this.getData({page_size:10,current_page:this.currentPage});
+            },
+            clickDialogBtn: function(){
+                var self = this;
+                self.form.rom_version = '';
+                self.form.md5_value = '';
+                this.dialogFormVisible=true;
             },
             beforeUpload: function(file){
                 // console.log(file);

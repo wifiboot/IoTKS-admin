@@ -7,7 +7,7 @@
             </el-breadcrumb>
         </div>
         <div class="handle-box" v-if="isShow">
-            <el-button type="primary" icon="plus" class="handle-del mr10" @click="dialogFormVisible=true">上传脚本</el-button>
+            <el-button type="primary" icon="plus" class="handle-del mr10" @click="clickDialogBtn">上传脚本</el-button>
         </div>
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column prop="script_name" label="脚本名称" width="380"></el-table-column>
@@ -134,6 +134,16 @@
                     }
                 })
             },
+            clickDialogBtn: function(){
+                var self = this;
+                self.form.file_name = '';
+                self.form.script_name = '';
+                self.form.script_developer = '';
+                self.form.script_info = '';
+                self.form.script_md5 = '';
+                self.fileList = [];
+                this.dialogFormVisible=true;
+            },
             handlePreview:function(file) {
                 console.log(file);
             },
@@ -151,6 +161,7 @@
                 self.form.script_developer = '';
                 self.form.script_info = '';
                 self.form.script_md5 = '';
+                self.fileList = [];
                 if(response.ret_code == '1001'){
                     self.$message({message:response.extra,type:'warning'});
                     setTimeout(function(){
