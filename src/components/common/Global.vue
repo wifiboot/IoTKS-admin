@@ -1,6 +1,7 @@
 <script>
+    var config = require('../../../config');
     var uniUrl = 'https://wifi.kunteng.org';
-    var baseUrl = 'https://api.rom.kunteng.org:443';
+    var baseUrl = config.build.webServer;
     //时间转换
     function timeStamp( second_time ){
         var time = parseInt(second_time) + "秒";
