@@ -91,9 +91,23 @@
             }
         },
         created:function(){
-            this.getFirmwareData({});
+            this.getParams();
+            // this.getFirmwareData({});
         },
         methods: {
+            getParams: function(){
+                var self = this;
+                self.curRadio = self.$route.query.curRadio || 'firmware';
+                if(self.curRadio == 'firmware'){//rom升级
+                    self.getFirmwareData({});
+                }
+                if(self.curRadio == 'apps'){//插件升级
+                    self.getAppsData({});
+                }
+                if(self.curRadio == 'script'){//脚本升级
+                    self.getScriptData({});
+                }
+            },
             getFirmwareData: function(params){
                 var self = this;
                 self.$axios.post(global_.baseUrl+'/task/list/sysupgrade',params).then(function(res){

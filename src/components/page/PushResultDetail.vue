@@ -10,7 +10,7 @@
             <h4>基本信息</h4>
             <el-table :data="firmwareData1" border style="width: 100%;margin:20px 0 40px;" ref="multipleTable">
                 <el-table-column prop="additions.dest_version" label="下发版本"></el-table-column>
-                <el-table-column prop="" label="设备型号"></el-table-column>
+                <el-table-column prop="additions.dev_type" label="设备型号"></el-table-column>
                 <el-table-column prop="" label="升级方式">
                     <template slot-scope="scope">{{scope.row.additions.upgrade_mode == '1'?'实时自动': (scope.row.additions.upgrade_mode == '2'?'用户自动':'定时自动')}}</template>
                 </el-table-column>
@@ -23,11 +23,11 @@
             <el-table :data="firmwareData" border style="width: 100%" ref="multipleTable">
                 <el-table-column prop="response_timestamp" label="完成时间" width="180"></el-table-column>
                 <el-table-column prop="mac" label="路由MAC" width="180"></el-table-column>
-                <el-table-column prop="" label="之前版本" width="180"></el-table-column>
+                <el-table-column prop="additions.old_version" label="之前版本" width="180"></el-table-column>
                 <el-table-column prop="additions.dest_version" label="更新后版本" width="180"></el-table-column>
-                <el-table-column prop="additions.upgrade_status" label="升级状态" width="100">
+                <el-table-column prop="task_result" label="升级状态" width="100">
                     <template slot-scope="scope">
-                        <el-tag :type="scope.row.pubsub_status == 'sysupgrade_ok' ? 'success' : 'danger'" close-transition>{{scope.row.pubsub_status == 'sysupgrade_ok'?'成功': (scope.row.pubsub_status == 'sysupgrade_fail'?'失败':'未知')}}</el-tag>
+                        <el-tag :type="scope.row.task_result == 'success' ? 'success' : 'warning'" close-transition>{{scope.row.task_result == 'success'?'成功': (scope.row.task_result == 'running'?'执行中':'失败')}}</el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作">
@@ -46,16 +46,16 @@
             </el-table>
             <hr style="margin-bottom:40px;height:1px;border:none;border-top:1px solid #ddd;">
             <el-table :data="appsData" border style="width: 100%" ref="multipleTable">
-                <el-table-column prop="response_timestamp" label="安装时间"></el-table-column>
+                <el-table-column prop="request_timestamp" label="下发时间"></el-table-column>
                 <el-table-column prop="mac" label="路由MAC"></el-table-column>
                 <el-table-column prop="pubsub_status" label="设备状态">
                     <template slot-scope="scope">
-                        <el-tag :type="scope.row.pubsub_status == 'response_ok' ? 'success' : 'warning'" close-transition>{{scope.row.pubsub_status == 'response_ok'?'在线': (scope.row.sbzt == 'offline'?'离线':'未知')}}</el-tag>
+                        <el-tag :type="scope.row.device_status == 'online' ? 'success' : 'warning'" close-transition>{{scope.row.device_status == 'online'?'在线': (scope.row.device_status == 'offline'?'离线':'未知')}}</el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column prop="sjzt" label="升级状态">
                     <template slot-scope="scope">
-                        <el-tag :type="scope.row.pubsub_status == 'response_ok' ? 'success' : 'warning'" close-transition>{{scope.row.pubsub_status == 'response_ok'?'在线': (scope.row.sbzt == 'offline'?'离线':'未知')}}</el-tag>
+                        <el-tag :type="scope.row.task_result == 'success' ? 'success' : 'warning'" close-transition>{{scope.row.task_result == 'success'?'成功': (scope.row.task_result == 'running'?'执行中':'失败')}}</el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作">

@@ -300,6 +300,7 @@
                             }
                             if(res.data.ret_code == 0){
                                 self.$message({message:'推送成功',type:'success'});
+                                self.$router.push({path:'/pushresult',query:{curRadio:'firmware'}});
                             }else{
                                 self.$message.error(res.data.extra);
                             }
@@ -346,6 +347,7 @@
                             }
                             if(res.data.ret_code == 0){
                                 self.$message({message:res.data.extra,type:'success'});
+                                self.$router.push({path:'/pushresult',query:{curRadio:'apps'}});
                             }else{
                                 self.$message.error(res.data.extra)
                             }
@@ -387,6 +389,7 @@
                             }
                             if(res.data.ret_code == 0){
                                 self.$message({message:res.data.extra,type:'success'});
+                                self.$router.push({path:'/pushresult',query:{curRadio:'script'}});
                             }else{
                                 self.$message.error(res.data.extra)
                             }

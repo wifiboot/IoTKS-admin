@@ -17,11 +17,18 @@
                 <el-button type="primary" icon="search" :disabled="isSuper=='0'?false:true" @click="search">查询</el-button>
             </el-form-item>
         </el-form>
+        <div class='rad-group' v-if="isSuper =='0'?true:false">
+            <el-radio-group v-model="radio3" @change="changeTab">
+                <el-radio-button label="all">全部</el-radio-button>
+                <el-radio-button label="0">未冻结</el-radio-button>
+                <el-radio-button label="1">已冻结</el-radio-button>
+            </el-radio-group>
+        </div>
         <el-table :data="userData" border style="width: 100%" ref="multipleTable" :empty-text="emptyMsg" v-loading="loading">
             <el-table-column prop="user_account" label="账 号" width="150"></el-table-column>
             <el-table-column prop="user_name" label="渠道名称" width="110"></el-table-column>
             <el-table-column prop="user_phone" label="联系电话" width="130"></el-table-column>
-            <el-table-column prop="user_status" label="冻结状态" width="120" :filters="[{ text: '已冻结', value: '1' }, { text: '未冻结', value: '0' }]" :filter-method="filterTag">
+            <el-table-column prop="user_status" label="冻结状态" width="120">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.user_status == '1' ? 'warning' : 'success'" close-transition>{{scope.row.user_status=='1'?'已冻结':'未冻结'}}</el-tag>
                 </template>
@@ -192,7 +199,7 @@
         data: function() {
             return {
                 uploadUrl:global_.baseUrl+'/device/import/excel',
-                radio3:'全部',
+                radio3:'all',
                 isSuper:localStorage.getItem('userMsg'),
                 dialogFormVisible: false,
                 form: {
@@ -282,12 +289,12 @@
             }
         },
         created: function(){
-           this.getUsers({});
+           this.getUsers({},'all');
         },
         methods: {
-            getUsers: function(params){//获取渠道列表
+            getUsers: function(params,url){//获取渠道列表
                 var self = this;
-                self.$axios.post(global_.baseUrl+'/admin/all',params).then(function(res){
+                self.$axios.post(global_.baseUrl+'/admin/'+url,params).then(function(res){
                     if(res.data.ret_code == '1001'){//未登录状态
                         self.$message({message:res.data.extra,type:'warning'});
                         setTimeout(function(){
@@ -298,7 +305,7 @@
                         self.emptyMsg = res.data.extra;
                     }
                     if(res.data.ret_code == 0){
-                        if(JSON.stringify(params) == '{}'){
+                        if(!params.hasOwnProperty('current_page')){
                             self.pageTotal = res.data.extra.length;
                             self.userData = res.data.extra.slice(0,10);
                         }else{
@@ -306,6 +313,16 @@
                         }
                     }
                 })
+            },
+            changeTab: function(){
+                var self = this;
+                var params = {};
+                if(self.radio3 == 'all'){
+                    self.currentPage = 1;
+                    self.getUsers(params,'all');
+                }else{
+                    self.getUsers({user_status:self.radio3},'status');
+                }
             },
             revoke: function(account){//冻结操作
                 var self = this;
@@ -630,7 +647,14 @@
             },
             handleCurrentChange:function(val){
                 this.currentPage = val;
-                this.getUsers({page_size:10,current_page:this.currentPage});
+                var url = this.radio3=='all'?'all':'status';
+                var params = {};
+                if(this.radio3 == 'all'){
+                    params = {page_size:10,current_page:this.currentPage};
+                }else{
+                    params = {page_size:10,current_page:this.currentPage,user_status:this.radio3};
+                }
+                this.getUsers(params,url);
             },
             filterTag:function(value, row) {
                 return row.user_status == value;

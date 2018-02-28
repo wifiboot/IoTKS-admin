@@ -24,7 +24,7 @@
 
         <el-table :data="listData" border style="width: 100%" ref="multipleTable" v-loading="loading">
             <el-table-column prop="update_time" label="更新时间" width="180"></el-table-column>
-            <el-table-column prop="status" label="状态" width="100":filters="[{ text: '在线', value: 'online' }, { text: '离线', value: 'offline' }]" :filter-method="filterTag">
+            <el-table-column prop="status" label="状态" width="100">
                 <template slot-scope="scope">
                     <el-tag :type="scope.row.status == 'offline' ? 'warning' : 'success'" close-transition>{{scope.row.status == 'online'?'在线':(scope.row.status == 'inactive'?'未激活':'离线')}}</el-tag>
                 </template>

@@ -214,12 +214,14 @@
                         self.form.pkg_version = arrName[2]
                     }else{
                         self.$message({message:'文件名称不符合标准',type:'warning'});
-                        return false
+                        self.fileList = [];
+                        return false;
                     }
 
                 }else{
                     self.$message({message:'文件名称不符合标准',type:'warning'});
-                    return false
+                    self.fileList = [];
+                    return false;
                 }
             },
             validateSpace: function (rule, value, callback) {
