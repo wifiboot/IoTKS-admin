@@ -9,10 +9,10 @@
         <div v-if="isShow=='firmware'?true:false">
             <h4>基本信息</h4>
             <el-table :data="firmwareData1" border style="width: 100%;margin:20px 0 40px;" ref="multipleTable">
-                <el-table-column prop="additions.dest_version" label="下发版本"></el-table-column>
-                <el-table-column prop="additions.dev_type" label="设备型号"></el-table-column>
+                <el-table-column prop="dest_version" label="下发版本"></el-table-column>
+                <el-table-column prop="dev_type" label="设备型号"></el-table-column>
                 <el-table-column prop="" label="升级方式">
-                    <template slot-scope="scope">{{scope.row.additions.upgrade_mode == '1'?'实时自动': (scope.row.additions.upgrade_mode == '2'?'用户自动':'定时自动')}}</template>
+                    <template slot-scope="scope">{{scope.row.upgrade_mode == '1'?'实时自动': (scope.row.upgrade_mode == '2'?'用户自动':'定时自动')}}</template>
                 </el-table-column>
                 <el-table-column prop="" label="配置更新">
                     <template slot-scope="scope">{{JSON.parse(scope.row.request_msg).reflash == '0'?'保留用户配置': '更改用户配置'}}</template>
@@ -23,8 +23,8 @@
             <el-table :data="firmwareData" border style="width: 100%" ref="multipleTable">
                 <el-table-column prop="response_timestamp" label="完成时间" width="180"></el-table-column>
                 <el-table-column prop="mac" label="路由MAC" width="180"></el-table-column>
-                <el-table-column prop="additions.old_version" label="之前版本" width="180"></el-table-column>
-                <el-table-column prop="additions.dest_version" label="更新后版本" width="180"></el-table-column>
+                <el-table-column prop="old_version" label="之前版本" width="180"></el-table-column>
+                <el-table-column prop="dest_version" label="更新后版本" width="180"></el-table-column>
                 <el-table-column prop="task_result" label="升级状态" width="100">
                     <template slot-scope="scope">
                         <el-tag :type="scope.row.task_result == 'success' ? 'success' : 'warning'" close-transition>{{scope.row.task_result == 'success'?'成功': (scope.row.task_result == 'running'?'执行中':'失败')}}</el-tag>
