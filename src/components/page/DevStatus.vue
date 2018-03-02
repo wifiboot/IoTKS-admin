@@ -31,7 +31,7 @@
             </el-table-column>
             <el-table-column prop="mac" label="路由Mac" width="180"></el-table-column>
             <el-table-column prop="dev_type" label="设备型号" width="140"></el-table-column>
-            <el-table-column prop="rom_verion" label="固件版本" width="140"></el-table-column>
+            <el-table-column prop="rom_version" label="固件版本" width="140"></el-table-column>
             <el-table-column prop="user_name" label="账号"></el-table-column>
             <el-table-column label="操作" width="170">
                 <template slot-scope="scope">
