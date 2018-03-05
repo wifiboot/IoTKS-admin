@@ -36,7 +36,7 @@
             <el-table-column label="操作" width="170">
                 <template slot-scope="scope">
                     <el-button class="btn1" size="small" type="text" @click="reset(scope.row.mac)">重启路由</el-button>
-                    <el-button class="btn1" v-if="curUser=='0'" size="small" type="danger" @click="del(scope.row.mac)">删除路由</el-button>
+                    <el-button class="btn1" v-if="curUser=='0' && scope.row.user_name" size="small" type="danger" @click="del(scope.row.mac)">删除路由</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -94,7 +94,10 @@
             getData: function(params,url){
                 var self = this;
                 if(self.curUser == '1'){
-                    params.filter.user_name = localStorage.getItem('ms_username');
+                    var filter = {
+                        user_name: localStorage.getItem('ms_username')
+                    };
+                    params['filter'] = filter;
                 }
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/device/list'+url ,params).then(function(res){
@@ -176,6 +179,9 @@
                 var params = {
                     filter:{"mac":str}
                 };
+                if(localStorage.getItem('userMsg') == 1){//非超级管理员
+                    params.filter.user_name = localStorage.getItem('ms_username');
+                }
                 self.$axios.post(global_.baseUrl+'/device/list',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == '1001'){

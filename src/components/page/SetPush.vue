@@ -179,6 +179,7 @@
                 typeListData:[],
                 ListData:[],
                 romListData:[],
+                isValidTime0:false,
                 upgradeTime:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
                 rules0: {
                     router_mac: [
@@ -221,6 +222,7 @@
                 pkgmodeTime:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
                 pluginListData:[],
                 pVerlist:[],
+                isValidTime1:false,
                 rules1: {
                     route_mac: [
                         {required: true, message: '请输入MAC', trigger: 'blur'},
@@ -376,7 +378,7 @@
                         var params = {
                             route_mac:self.form2.route_mac,
                             script_name: self.form2.script_name,
-                            operator:self.form1.operator
+                            operator:self.form2.operator
                         };
                         self.fullscreenLoading = true;
                         self.$axios.post(global_.baseUrl + '/manage/script',params).then(function (res) {
@@ -537,9 +539,7 @@
                     this.form0.expired_time = '';
                     this.form0.isTime =  false;
                 }
-                if(value == '3'){
-
-                }
+                this.isValidTime0 = value=='2'?true:false;
             },
             handleClick:function (tab,event) {
                 var self = this;
@@ -564,7 +564,11 @@
             validateTimeNum: function (rule, value, callback) {
                 var self = this;
                 var reg = /^\d+$/;
-                if(!self.form0.isTime || !self.form1.isTime){
+                if(!reg.test(value)){
+                    callback(new  Error('输入必须是数字'));
+                }
+                // if(!self.form0.isTime || !self.form1.isTime){
+                if((self.task_type == '1' && self.isValidTime0) || (self.task_type == '2' && self.isValidTime1)){
                     if(!reg.test(value) || Number(value)<24){
                         callback(new Error('输入必须是数字,且大于24'));
                     }else{
@@ -621,12 +625,10 @@
                     this.form1.expired_time = '0';
                     this.form1.isTime =  true;
                 }else{
-                    this.form1.expired_time = ' ';
+                    this.form1.expired_time = '';
                     this.form1.isTime =  false;
                 }
-                if(value == '3'){
-
-                }
+                this.isValidTime1 = value=='2'?true:false;
             },
         }
     }

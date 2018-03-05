@@ -115,7 +115,7 @@
                     }
                     if(res.data.ret_code == 0){
                         var data = res.data.extra[0];
-                        self.formFirmware.msg = data.pubsub_status=='sysupgrade_ok'?'升级成功':'升级失败';
+                        self.formFirmware.msg = data.task_result_info;
                         self.formFirmware.response_msg = data.response_msg;
                         self.formFirmware.request_msg = data.request_msg;
                     }else{

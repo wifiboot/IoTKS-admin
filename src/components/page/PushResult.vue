@@ -36,7 +36,7 @@
             </el-table-column>
             <el-table-column prop="upgrade_mode" label="升级方式" width="100">
                 <template slot-scope="scope">
-                    <el-tag :type="scope.row.upgrade_mode == '1' ? 'warning' : 'success'" close-transition>{{scope.row.upgrade_mode == '1'?'实时自动':(scope.row.upgrade_mode == '2'?'用户自动':'定时自动')}}</el-tag>
+                    <el-tag :type="scope.row.upgrade_mode == '1' ? 'warning' : (scope.row.upgrade_mode=='2'?'success':'primary')" close-transition>{{scope.row.upgrade_mode == '1'?'实时自动':(scope.row.upgrade_mode == '2'?'用户自动':'定时自动')}}</el-tag>
                 </template>
             </el-table-column>
             <el-table-column label="结果" width="150">
@@ -119,7 +119,7 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        if(JSON.stringify(params) == '{}'){
+                        if(!params.hasOwnProperty('current_page')){
                             self.pageTotal = res.data.extra.length;
                             self.listData = res.data.extra.slice(0,10);
                         }else{
