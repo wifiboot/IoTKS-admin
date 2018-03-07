@@ -98,8 +98,10 @@
             getParams: function(){
                 var self = this;
                 self.curRadio = self.$route.query.curRadio || 'firmware';
+                var userName = localStorage.getItem('userMsg')=='0'?'':localStorage.getItem('ms_username');
+                var params = userName==''?{}:{filter:{user_name:userName}};
                 if(self.curRadio == 'firmware'){//rom升级
-                    self.getFirmwareData({});
+                    self.getFirmwareData(params);
                 }
                 if(self.curRadio == 'apps'){//插件升级
                     self.getAppsData({});
@@ -223,7 +225,7 @@
                 var params = {
                     filter:{"mac":str}
                 };
-                var urlStr = self.curRadio=='firmware'?'/task/list/sysupgrade':(self.curRadio=='apps'?'/manage/apps_query':'/manage/script_detail_detail');
+                var urlStr = self.curRadio=='firmware'?'/task/list/sysupgrade':(self.curRadio=='apps'?'/manage/apps_query':'/manage/script_query');
                 self.$axios.post(global_.baseUrl + urlStr,params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == '1001'){

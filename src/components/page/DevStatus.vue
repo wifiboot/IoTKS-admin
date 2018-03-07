@@ -36,7 +36,7 @@
             <el-table-column label="操作" width="170">
                 <template slot-scope="scope">
                     <el-button class="btn1" size="small" type="text" @click="reset(scope.row.mac)">重启路由</el-button>
-                    <el-button class="btn1" v-if="curUser=='0' && scope.row.user_name" size="small" type="danger" @click="del(scope.row.mac)">删除路由</el-button>
+                    <el-button class="btn1" v-if="curUser=='0' && scope.row.user_name" size="small" type="danger" @click="del(scope.row._id,scope.row.mac)">删除路由</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -139,8 +139,27 @@
                     }
                 })
             },
-            del:function(mac){
-
+            del:function(iid,mac){
+                var self = this;
+                var params = {
+                    _id:iid,
+                    route_mac:mac
+                };
+                self.loading = true;
+                self.$axios.post(global_.baseUrl+'/device/leave',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 0){
+                        self.$message({message:'已删除账号 "'+localStorage.getItem('ms_username')+'" 下的路由',type:'success'})
+                    }else{
+                        self.$message.error(res.data.extra);
+                    }
+                })
             },
             changeTab: function(){
                 var url = '';

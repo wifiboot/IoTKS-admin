@@ -55,7 +55,7 @@
                 </el-table-column>
                 <el-table-column prop="sjzt" label="升级状态">
                     <template slot-scope="scope">
-                        <el-tag :type="scope.row.task_result == 'success' ? 'success' : 'warning'" close-transition>{{scope.row.task_result == 'success'?'成功': (scope.row.task_result == 'running'?'执行中':'失败')}}</el-tag>
+                        <el-tag :type="scope.row.pubsub_status == 'respone_ok' ? 'success' : 'warning'" close-transition>{{scope.row.pubsub_status == 'respone_ok'?'成功': (scope.row.pubsub_status == 'respone_fail'?'失败':'执行中')}}</el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作">
@@ -79,7 +79,7 @@
                 <el-table-column prop="mac" label="路由MAC" width="180"></el-table-column>
                 <el-table-column prop="task_status" label="升级状态" width="100">
                     <template slot-scope="scope">
-                        <el-tag :type="scope.row.task_status == 'normal' ? 'success' : 'danger'" close-transition>{{scope.row.task_status == 'normal'?'正常': '未知'}}</el-tag>
+                        <el-tag :type="scope.row.pubsub_status == 'respone_ok' ? 'success' : 'danger'" close-transition>{{scope.row.pubsub_status == 'respone_ok'?'成功': (scope.row.pubsub_status == 'respone_fail'?'失败':'执行中')}}</el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作">
