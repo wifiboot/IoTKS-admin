@@ -120,6 +120,7 @@
                     }
                     if(res.data.ret_code == 0){
                         if(!params.hasOwnProperty('current_page')){
+                        // if(JSON.stringify(params) == '{}'){
                             self.pageTotal = res.data.extra.length;
                             self.listData = res.data.extra.slice(0,10);
                         }else{

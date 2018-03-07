@@ -21,7 +21,7 @@
             </el-table>
             <hr style="margin-bottom:40px;height:1px;border:none;border-top:1px solid #ddd;">
             <el-table :data="firmwareData" border style="width: 100%" ref="multipleTable">
-                <el-table-column prop="task_finish_at" label="完成时间" width="180"></el-table-column>
+                <!--<el-table-column prop="task_finish_at" label="完成时间" width="180"></el-table-column>-->
                 <el-table-column prop="mac" label="路由MAC" width="180"></el-table-column>
                 <el-table-column prop="old_version" label="之前版本" width="180"></el-table-column>
                 <el-table-column prop="dest_version" label="更新后版本" width="180"></el-table-column>

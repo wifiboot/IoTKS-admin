@@ -100,7 +100,7 @@
                                     <el-radio label="2">用户自动升级</el-radio>
                                     <el-radio label="3">定时自动升级(整点时刻)</el-radio>
                                 </el-radio-group>
-                                <el-select :inline="true" v-if="form1.pkg_mode=='3'?true:false" v-model="form1.upgrade_time" style="width:70px;" placeholder="0">
+                                <el-select :inline="true" v-if="form1.pkg_mode=='3'?true:false" v-model="form1.exec_time" style="width:70px;" placeholder="0">
                                     <el-option
                                         v-for="item in pkgmodeTime"
                                         :key="item"
@@ -214,7 +214,7 @@
                     pkg_str_name: '',
                     pkg_version: '',
                     pkg_mode: '1',
-                    upgrade_time:'0',
+                    exec_time:'0',
                     expired_time:'0',
                     isTime: true,
                     operator: ''
@@ -334,7 +334,7 @@
                             pkg_str_name: self.form1.pkg_str_name,
                             pkg_version:self.form1.pkg_version,
                             pkg_mode: self.form1.pkg_mode,
-                            upgrade_time: self.form1.upgrade_time,
+                            exec_time: self.form1.exec_time,
                             expired_time:self.form1.expired_time,
                             operator:self.form1.operator
                         };
@@ -539,7 +539,7 @@
                     this.form0.expired_time = '';
                     this.form0.isTime =  false;
                 }
-                this.isValidTime0 = value=='2'?true:false;
+                this.isValidTime0 = value=='3'?true:false;
             },
             handleClick:function (tab,event) {
                 var self = this;
@@ -570,7 +570,7 @@
                 // if(!self.form0.isTime || !self.form1.isTime){
                 if((self.task_type == '1' && self.isValidTime0) || (self.task_type == '2' && self.isValidTime1)){
                     if(!reg.test(value) || Number(value)<24){
-                        callback(new Error('输入必须是数字,且大于24'));
+                        callback(new Error('输入必须是数字,且不小于24'));
                     }else{
                         callback();
                     }
@@ -628,7 +628,7 @@
                     this.form1.expired_time = '';
                     this.form1.isTime =  false;
                 }
-                this.isValidTime1 = value=='2'?true:false;
+                this.isValidTime1 = value=='3'?true:false;
             },
         }
     }
