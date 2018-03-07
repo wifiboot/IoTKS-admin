@@ -23,7 +23,9 @@
             <el-table :data="firmwareData" border style="width: 100%" ref="multipleTable">
                 <!--<el-table-column prop="task_finish_at" label="完成时间" width="180"></el-table-column>-->
                 <el-table-column prop="mac" label="路由MAC" width="180"></el-table-column>
-                <el-table-column prop="old_version" label="之前版本" width="180"></el-table-column>
+                <el-table-column prop="old_version" label="之前版本" width="180">
+                    <template slot-scope="scope">{{scope.row.old_version || '未知'}}</template>
+                </el-table-column>
                 <el-table-column prop="dest_version" label="更新后版本" width="180"></el-table-column>
                 <el-table-column prop="task_result" label="升级状态" width="100">
                     <template slot-scope="scope">
@@ -48,14 +50,14 @@
             <el-table :data="appsData" border style="width: 100%" ref="multipleTable">
                 <el-table-column prop="request_timestamp" label="下发时间"></el-table-column>
                 <el-table-column prop="mac" label="路由MAC"></el-table-column>
-                <el-table-column prop="pubsub_status" label="设备状态">
+                <el-table-column prop="device_status" label="设备状态">
                     <template slot-scope="scope">
                         <el-tag :type="scope.row.device_status == 'online' ? 'success' : 'warning'" close-transition>{{scope.row.device_status == 'online'?'在线': (scope.row.device_status == 'offline'?'离线':'未知')}}</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="sjzt" label="升级状态">
+                <el-table-column prop="pubsub_status" label="升级状态">
                     <template slot-scope="scope">
-                        <el-tag :type="scope.row.pubsub_status == 'respone_ok' ? 'success' : 'warning'" close-transition>{{scope.row.pubsub_status == 'respone_ok'?'成功': (scope.row.pubsub_status == 'respone_fail'?'失败':'执行中')}}</el-tag>
+                        <el-tag :type="scope.row.pubsub_status == 'response_ok' ? 'success' : (scope.row.pubsub_status == 'response_fail'?'danger':'warning')" close-transition>{{scope.row.pubsub_status == 'response_ok'?'成功': (scope.row.pubsub_status == 'response_fail'?'失败':'执行中')}}</el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作">
@@ -77,9 +79,9 @@
             <el-table :data="scriptData" border style="width: 100%" ref="multipleTable">
                 <el-table-column prop="response_timestamp" label="完成时间" width="180"></el-table-column>
                 <el-table-column prop="mac" label="路由MAC" width="180"></el-table-column>
-                <el-table-column prop="task_status" label="升级状态" width="100">
+                <el-table-column prop="pubsub_status" label="升级状态" width="100">
                     <template slot-scope="scope">
-                        <el-tag :type="scope.row.pubsub_status == 'respone_ok' ? 'success' : 'danger'" close-transition>{{scope.row.pubsub_status == 'respone_ok'?'成功': (scope.row.pubsub_status == 'respone_fail'?'失败':'执行中')}}</el-tag>
+                        <el-tag :type="scope.row.pubsub_status == 'response_ok' ? 'success' : (scope.row.pubsub_status == 'response_fail'?'danger':'warning')" close-transition>{{scope.row.pubsub_status == 'response_ok'?'成功': (scope.row.pubsub_status == 'response_fail'?'失败':'执行中')}}</el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作">
