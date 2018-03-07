@@ -140,6 +140,25 @@
                                     </el-option>
                                 </el-select>
                             </el-form-item>
+                            <el-form-item label="升级方式" prop="script_mode" :inline="true">
+                                <el-radio-group v-model="form2.script_mode" @change="changeScriptMode" :inline="true">
+                                    <el-radio label="1">实时自动升级</el-radio>
+                                    <el-radio label="2">用户自动升级</el-radio>
+                                    <el-radio label="3">定时自动升级(整点时刻)</el-radio>
+                                </el-radio-group>
+                                <el-select :inline="true" v-if="form2.script_mode=='3'?true:false" v-model="form2.exec_time" style="width:70px;" placeholder="0">
+                                    <el-option
+                                        v-for="item in scriptmodeTime"
+                                        :key="item"
+                                        :label="item"
+                                        :value="item">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="超时时间" prop="expired_time">
+                                <el-input v-model="form2.expired_time" :disabled="form2.isTime" class="inp100"></el-input>
+                                <a>&nbsp;小时</a>
+                            </el-form-item>
                             <el-form-item label="操作人" prop="operator">
                                 <el-input v-model="form2.operator" class="diainp"></el-input>
                             </el-form-item>
@@ -246,9 +265,15 @@
                 form2: {
                     route_mac: '',
                     script_name: '',
+                    script_mode: '1',
+                    exec_time:'0',
+                    expired_time:'0',
+                    isTime: true,
                     operator: ''
                 },
                 scriptListData:[],
+                scriptmodeTime:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+                isValidTime2:false,
                 rules2: {
                     route_mac: [
                         {required: true, message: '请输入MAC', trigger: 'blur'},
@@ -256,10 +281,14 @@
                     ],
                     script_name: [
                         {required: true, message: '请选择要安装的脚本', trigger: 'change'}
-                    ]
-                    // server_port: [
-                    //     {required: true, message: '请选择脚本的版本', trigger: 'change'}
-                    // ]
+                    ],
+                    script_mode: [
+                        {required: true, message: '请选择升级方式', trigger: 'change'}
+                    ],
+                    expired_time: [
+                        {required: true, message: '请输入超时时间', trigger: 'blur'},
+                        {validator: this.validateTimeNum, trigger: 'blur'}
+                    ],
                 },
                 task_type: '1',
                 value: '',
@@ -378,6 +407,9 @@
                         var params = {
                             route_mac:self.form2.route_mac,
                             script_name: self.form2.script_name,
+                            script_mode: self.form2.script_mode,
+                            exec_time: self.form2.exec_time,
+                            expired_time:self.form2.expired_time,
                             operator:self.form2.operator
                         };
                         self.fullscreenLoading = true;
@@ -397,6 +429,10 @@
                             }
                             self.form2.route_mac = '';
                             self.form2.script_name = '';
+                            self.form2.script_mode = '1';
+                            self.form2.upgrade_time = '';
+                            self.form2.expired_time = '0';
+                            self.form2.isTime = true;
                             self.form2.operator = '';
 
                         })
@@ -568,7 +604,7 @@
                     callback(new  Error('输入必须是数字'));
                 }
                 // if(!self.form0.isTime || !self.form1.isTime){
-                if((self.task_type == '1' && self.isValidTime0) || (self.task_type == '2' && self.isValidTime1)){
+                if((self.task_type == '1' && self.isValidTime0) || (self.task_type == '2' && self.isValidTime1) || (self.task_type == '3' && self.isValidTime2)){
                     if(!reg.test(value) || Number(value)<24){
                         callback(new Error('输入必须是数字,且不小于24'));
                     }else{
@@ -629,6 +665,16 @@
                     this.form1.isTime =  false;
                 }
                 this.isValidTime1 = value=='3'?true:false;
+            },
+            changeScriptMode: function(value){
+                if(value == '1'){
+                    this.form2.expired_time = '0';
+                    this.form2.isTime =  true;
+                }else{
+                    this.form2.expired_time = '';
+                    this.form2.isTime =  false;
+                }
+                this.isValidTime2 = value=='3'?true:false;
             },
         }
     }

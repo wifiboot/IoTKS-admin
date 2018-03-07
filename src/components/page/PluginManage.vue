@@ -261,6 +261,7 @@
                         var a = document.createElement('a');
                         a.download = fileName;
                         a.href = e.target.result;
+                        console.log(e.target.result);
                         document.body.appendChild(a);  // 修复firefox中无法触发click
                         a.click();
                         document.body.removeChild(a);

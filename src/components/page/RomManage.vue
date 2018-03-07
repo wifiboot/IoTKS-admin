@@ -243,7 +243,26 @@
                     file_name:fileName
                 };
                 self.loading = true;
-                self.$axios.post(global_.baseUrl+'/rom/download',params).then(function(res){
+                self.$axios.post(global_.baseUrl+'/rom/download/check',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == 0){
+                        const aLink = document.createElement('a');
+                        const evt = document.createEvent('MouseEvents');
+                        // var evt = document.createEvent("HTMLEvents")
+                        evt.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+                        aLink.download = fileName;
+                        aLink.href = global_.baseUrl+res.data.extra.access_path;
+                        aLink.dispatchEvent(evt)
+
+                    }else{
+                        self.$message.error(res.data.extra);
+                    }
+                },function(err){
+                    self.$message.error('下载失败');
+                    self.loading = false;
+                    console.log(err);
+                })
+                /*self.$axios.post(global_.baseUrl+'/rom/download',params).then(function(res){
                     self.loading = false;
                     // console.log(res);
                     var blob = new Blob([res.data]);
@@ -254,6 +273,7 @@
                         var a = document.createElement('a');
                         a.download = fileName;
                         a.href = e.target.result;
+                        console.log(e.target.result);
                         document.body.appendChild(a);  // 修复firefox中无法触发click
                         a.click();
                         document.body.removeChild(a);
@@ -271,7 +291,7 @@
                     self.$message.error('下载失败');
                     self.loading = false;
                     console.log(err);
-                })
+                })*/
             },
             delRom: function(id,fileName,i){//删除
                 var self = this;
