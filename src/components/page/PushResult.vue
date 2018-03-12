@@ -202,6 +202,14 @@
                 var params = {
                     page_size:10,current_page:this.currentPage
                 };
+                if(self.search_word!=''){
+                    if(!self.validateSearchWord(self.search_word)){
+                        return false;
+                    }else{
+                        var filter = {'mac':(self.search_word.indexOf(':')>=0?self.search_word.replace(/:/g,''):self.search_word).toUpperCase()};
+                        params['filter'] = filter;
+                    }
+                }
                 if(self.curRadio == 'firmware'){
                     self.getFirmwareData(params);
                 }
@@ -213,10 +221,23 @@
                 }
 
             },
+            validateSearchWord: function(macstr){
+                var self = this;
+                var reg_name = /^[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}$/;
+                var reg_name2 = /^[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}[A-Fa-f\d]{2}$/;
+                if(macstr == ''){
+                    self.$message({message:'输入不能为空',type:'warning'});
+                    return false;
+                }
+                if(!reg_name.test(macstr) && !reg_name2.test(macstr)){
+                    self.$message({message:'设备MAC输入有误',type:'warning'});
+                    return false;
+                }
+                return true;
+            },
             search: function(){
                 var self = this;
-                if(self.search_word == ''){
-                    self.$message({message:'输入不能为空',type:'warning'});
+                if(!self.validateSearchWord(self.search_word)){
                     return false;
                 }
                 self.loading = true;

@@ -39,21 +39,19 @@
                 </template>
             </el-table-column>
             <el-table-column prop="user_create_time" label="创建时间" width="150"></el-table-column>
-            <el-table-column label="在线设备">
+            <el-table-column label="在线设备" width="100">
                 <template slot-scope="scope">
                     <el-tag type="warning">{{scope.row.user_online_count + '/ ' + scope.row.user_device_count}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column label="操作" width="240">
+            <el-table-column label="操作" width="320">
                 <template slot-scope="scope">
                     <!--<el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.user_account)">修改密码</el-button>-->
                     <el-button class="btn1" size="small" type="text" @click="resetPassword(scope.row.user_account)">重置密码</el-button>
-                    <!--<el-button class="btn1" size="small" :disabled="scope.row.user_type =='1'?false:true" type="text" @click="toRouter(scope.row.user_account)">导入路由</el-button>-->
                     <el-button class="btn1" size="small" v-if="scope.row.user_type =='1'?true:false" type="text" @click="toRouter(scope.row.user_account)">导入路由</el-button>
                     <el-button class="btn1" size="small" v-if="scope.row.user_status =='0' && scope.row.user_type =='1'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>
                     <el-button class="btn1" size="small" v-else-if="scope.row.user_status =='1' && scope.row.user_type =='1'" @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>
-                    <!--<el-button class="btn1" size="small" v-if="scope.row.user_status =='0'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>-->
-                    <!--<el-button class="btn1" size="small" v-else @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>-->
+                    <el-button class="btn1" size="small" v-if="scope.row.user_type =='1'?true:false" type="success" @click="toEnter(scope.row.user_account)">点击进入</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -378,6 +376,49 @@
                     console.log(err);
                 })
 
+            },
+            getUser: function(){
+                var self = this;
+                self.$axios.post(global_.baseUrl+'/admin/info').then(function(res){
+                    if(res.data.ret_code == 0){
+                        localStorage.setItem('userMsg',res.data.ret_msg);
+                        if(res.data.ret_msg == '1'){//普通管理员
+
+                        }
+                        setTimeout(function(){
+                            // self.$router.push('/setpush')
+                            self.$router.push({path:'/'});
+                        },2000)
+
+                    }
+                })
+            },
+            toEnter: function(user){
+                var self = this;
+                self.loading = true;
+                var params = {
+                    user_account:user
+                };
+                self.$axios.post(global_.baseUrl+'/admin/switch',params).then(function(res){
+                    self.loading = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == '1003'){
+                        self.emptyMsg = res.data.extra;
+                    }
+                    if(res.data.ret_code == 0){
+                        self.$message({message:res.data.extra,type:'success'});
+                        localStorage.setItem('ms_username',user);
+                        localStorage.setItem('userMsg','1');
+                        window.location.reload();
+                    }else{
+                        self.$message.error(res.data.extra);
+                    }
+                })
             },
             saveCreate: function(formName){
                 let self = this;
