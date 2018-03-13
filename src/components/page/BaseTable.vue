@@ -44,11 +44,12 @@
                     <el-tag type="warning">{{scope.row.user_online_count + '/ ' + scope.row.user_device_count}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column label="操作" width="320">
+            <el-table-column label="操作" width="380">
                 <template slot-scope="scope">
                     <!--<el-button class="btn1" size="small" type="text" @click="resetPwd(scope.row.user_account)">修改密码</el-button>-->
                     <el-button class="btn1" size="small" type="text" @click="resetPassword(scope.row.user_account)">重置密码</el-button>
                     <el-button class="btn1" size="small" v-if="scope.row.user_type =='1'?true:false" type="text" @click="toRouter(scope.row.user_account)">导入路由</el-button>
+                    <el-button class="btn1" size="small" v-if="scope.row.user_type =='1'?true:false" type="text" @click="outRouter(scope.row.user_account)">导出路由</el-button>
                     <el-button class="btn1" size="small" v-if="scope.row.user_status =='0' && scope.row.user_type =='1'" @click="revoke(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">冻结账户</el-button>
                     <el-button class="btn1" size="small" v-else-if="scope.row.user_status =='1' && scope.row.user_type =='1'" @click="restore(scope.row.user_account)" :type="scope.row.user_status == '1' ? 'warning' : 'danger'">解冻账户</el-button>
                     <el-button class="btn1" size="small" v-if="scope.row.user_type =='1'?true:false" type="success" @click="toEnter(scope.row.user_account)">点击进入</el-button>
@@ -570,6 +571,40 @@
                 self.showRouterDialog = true;
                 self.curAccount2 = account;
                 self.formMacfile.user_name = account;
+            },
+            outRouter: function(account){
+                var self = this;
+                var params = {
+                    user_account: account
+                };
+                self.fullscreenLoading  = true;
+                self.$axios.post(global_.baseUrl+'/device/export',params).then(function(res){
+                    self.fullscreenLoading  = false;
+                    if(res.data.ret_code == '1001'){
+                        self.$message({message:res.data.extra,type:'warning'});
+                        setTimeout(function(){
+                            self.$router.replace('login');
+                        },2000)
+                    }
+                    if(res.data.ret_code == 0){
+                        const aLink = document.createElement('a');
+                        const evt = document.createEvent('MouseEvents');
+                        // var evt = document.createEvent("HTMLEvents")
+                        evt.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+                        var str = res.data.extra;
+                        var index = str.lastIndexOf("\/");
+                        str  = str .substring(index + 1, str .length);
+                        aLink.download = str;
+                        aLink.href = global_.baseUrl+res.data.extra;
+                        aLink.dispatchEvent(evt);
+                        self.$message({message:'导入成功',type:'success'})
+                    }else{
+                        self.$message.error(res.data.extra);
+                    }
+                },function(err){
+                    self.fullscreenLoading  = false;
+                    self.$message.error(err);
+                })
             },
             saveToRouterChange: function(formName){
                 var self = this;
