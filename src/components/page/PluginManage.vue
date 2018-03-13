@@ -252,19 +252,17 @@
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/pkg/download',params).then(function(res){
                     self.loading = false;
-                    console.log(res);
-                    var blob = new Blob([res.data]);
-                    var reader = new FileReader();
-                    reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表情href
-                    reader.onload = function (e) {
-                        // 转换完成，创建一个a标签用于下载
-                        var a = document.createElement('a');
-                        a.download = fileName;
-                        a.href = e.target.result;
-                        console.log(e.target.result);
-                        document.body.appendChild(a);  // 修复firefox中无法触发click
-                        a.click();
-                        document.body.removeChild(a);
+
+                    if(res.data.ret_code == 0){
+                        const aLink = document.createElement('a');
+                        const evt = document.createEvent('MouseEvents');
+                        // var evt = document.createEvent("HTMLEvents")
+                        evt.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+                        aLink.download = fileName;
+                        aLink.href = global_.baseUrl+res.data.extra;
+                        aLink.dispatchEvent(evt)
+                    }else{
+                        self.$message.error(res.data.extra);
                     }
 
                     if(res.data.ret_code == '1001'){
@@ -272,12 +270,6 @@
                         setTimeout(function(){
                             self.$router.replace('login');
                         },2000)
-                    }
-                    if(res.data.ret_code == 0){
-                        self.$message({message:'下载成功',type:'success'});
-                        self.getData();
-                    }else{
-                        self.$message.error(res.data.extra)
                     }
 
                 },function(err){
