@@ -625,7 +625,15 @@
                             }
                             if(res.data.ret_code == '1017'){
                                 self.showRouterDialog = false;
-                                self.$message({message:'"'+ res.data.extra.join('/')+' "已存在',type:'warning'})
+                                var arr = res.data.extra;
+                                var str = '';
+                                if(arr.length > 3){
+                                    var newarr = arr.slice(0,3);
+                                    str = newarr.join(' / ')+'...';
+                                }else{
+                                    str = arr.join(' / ');
+                                }
+                                self.$message({message:'"'+ str +' "已存在',type:'warning'})
                             }
                             if(res.data.ret_code == 0){
                                 self.showRouterDialog = false;
@@ -765,7 +773,15 @@
             handleSuccess: function(response,file,fileList){
                 if(response.ret_code == '1017'){
                     this.showRouterDialog = false;
-                    this.$message({message:'"'+ response.extra.join(' / ')+' "已存在',type:'warning'})
+                    var arr = response.extra;
+                    var str = '';
+                    if(arr.length > 3){
+                        var newarr = arr.slice(0,3);
+                        str = newarr.join(' / ')+'...';
+                    }else{
+                        str = arr.join(' / ');
+                    }
+                    this.$message({message:'"'+ str +' "已存在',type:'warning'})
                 }
                 if(response.ret_code == 0){
                     this.$message({message:'创建成功',type:'success'});
