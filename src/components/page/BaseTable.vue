@@ -597,7 +597,7 @@
                         aLink.download = str;
                         aLink.href = global_.baseUrl+res.data.extra;
                         aLink.dispatchEvent(evt);
-                        self.$message({message:'导入成功',type:'success'})
+                        self.$message({message:'导出成功',type:'success'})
                     }else{
                         self.$message.error(res.data.extra);
                     }
