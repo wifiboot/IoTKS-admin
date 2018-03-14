@@ -623,6 +623,10 @@
                                     self.$router.replace('login');
                                 },2000)
                             }
+                            if(res.data.ret_code == '1017'){
+                                self.showRouterDialog = false;
+                                self.$message({message:'"'+ res.data.extra.join('/')+' "已存在',type:'warning'})
+                            }
                             if(res.data.ret_code == 0){
                                 self.showRouterDialog = false;
                                 self.$message({message:'导入成功',type:'success'})
@@ -759,6 +763,10 @@
                 // }
             },
             handleSuccess: function(response,file,fileList){
+                if(response.ret_code == '1017'){
+                    this.showRouterDialog = false;
+                    this.$message({message:'"'+ response.extra.join(' / ')+' "已存在',type:'warning'})
+                }
                 if(response.ret_code == 0){
                     this.$message({message:'创建成功',type:'success'});
                 }else{
