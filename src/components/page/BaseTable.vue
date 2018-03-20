@@ -26,7 +26,7 @@
         </div>
         <el-table :data="userData" border style="width: 100%" ref="multipleTable" :empty-text="emptyMsg" v-loading="loading">
             <el-table-column prop="user_account" label="账 号" width="150"></el-table-column>
-            <el-table-column prop="user_name" label="渠道名称" width="110"></el-table-column>
+            <el-table-column prop="user_name" label="渠道名称"></el-table-column>
             <el-table-column prop="user_phone" label="联系电话" width="130"></el-table-column>
             <el-table-column prop="user_status" label="冻结状态" width="120">
                 <template slot-scope="scope">
@@ -293,7 +293,9 @@
         methods: {
             getUsers: function(params,url){//获取渠道列表
                 var self = this;
+                self.loading = true;
                 self.$axios.post(global_.baseUrl+'/admin/'+url,params).then(function(res){
+                    self.loading = false;
                     if(res.data.ret_code == '1001'){//未登录状态
                         self.$message({message:res.data.extra,type:'warning'});
                         setTimeout(function(){
@@ -316,6 +318,7 @@
             changeTab: function(){
                 var self = this;
                 var params = {};
+                self.currentPage = 1;
                 if(self.radio3 == 'all'){
                     self.currentPage = 1;
                     self.getUsers(params,'all');
@@ -342,7 +345,11 @@
                     }
                     if(res.data.ret_code == 0){
                         self.$message({message:res.data.extra,type:'success'});
-                        self.getUsers();
+                        if(self.radio3 == 'all'){
+                            self.getUsers({page_size:10,current_page:self.currentPage},'all');
+                        }else{
+                            self.getUsers({user_status:self.radio3,page_size:10,current_page:self.currentPage},'status');
+                        }
                     }
 
                 },function(err){
@@ -368,7 +375,12 @@
                     }
                     if(res.data.ret_code == 0){
                         self.$message({message:res.data.extra,type:'success'});
-                        self.getUsers();
+                        var param = {};
+                        if(self.radio3 == 'all'){
+                            self.getUsers({page_size:10,current_page:self.currentPage},'all');
+                        }else{
+                            self.getUsers({user_status:self.radio3,page_size:10,current_page:self.currentPage},'status');
+                        }
                     }
 
                 },function(err){
@@ -453,8 +465,9 @@
                             self.form.selectProv = '';
                             self.form.selectCity = '';
                             self.form.addr = '';
+                            self.radio3 = 'all';
                             self.dialogFormVisible = false;
-                            self.getUsers({});
+                            self.getUsers({},'all');
                         }else{
                             self.$message(res.data.extra);
                         }
@@ -491,10 +504,6 @@
                         }else{
                             self.userData = res.data.data;
                         }
-                    }
-                    if(res.data.ret_code == 0){
-                        self.pageTotal = res.data.extra.length;
-                        self.listData = res.data.extra.slice(0,10);
                     }
                 })
 
@@ -637,7 +646,12 @@
                             }
                             if(res.data.ret_code == 0){
                                 self.showRouterDialog = false;
-                                self.$message({message:'导入成功',type:'success'})
+                                self.$message({message:'导入成功',type:'success'});
+                                if(self.radio3 == 'all'){
+                                    self.getUsers({page_size:10,current_page:self.currentPage},'all');
+                                }else{
+                                    self.getUsers({user_status:self.radio3,page_size:10,current_page:self.currentPage},'status');
+                                }
                             }else{
                                 self.$message.error(res.data.extra);
                             }
@@ -785,6 +799,11 @@
                 }
                 if(response.ret_code == 0){
                     this.$message({message:'创建成功',type:'success'});
+                    if(self.radio3 == 'all'){
+                        self.getUsers({page_size:10,current_page:self.currentPage},'all');
+                    }else{
+                        self.getUsers({user_status:self.radio3,page_size:10,current_page:self.currentPage},'status');
+                    }
                 }else{
                     this.$message.error(response.extra);
                 }

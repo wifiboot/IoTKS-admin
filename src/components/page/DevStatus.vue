@@ -155,7 +155,14 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        self.$message({message:'已删除账号 "'+localStorage.getItem('ms_username')+'" 下的路由',type:'success'})
+                        self.$message({message:'已删除账号 "'+localStorage.getItem('ms_username')+'" 下的路由',type:'success'});
+                        var url = '';
+                        if(self.radio3 == 'all'){
+                            url = '';
+                        }else{
+                            url = '/'+self.radio3;
+                        }
+                        self.getData({page_size:10,current_page:self.currentPage},url);
                     }else{
                         self.$message.error(res.data.extra);
                     }
