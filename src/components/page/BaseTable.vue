@@ -306,11 +306,13 @@
                         self.emptyMsg = res.data.extra;
                     }
                     if(res.data.ret_code == 0){
+                        self.pageTotal = res.data.extra.count || self.pageTotal;
                         if(!params.hasOwnProperty('current_page')){
-                            self.pageTotal = res.data.extra.length;
-                            self.userData = res.data.extra.slice(0,10);
+                            // self.pageTotal = res.data.extra.length;
+                            // self.userData = res.data.extra.slice(0,10);
+                            self.userData = res.data.extra.allAdmin;
                         }else{
-                            self.userData = res.data.extra;
+                            self.userData = res.data.extra.allAdmin;
                         }
                     }
                 })

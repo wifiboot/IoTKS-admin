@@ -109,11 +109,14 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
+                        self.pageTotal = res.data.extra.count || self.pageTotal;
                         if(!params.hasOwnProperty('current_page')){
-                            self.pageTotal = res.data.extra.length;
-                            self.listData = res.data.extra.slice(0,10);
+                            // self.pageTotal = res.data.extra.length;
+                            // self.listData = res.data.extra.slice(0,10);
+                            self.listData = res.data.extra.query;
                         }else{
-                            self.listData = res.data.extra;
+                            // self.listData = res.data.extra;
+                            self.listData = res.data.extra.query;
                         }
                     }
                 })
@@ -175,6 +178,7 @@
                 }else{
                     url = '/'+this.radio3;
                 }
+                this.currentPage = 1;
                 this.getData({},url);
             },
             handleCurrentChange:function(val){
@@ -217,8 +221,10 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        self.pageTotal = res.data.extra.length;
-                        self.listData = res.data.extra.slice(0,10);
+                        // self.pageTotal = res.data.extra.length;
+                        // self.listData = res.data.extra.slice(0,10);
+                        self.pageTotal = res.data.extra.count;
+                        self.listData = res.data.extra.query;
                     }
                 })
 
