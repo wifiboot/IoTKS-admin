@@ -91,7 +91,14 @@
                 </el-table-column>
             </el-table>
         </div>
-
+        <div class="pagination">
+            <el-pagination
+                @current-change ="handleCurrentChange"
+                :current-page="currentPage"
+                layout="prev, pager, next"
+                :total="pageTotal">
+            </el-pagination>
+        </div>
     </div>
 </template>
 
@@ -112,6 +119,8 @@
                 firmwareData1:[],
                 scriptData1:[],
                 isShow:'apps',
+                pageTotal:0,
+                currentPage:1,
 
             }
         },
@@ -125,20 +134,21 @@
                 self.curRadio = self.$route.query.curRadio;
                 if(self.curRadio == 'apps'){//插件升级
                     self.isShow = 'apps';
-                    self.getAppsDetailData();
+                    self.getAppsDetailData({});
                 }
                 if(self.curRadio == 'firmware'){//rom升级
                     self.isShow = 'firmware';
-                    self.getFirmwareData();
+                    self.getFirmwareData({});
                 }
                 if(self.curRadio == 'script'){//脚本升级
                     self.isShow = 'script';
-                    self.getScriptDetailData();
+                    self.getScriptDetailData({});
                 }
             },
-            getFirmwareData: function(){
+            getFirmwareData: function(params){
                 var self = this;
-                self.$axios.post(global_.baseUrl+'/task/list/detail',{uuid:self.curId}).then(function(res){
+                params.uuid = self.curId;
+                self.$axios.post(global_.baseUrl+'/task/list/detail',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == '1001'){
                         self.$message({message:res.data.extra,type:'warning'});
@@ -147,8 +157,14 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        self.firmwareData = res.data.extra;
-                        self.firmwareData1 = res.data.extra.slice(0,1);
+                        // self.firmwareData = res.data.extra;
+                        self.firmwareData1 = res.data.extra.resultList.slice(0,1);
+                        self.pageTotal = res.data.extra.count || self.pageTotal;
+                        if(!params.hasOwnProperty('current_page')){
+                            self.firmwareData = res.data.extra.resultList;
+                        }else{
+                            self.firmwareData = res.data.extra.resultList;
+                        }
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -157,9 +173,10 @@
                     console.log(err);
                 });
             },
-            getAppsDetailData: function(){
+            getAppsDetailData: function(params){
                 var self = this;
-                self.$axios.post(global_.baseUrl+'/manage/apps_detail',{uuid:self.curId}).then(function(res){
+                params.uuid = self.curId;
+                self.$axios.post(global_.baseUrl+'/manage/apps_detail',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == '1001'){
                         self.$message({message:res.data.extra,type:'warning'});
@@ -168,8 +185,10 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        self.appsData = res.data.extra;
-                        self.appsData1 = res.data.extra.slice(0,1);
+                        // self.appsData = res.data.extra;
+                        self.appsData1 = res.data.extra.apps_task.slice(0,1);
+                        self.pageTotal = res.data.extra.count || self.pageTotal;
+                        self.appsData = res.data.extra.apps_task;
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -178,9 +197,10 @@
                     console.log(err);
                 });
             },
-            getScriptDetailData: function(){
+            getScriptDetailData: function(params){
                 var self = this;
-                self.$axios.post(global_.baseUrl+'/manage/script_detail',{uuid:self.curId}).then(function(res){
+                params.uuid = self.curId;
+                self.$axios.post(global_.baseUrl+'/manage/script_detail',params).then(function(res){
                     self.loading = false;
                     if(res.data.ret_code == '1001'){
                         self.$message({message:res.data.extra,type:'warning'});
@@ -189,8 +209,10 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        self.scriptData = res.data.extra;
-                        self.scriptData1 = res.data.extra.slice(0,1);
+                        // self.scriptData = res.data.extra;
+                        self.scriptData1 = res.data.extra.script_task.slice(0,1);
+                        self.pageTotal = res.data.extra.count || self.pageTotal;
+                        self.scriptData = res.data.extra.script_task;
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -198,13 +220,29 @@
                     self.loading = false;
                     console.log(err);
                 });
+            },
+            handleCurrentChange:function(val){
+                var self = this;
+                self.currentPage = val;
+                var params = {
+                    page_size:10,
+                    current_page:this.currentPage
+                };
+                if(self.curRadio == 'apps'){//插件升级
+                    self.isShow = 'apps';
+                    self.getAppsDetailData(params);
+                }
+                if(self.curRadio == 'firmware'){//rom升级
+                    self.isShow = 'firmware';
+                    self.getFirmwareData(params);
+                }
+                if(self.curRadio == 'script'){//脚本升级
+                    self.isShow = 'script';
+                    self.getScriptDetailData(params);
+                }
             },
             handleEdit: function(mac){
                 this.$router.push({path:'/updateromstatus',query:{curid:this.curId,curmac:mac,curRadio:this.curRadio}});
-            },
-            handleCurrentChange:function(val){
-//                this.cur_page = val;
-//                this.getData();
             },
             changePage:function(values) {
                 this.information.pagination.per_page = values.perpage;
