@@ -32,11 +32,11 @@
             <el-table-column prop="mac" label="路由Mac" width="180"></el-table-column>
             <el-table-column prop="dev_type" label="设备型号" width="140"></el-table-column>
             <el-table-column prop="rom_version" label="固件版本" width="140"></el-table-column>
-            <el-table-column prop="user_name" label="账号" width="140"></el-table-column>
+            <el-table-column prop="user_name" label="账号"></el-table-column>
             <el-table-column label="操作" width="170">
                 <template slot-scope="scope">
                     <el-button class="btn1" size="small" type="text" @click="reset(scope.row.mac)">重启路由</el-button>
-                    <el-button class="btn1" v-if="curUser=='0' && scope.row.user_name" size="small" type="danger" @click="del(scope.row._id,scope.row.mac)">删除路由</el-button>
+                    <el-button class="btn1" v-if="curUser=='0' && scope.row.user_name" size="small" type="danger" @click="del(scope.row._id,scope.row.mac,scope.row.user_name)">删除路由</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -142,11 +142,12 @@
                     }
                 })
             },
-            del:function(iid,mac){
+            del:function(iid,mac,username){
                 var self = this;
                 var params = {
                     _id:iid,
-                    route_mac:mac
+                    route_mac:mac,
+                    user_name:username
                 };
                 self.loading = true;
                 self.$axios.post(global_.baseUrl+'/device/leave',params).then(function(res){

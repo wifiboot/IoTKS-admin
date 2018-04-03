@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-loading="loading">
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item><i class="el-icon-upload"></i> 批量执行任务</el-breadcrumb-item>
@@ -62,7 +62,7 @@
                                 <el-input v-model="form0.operator_name" class="diainp"></el-input>
                             </el-form-item>
                             <el-form-item>
-                                <el-button type="primary" @click="onRomSubmit('form0')" v-loading.fullscreen.lock="fullscreenLoading">执行</el-button>
+                                <el-button type="primary" @click="onRomSubmit('form0')">执行</el-button>
                             </el-form-item>
                         </el-form>
                     </div>
@@ -295,7 +295,8 @@
 
                 romtest:[],
                 filetest:'',
-                fullscreenLoading: false,
+                // fullscreenLoading: false,
+                loading:false
             }
         },
         created:function () {
@@ -319,10 +320,10 @@
                             reflash:self.form0.reflash,
                             expired_time:self.form0.expired_time
                         };
-                        self.fullscreenLoading = true;
+                        self.loading = true;
                         self.$axios.post(global_.baseUrl + '/task/add/sysupgrade',params).then(function (res) {
                             // console.log(res.data);
-                            self.fullscreenLoading = false;
+                            self.loading = false;
                             if(res.data.ret_code == '1001'){
                                 self.$message({message:res.data.extra,type:'warning'});
                                 setTimeout(function(){
@@ -367,9 +368,9 @@
                             expired_time:self.form1.expired_time,
                             operator:self.form1.operator
                         };
-                        self.fullscreenLoading = true;
+                        self.loading = true;
                         self.$axios.post(global_.baseUrl + '/manage/apps',params).then(function (res) {
-                            self.fullscreenLoading = false;
+                            self.loading = false;
                             if(res.data.ret_code == '1001'){
                                 self.$message({message:res.data.extra,type:'warning'});
                                 setTimeout(function(){
@@ -412,9 +413,9 @@
                             expired_time:self.form2.expired_time,
                             operator:self.form2.operator
                         };
-                        self.fullscreenLoading = true;
+                        self.loading = true;
                         self.$axios.post(global_.baseUrl + '/manage/script',params).then(function (res) {
-                            self.fullscreenLoading = false;
+                            self.loading = false;
                             if(res.data.ret_code == '1001'){
                                 self.$message({message:res.data.extra,type:'warning'});
                                 setTimeout(function(){

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-loading="loading">
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item><i class="el-icon-star-off"></i> 辅助工具</el-breadcrumb-item>
@@ -44,6 +44,7 @@
                     ]
                 },
                 fullscreenLoading:false,
+                loading:false
             }
         },
         created:function () {
@@ -55,7 +56,8 @@
                 self.$refs[formName].validate(function(valid){
                     if(valid){
                         // console.log('验证成功')
-                        self.fullscreenLoading  = true;
+                        // self.fullscreenLoading  = true;
+                        self.loading  = true;
                         var mac = self.form0.route_mac;
                         var str = (mac.indexOf(':')>=0?mac.replace(/:/g,''):mac).toUpperCase();
                         var params = {
@@ -63,7 +65,7 @@
                         };
                         // self.$axios.defaults.withCredentials = true;
                         self.$axios.post(global_.baseUrl+'/device/sysinfo',params).then(function(res){
-                            self.fullscreenLoading  = false;
+                            // self.fullscreenLoading  = false;
                             self.loading = false;
                             if(res.data.ret_code == '1001'){
                                 self.$message({message:res.data.extra,type:'warning'});
@@ -81,7 +83,8 @@
 
                         },function(err){
                             self.$message.error('操作失败');
-                            self.fullscreenLoading  = false;
+                            // self.fullscreenLoading  = false;
+                            self.loading  = false;
                         })
 
                     }else{

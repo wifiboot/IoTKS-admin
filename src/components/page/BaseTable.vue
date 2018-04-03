@@ -1,5 +1,5 @@
 <template>
-    <div class="table">
+    <div class="table" v-loading="loading2">
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item><i class="el-icon-menu"></i> 渠道管理</el-breadcrumb-item>
@@ -200,6 +200,7 @@
                 uploadUrl:global_.baseUrl+'/device/import/excel',
                 radio3:'all',
                 isSuper:localStorage.getItem('userMsg'),
+                loading2:false,
                 dialogFormVisible: false,
                 form: {
                     user:'',
@@ -536,7 +537,7 @@
                         self.$message.error(res.data.extra);
                     }
                 },function(err){
-                    self.fullscreenLoading  = false;
+                    self.loading  = false;
                     self.$message.error(err);
                 })
 
@@ -588,9 +589,9 @@
                 var params = {
                     user_account: account
                 };
-                self.fullscreenLoading  = true;
+                self.loading  = true;
                 self.$axios.post(global_.baseUrl+'/device/export',params).then(function(res){
-                    self.fullscreenLoading  = false;
+                    self.loading  = false;
                     if(res.data.ret_code == '1001'){
                         self.$message({message:res.data.extra,type:'warning'});
                         setTimeout(function(){
@@ -613,7 +614,7 @@
                         self.$message.error(res.data.extra);
                     }
                 },function(err){
-                    self.fullscreenLoading  = false;
+                    self.loading  = false;
                     self.$message.error(err);
                 })
             },
@@ -625,9 +626,9 @@
                             user_name: self.curAccount2,
                             route_mac:self.formRouter2.route_mac
                         };
-                        self.fullscreenLoading  = true;
+                        self.loading2  = true;
                         self.$axios.post(global_.baseUrl+'/device/import',params).then(function(res){
-                            self.fullscreenLoading  = false;
+                            self.loading2  = false;
                             if(res.data.ret_code == '1001'){
                                 self.$message({message:res.data.extra,type:'warning'});
                                 setTimeout(function(){
@@ -658,7 +659,7 @@
                                 self.$message.error(res.data.extra);
                             }
                         },function(err){
-                            self.fullscreenLoading  = false;
+                            self.loading2  = false;
                             self.$message.error(err);
                         })
                     }else {
