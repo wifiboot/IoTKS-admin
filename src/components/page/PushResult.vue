@@ -145,12 +145,14 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        if(JSON.stringify(params) == '{}'){
-                            self.pageTotal = res.data.extra.length;
-                            self.listData = res.data.extra.slice(0,10);
-                        }else{
-                            self.listData = res.data.extra;
-                        }
+                        self.pageTotal = res.data.extra.count || self.pageTotal;
+                        // if(!params.hasOwnProperty('current_page')){
+                            // self.pageTotal = res.data.extra.length;
+                            // self.listData = res.data.extra.slice(0,10);
+                            self.listData = res.data.extra.apps_task;
+                        // }else{
+                        //     self.listData = res.data.extra;
+                        // }
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -170,12 +172,14 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        if(JSON.stringify(params) == '{}'){
-                            self.pageTotal = res.data.extra.length;
-                            self.listData = res.data.extra.slice(0,10);
-                        }else{
-                            self.listData = res.data.extra;
-                        }
+                        self.pageTotal = res.data.extra.count || self.pageTotal;
+                        // if(JSON.stringify(params) == '{}'){
+                        //     self.pageTotal = res.data.extra.length;
+                        //     self.listData = res.data.extra.slice(0,10);
+                        // }else{
+                        //     self.listData = res.data.extra;
+                        // }
+                        self.listData = res.data.extra.script_task;
                     }else{
                         self.$message.error(res.data.extra)
                     }
@@ -186,6 +190,7 @@
             },
             changeTab: function(){
                 var self = this;
+                self.currentPage = 1;
                 if(self.curRadio == 'firmware'){
                     self.getFirmwareData({});
                 }
@@ -237,6 +242,7 @@
             },
             search: function(){
                 var self = this;
+                self.currentPage = 1;
                 if(!self.validateSearchWord(self.search_word)){
                     return false;
                 }
