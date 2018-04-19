@@ -121,13 +121,17 @@
                         },2000)
                     }
                     if(res.data.ret_code == 0){
-                        if(!params.hasOwnProperty('current_page')){
-                        // if(JSON.stringify(params) == '{}'){
-                            self.pageTotal = res.data.extra.length;
-                            self.listData = res.data.extra.slice(0,10);
-                        }else{
-                            self.listData = res.data.extra;
-                        }
+                        self.pageTotal = res.data.extra.count || self.pageTotal;
+                        self.listData = res.data.extra.resultList;
+                        // if(!params.hasOwnProperty('current_page')){
+                        // // if(JSON.stringify(params) == '{}'){
+                        //     self.pageTotal = res.data.extra.length;
+                        //     self.listData = res.data.extra.slice(0,10);
+                        // }else{
+                        //     self.listData = res.data.extra;
+                        // }
+                    }else{
+                        self.$message.error(res.data.extra);
                     }
                 },function(err){
                     self.loading = false;
